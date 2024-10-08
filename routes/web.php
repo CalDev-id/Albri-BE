@@ -27,6 +27,12 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('cabangs', CabangController::class);
 
+    Route::get('/users', function(){
+        return Inertia::render('Users/UsersPage');
+    });
+    Route::get('/laporan', function(){
+        return Inertia::render('Laporan/LaporanPage');
+    });
 });
 
 // Route::get('/home', function(){

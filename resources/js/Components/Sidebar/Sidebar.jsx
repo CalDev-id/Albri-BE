@@ -91,8 +91,8 @@ const menuGroups = [
               />
             </svg>
           ),
-          label: "Mentors",
-          route: "/tutor",
+          label: "Users",
+          route: "/users",
         },
         {
           icon: (
@@ -145,7 +145,7 @@ const menuGroups = [
               />
             </svg>
           ),
-          label: "Reports",
+          label: "Laporan",
           route: "/laporan",
         },
         {
