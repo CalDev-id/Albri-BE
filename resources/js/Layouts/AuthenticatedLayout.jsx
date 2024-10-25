@@ -150,13 +150,13 @@ export default function Authenticated({ header, children }) {
                             <ResponsiveNavLink href={route('profile.edit')}>
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
+                            <Dropdown.Link
+                            href={route('logout')}
+                            method="post"
+                            as="button"
+                        >
+                            Log Out
+                        </Dropdown.Link>
                         </div>
                     </div>
                 </div>

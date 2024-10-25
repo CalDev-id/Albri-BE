@@ -51,7 +51,7 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         $user->delete();
 
@@ -60,4 +60,14 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+    // public function destroy(Request $request): RedirectResponse
+    // {
+    //     Auth::guard('web')->logout();
+
+    //     $request->session()->invalidate();
+
+    //     $request->session()->regenerateToken();
+
+    //     return redirect('/');
+    // }
 }
