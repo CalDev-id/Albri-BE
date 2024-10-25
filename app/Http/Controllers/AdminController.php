@@ -24,12 +24,22 @@ class AdminController extends Controller
         $userData = User::with('roles') // Mengambil data roles juga
         ->latest()
         ->paginate(5, ['*'], 'userPage');
+        $guruData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Guru');
+        })
+        ->with(['roles' => function ($query) {
+            $query->where('name', 'Guru');
+        }])
+        ->latest()
+        ->paginate(5, ['*'], 'guruPage');
+
         
 
 
         return Inertia::render('Admin/Dashboard', [
             'mitraData' => $mitraData,
             'userData' => $userData,
+            'guruData' => $guruData,
         ]);
     }
 

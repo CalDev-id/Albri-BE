@@ -3,7 +3,7 @@ import { usePage } from '@inertiajs/react';
 import DefaultLayout from '@/Layouts/DefaultLayout';
 
 const AdminDashboard = () => {
-    const { mitraData, userData } = usePage().props;
+    const { mitraData, userData, guruData } = usePage().props;
 
     return (
         <DefaultLayout>
@@ -52,6 +52,35 @@ const AdminDashboard = () => {
                                         {role.name}
                                     </span>
                                 ))}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <h2 className="mt-8 mb-4 text-lg font-bold">Data Guru</h2>
+
+            <table className="table-auto w-full text-left">
+                <thead>
+                    <tr>
+                        <th className="px-4 py-2">No</th>
+                        <th className="px-4 py-2">Name</th>
+                        <th className="px-4 py-2">Email</th>
+                        <th className="px-4 py-2">Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {guruData.data.map((user, index) => (
+                        <tr key={user.id}>
+                            <td className="border px-4 py-2">{guruData.from + index}</td>
+                            <td className="border px-4 py-2">{user.name}</td>
+                            <td className="border px-4 py-2">{user.email}</td>
+                            <td className="border px-4 py-2">
+                                {user.roles.map(role => (
+                                    <span key={role.id} >
+                                        {role.name}
+                                    </span>
+                                ))}
+                            </td>
                         </tr>
                     ))}
                 </tbody>
