@@ -1,0 +1,191 @@
+import { Link } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+
+const Navbar = ({ method = "get", active }) => {
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 50) {  // Ubah angka sesuai dengan tinggi scroll yang kamu inginkan
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
+    return (
+        <div
+            className={`w-full fixed z-[999999999] ${
+                isScrolled ? "bg-[#4bb0b2]" : "bg-transparent"
+            } transition duration-300 ease-in-out font-Geologica`} // Transisi yang halus saat bg berubah
+        >
+            <div className="md:container">
+                <div className="navbar justify-between">
+                    <div className="">
+                        <div className="dropdown">
+                            <label
+                                tabIndex={0}
+                                className="btn btn-ghost lg:hidden"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M4 6h16M4 12h8m-8 6h16"
+                                    />
+                                </svg>
+                            </label>
+                            <ul
+                                tabIndex={0}
+                                className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+                            >
+                                <li>
+                                    <Link
+                                        href="/"
+                                        className={
+                                            active === "home"
+                                                ? "text-[#EB9928] justify-between active:bg-[#FFCE2E]"
+                                                : "justify-between active:bg-[#FFCE2E]"
+                                        }
+                                        method={method}
+                                        as="button"
+                                    >
+                                        About Us
+                                    </Link>
+                                </li>
+                                <li tabIndex={0}>
+                                    <Link
+                                        href="/"
+                                        className={
+                                            active === "dbcc"
+                                                ? "text-[#EB9928] justify-between active:bg-[#FFCE2E]"
+                                                : "justify-between active:bg-[#FFCE2E]"
+                                        }
+                                        method={method}
+                                        as="button"
+                                    >
+                                        Programs
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/"
+                                        method={method}
+                                        className={
+                                            active === "national"
+                                                ? "text-[#EB9928] active:bg-[#FFCE2E]"
+                                                : "active:bg-[#FFCE2E]"
+                                        }
+                                        as="button"
+                                    >
+                                        National Seminar
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h1 className="text-white font-bold text-2xl font-Geologica">
+                            Albri
+                        </h1>
+                    </div>
+                    <div className="">
+                        <div className="hidden lg:flex mr-5">
+                            <ul className="menu menu-horizontal px-1 font-semibold ">
+                                <li>
+                                    <Link
+                                        href="/"
+                                        className={
+                                            active === "home"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        method={method}
+                                        as="button"
+                                    >
+                                        Tentang Kami
+                                    </Link>
+                                </li>
+                                <li tabIndex={0}>
+                                    <Link
+                                        href="/"
+                                        className={
+                                            active === "dbcc"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        method={method}
+                                        as="button"
+                                    >
+                                        Program
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/"
+                                        method={method}
+                                        className={
+                                            active === "national"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        as="button"
+                                    >
+                                        Harga
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/"
+                                        method={method}
+                                        className={
+                                            active === "guru"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        as="button"
+                                    >
+                                        Guru
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/"
+                                        method={method}
+                                        className={
+                                            active === "informasi"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        as="button"
+                                    >
+                                        Informasi
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="text-transparent">
+                        p
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Navbar;
