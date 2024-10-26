@@ -22,14 +22,30 @@ Route::get('/', function () {
     ]);
 });
 
+use App\Http\Controllers\AdminController;
+
+// Route::middleware(['auth', 'role:admin'])->group(function () {
+//     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+//     Route::resource('users', UserController::class);
+// });
+
+
 // Route untuk Admin
 Route::get('/admin/dashboard', function () {
     return Inertia::render('Admin/Dashboard');
 })->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
 
-Route::get('/admin/dashboard', [MitraController::class, 'showadmin'])
-    ->middleware(['auth', 'role:Admin']) // Pastikan hanya admin yang bisa mengakses
+ Route::get('/admin/dashboard', [AdminController::class, 'index'])
+    ->middleware(['auth', 'role:Admin'])
     ->name('admin.dashboard');
+
+// Route::get('/admin/user', [AdminController::class, 'showuser'])
+//     ->middleware(['auth', 'role:Admin'])
+//     ->name('admin.user');
+
+// Route::get('/admin/dashboard', [MitraController::class, 'showadmin'])
+//     ->middleware(['auth', 'role:Admin']) // Pastikan hanya admin yang bisa mengakses
+//     ->name('admin.dashboard');
 
 
 // Route untuk Guru
