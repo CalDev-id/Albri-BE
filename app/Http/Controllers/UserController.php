@@ -68,16 +68,14 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-
-        $validatedata = $request->validate([
+        $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|same:confirm-password',
+            'password' => 'required|confirmed|min:8',
             'roles' => 'required'
         ]);
-      
     
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
@@ -85,9 +83,10 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
     
-        return redirect()->route('users.index')
-                        ->with('success','User created successfully');
+        // Redirect dengan Inertia::location untuk refresh halaman penuh
+        return Inertia::location('/admin/users');
     }
+    
     
     /**
      * Display the specified resource.
@@ -159,7 +158,6 @@ class UserController extends Controller
     public function destroy($id): RedirectResponse
     {
         User::find($id)->delete();
-        return redirect()->route('users.index')
-                        ->with('success','User deleted successfully');
+        return redirect()->route('admin.users'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
     }
 }

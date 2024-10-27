@@ -24,7 +24,7 @@ Route::get('/login', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->middleware('guest');
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth','web')->name('logout');
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth', 'web')->name('logout');
 
 
 
@@ -40,10 +40,11 @@ Route::get('/admin/dashboard', function () {
     return Inertia::render('Admin/Dashboard');
 })->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
 
- Route::get('/admin/dashboard', [AdminController::class, 'index'])
+Route::get('/admin/dashboard', [AdminController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.dashboard');
 
+// Admin Controll Users
 Route::get('/admin/users', [UserController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.users');
@@ -51,6 +52,28 @@ Route::get('/admin/users', [UserController::class, 'index'])
 Route::get('/admin/users/create', [UserController::class, 'create'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.users.create');
+
+Route::post('/admin/users', [UserController::class, 'store'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.store');
+
+Route::get('/admin/users/{id}', [UserController::class, 'show'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.show');
+
+Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.edit');
+
+Route::put('/admin/users/{id}', [UserController::class, 'update'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.update');
+
+Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.destroy');
+
+
 
 
 
@@ -87,7 +110,7 @@ Route::post('/mitras', [MitraController::class, 'store'])
     ->middleware(['auth', 'role:Admin|Mitra'])
     ->name('Mitra.Store');
 
-    Route::delete('/mitras/{id}', [MitraController::class, 'destroy'])
+Route::delete('/mitras/{id}', [MitraController::class, 'destroy'])
     ->middleware(['auth', 'role:Mitra|Admin'])
     ->name('mitra.destroy');
 
@@ -95,7 +118,7 @@ Route::get('/mitra/{id}/edit', [MitraController::class, 'edit'])
     ->middleware(['auth', 'role:Mitra|Admin'])
     ->name('Mitra.Edit');
 
-    Route::put('/mitra/{id}', [MitraController::class, 'update'])
+Route::put('/mitra/{id}', [MitraController::class, 'update'])
     ->middleware(['auth', 'role:Mitra|Admin'])
     ->name('mitra.update'); // Ubah jadi lowercase
 
@@ -130,44 +153,44 @@ Route::middleware('auth')->group(function () {
 
 // Route::get('/users', function () {
 
-Route::group(['middleware' => ['auth']], function () {
-    Route::resource('roles', RoleController::class)->middleware('role:Admin');
+// Route::group(['middleware' => ['auth']], function () {
+//     Route::resource('roles', RoleController::class)->middleware('role:Admin');
 
-    // Route for displaying the list of users
-    Route::get('users', [App\Http\Controllers\UserController::class, 'index'])
-        ->name('users.index')
-        ->middleware('auth', 'verified',);
+//     // Route for displaying the list of users
+//     Route::get('users', [App\Http\Controllers\UserController::class, 'index'])
+//         ->name('users.index')
+//         ->middleware('auth', 'verified',);
 
-    // Route for displaying the form to create a new user
-    Route::get('users/create', [App\Http\Controllers\UserController::class, 'create'])
-        ->name('users.create')
-        ->middleware('auth', 'verified', 'role:Admin');
+//     // Route for displaying the form to create a new user
+//     Route::get('users/create', [App\Http\Controllers\UserController::class, 'create'])
+//         ->name('users.create')
+//         ->middleware('auth', 'verified', 'role:Admin');
 
-    // Route for storing a newly created user
-    Route::post('users', [App\Http\Controllers\UserController::class, 'store'])
-        ->name('users.store')
-        ->middleware('auth', 'verified', 'role:Admin');
+//     // Route for storing a newly created user
+//     Route::post('users', [App\Http\Controllers\UserController::class, 'store'])
+//         ->name('users.store')
+//         ->middleware('auth', 'verified', 'role:Admin');
 
-    // Route for displaying a specific user
-    Route::get('users/{id}', [App\Http\Controllers\UserController::class, 'show'])
-        ->name('users.show')
-        ->middleware('auth', 'verified', 'role:Admin');
+//     // Route for displaying a specific user
+//     Route::get('users/{id}', [App\Http\Controllers\UserController::class, 'show'])
+//         ->name('users.show')
+//         ->middleware('auth', 'verified', 'role:Admin');
 
-    // Route for displaying the form to edit an existing user
-    Route::get('users/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])
-        ->name('users.edit')
-        ->middleware('auth', 'verified', 'role:Admin');
+//     // Route for displaying the form to edit an existing user
+//     Route::get('users/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])
+//         ->name('users.edit')
+//         ->middleware('auth', 'verified', 'role:Admin');
 
-    // Route for updating an existing user
-    Route::put('users/{id}', [App\Http\Controllers\UserController::class, 'update'])
-        ->name('users.update')
-        ->middleware('auth', 'verified', 'role:Admin');
+//     // Route for updating an existing user
+//     Route::put('users/{id}', [App\Http\Controllers\UserController::class, 'update'])
+//         ->name('users.update')
+//         ->middleware('auth', 'verified', 'role:Admin');
 
-    // Route for deleting a user
-    Route::delete('users/{id}', [App\Http\Controllers\UserController::class, 'destroy'])
-        ->name('users.destroy')
-        ->middleware('auth', 'verified', 'role:Admin');
-});
+//     // Route for deleting a user
+//     Route::delete('users/{id}', [App\Http\Controllers\UserController::class, 'destroy'])
+//         ->name('users.destroy')
+//         ->middleware('auth', 'verified', 'role:Admin');
+// });
 Route::get('/home', function () {
     return Inertia::render('Home');
 });
