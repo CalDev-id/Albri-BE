@@ -8,7 +8,11 @@ import Header from "@/Components/Header/Header";
 const DefaultLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
+
+      
         <>
+
+
         {/* <!-- ===== Page Wrapper Start ===== --> */}
         <div className="flex">
           {/* <!-- ===== Sidebar Start ===== --> */}
@@ -33,6 +37,7 @@ const DefaultLayout = ({ children }) => {
         </div>
         {/* <!-- ===== Page Wrapper End ===== --> */}
       </>
+      
     )
 }
 

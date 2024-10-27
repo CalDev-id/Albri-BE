@@ -7,21 +7,28 @@ use Illuminate\Http\Request;
 use App\Models\Guru;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+
 
 class GuruController extends Controller
 {
     public function index()
     {
-        // Ambil semua data guru dari database
-        $gurus = Guru::all();
-        
 
-        
+        $guruData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Guru');
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Guru');
+        }])->latest()
+            ->paginate(5, ['*'], 'guruPage');
+
         // Kirim data guru ke tampilan Inertia
         return Inertia::render('Guru/Dashboard', [
-            'gurus' => $gurus
+            'guruData' => $guruData
         ]);
     }
+
+
     public function showadmin()
     {
         $gurus = Guru::all();
@@ -44,17 +51,17 @@ class GuruController extends Controller
             'phone' => 'required',
             'email' => 'required|email|unique:gurus,email',
         ]);
-    
+
         Guru::create([
             'name' => $request->name,
             'address' => $request->address,
             'phone' => $request->phone,
             'email' => $request->email,
         ]);
-    
+
         return redirect()->route('guru.dashboard')->with('success', 'Guru berhasil ditambahkan');
     }
-    
+
 
     public function edit($id)
     {
@@ -92,7 +99,6 @@ class GuruController extends Controller
 
         // Redirect ke halaman daftar guru
         return redirect()->route('guru.dashboard');
-
     }
 
     public function destroy($id)
@@ -103,6 +109,4 @@ class GuruController extends Controller
         // Redirect ke halaman daftar guru
         return redirect()->route('guru.dashboard');
     }
-
-    
 }
