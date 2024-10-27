@@ -68,16 +68,14 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-
-        $validatedata = $request->validate([
+        $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|same:confirm-password',
+            'password' => 'required|confirmed|min:8',
             'roles' => 'required'
         ]);
-      
     
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
@@ -85,9 +83,10 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
     
-        return redirect()->route('users.index')
-                        ->with('success','User created successfully');
+        // Redirect dengan Inertia::location untuk refresh halaman penuh
+        return Inertia::location('/admin/users');
     }
+    
     
     /**
      * Display the specified resource.
@@ -108,14 +107,19 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id): View
+    public function edit($id)
     {
-        $user = User::find($id);
-        $roles = Role::pluck('name','name')->all();
-        $userRole = $user->roles->pluck('name','name')->all();
+        $user = User::findOrFail($id);  // Menggunakan findOrFail agar memberikan error jika user tidak ditemukan
+        $roles = Role::all(['id', 'name']);  // Ambil role dengan id dan name
+        $userRole = $user->roles->pluck('id')->toArray();  // Hanya mengambil id dari role user
     
-        return view('users.edit',compact('user','roles','userRole'));
+        return Inertia::render('Admin/Users/edit', [
+            'user' => $user,
+            'roles' => $roles,
+            'userRole' => $userRole,  // Mengirim array user role
+        ]);
     }
+    
     
     /**
      * Update the specified resource in storage.
@@ -124,31 +128,34 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $id): RedirectResponse
     {
-        $validatedata = $request->validate([
+        // Validasi input
+        $validatedData = $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,'.$id,
-            'password' => 'same:confirm-password',
-            'roles' => 'required'
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => 'nullable|same:confirm-password', // Password optional
+            'roles' => 'required|array' // Validasi roles sebagai array
         ]);
     
-        $input = $request->all();
-        if(!empty($input['password'])){ 
-            $input['password'] = Hash::make($input['password']);
-        }else{
-            $input = Arr::except($input,array('password'));    
+        // Mengambil input data kecuali password jika kosong
+        $input = $request->except(['password']);
+        if (!empty($request->password)) {
+            $input['password'] = Hash::make($request->password);
         }
     
-        $user = User::find($id);
+        // Update data user
+        $user = User::findOrFail($id);
         $user->update($input);
-        DB::table('model_has_roles')->where('model_id',$id)->delete();
     
-        $user->assignRole($request->input('roles'));
+        // Hapus roles yang lama dan assign role baru
+        $user->roles()->sync($request->roles);
     
-        return redirect()->route('users.index')
-                        ->with('success','User updated successfully');
+        // Redirect dengan Inertia::location untuk refresh halaman penuh
+        return redirect()->route('admin.users'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
     }
+    
     
     /**
      * Remove the specified resource from storage.
@@ -159,7 +166,6 @@ class UserController extends Controller
     public function destroy($id): RedirectResponse
     {
         User::find($id)->delete();
-        return redirect()->route('users.index')
-                        ->with('success','User deleted successfully');
+        return redirect()->route('admin.users'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
     }
 }

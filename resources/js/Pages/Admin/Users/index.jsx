@@ -54,15 +54,28 @@ const AdminUsers = () => {
                     </td>
                     <td className="py-4 px-4 text-center">
                   <div className="flex justify-center gap-3">
-                    <Link href={''}>
+                    <Link href={'/admin/users/{id}/edit'}>
                       <FaEye className="text-blue-500 hover:text-blue-700 cursor-pointer" />
                     </Link>
 
-                    <Link href={''}>
-                      <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                    </Link>
-                    
+                    <Link href={`/admin/users/${user.id}/edit`}>
+    <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
+</Link>
+
+
+                    <Link 
+                     href={`/admin/users/${user.id}`}
+            method="delete"
+            as="button" // Menampilkan Link sebagai tombol
+            data={{ id: user.id }}
+            onClick={(e) => {
+              if (!confirm('Are you sure you want to delete this user?')) {
+                e.preventDefault(); // Mencegah tindakan delete jika user membatalkan konfirmasi
+              }
+            }}
+                    >                    
                     <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
+                    </Link>
                   </div>
                 </td>
 
