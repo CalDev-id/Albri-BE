@@ -7,9 +7,11 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -39,7 +41,7 @@ public function store(LoginRequest $request): RedirectResponse
     if ($user->hasRole('Admin')) {
         return redirect()->route('admin.dashboard');
     } elseif ($user->hasRole('Guru')) {
-        return redirect()->route('Guru.Dashboard');
+        return redirect()->route('guru.dashboard');
     } elseif ($user->hasRole('Private')) {
         return redirect()->route('Private.Dashboard');
     } elseif ($user->hasRole('Mitra')) {
@@ -61,7 +63,10 @@ public function store(LoginRequest $request): RedirectResponse
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+        Log::info('User logged out and session invalidated.');
 
-        return redirect('/');
+        
+        return redirect('login')->with('success', 'You have been logged out.');    
+    
     }
 }

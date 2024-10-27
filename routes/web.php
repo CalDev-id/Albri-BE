@@ -8,6 +8,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MitraController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\GuruController;
+use App\Http\Controllers\AdminController;
+
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
@@ -20,9 +23,16 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->middleware('guest');
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth','web')->name('logout');
 
-use App\Http\Controllers\AdminController;
+
+
+// Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+//     ->middleware('auth')
+//     ->name('auth.login');
+
+
 
 // Route::middleware(['auth', 'role:admin'])->group(function () {
 //     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -48,10 +58,20 @@ Route::get('/admin/dashboard', function () {
 //     ->name('admin.dashboard');
 
 
+
+
+
+
+
+
 // Route untuk Guru
 Route::get('/guru/dashboard', function () {
     return Inertia::render('Guru/Dashboard');
-})->middleware(['auth', 'role:Guru'])->name('Guru.Dashboard');
+})->middleware(['auth', 'role:Guru'])->name('guru.dashboard');
+
+Route::get('guru/dashboard', [GuruController::class, 'index'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.dashboard');
 
 // Route untuk Private
 Route::get('/private/dashboard', function () {
@@ -85,15 +105,6 @@ Route::get('/mitra/{id}/edit', [MitraController::class, 'edit'])
 
 
 
-// guru route
-use App\Http\Controllers\GuruController;
-
-Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
-Route::get('/guru/create', [GuruController::class, 'create'])->name('guru.create');
-Route::post('/guru', [GuruController::class, 'store'])->name('guru.store');
-Route::delete('/gurus/{id}', [GuruController::class, 'destroy'])->name('guru.destroy');
-
-
 
 
 
@@ -105,7 +116,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 
 
     Route::resource('cabangs', CabangController::class);
