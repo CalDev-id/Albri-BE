@@ -28,11 +28,6 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middl
 
 
 
-// Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-//     ->middleware('auth')
-//     ->name('auth.login');
-
-
 
 // Route::middleware(['auth', 'role:admin'])->group(function () {
 //     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -49,13 +44,13 @@ Route::get('/admin/dashboard', function () {
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.dashboard');
 
-// Route::get('/admin/user', [AdminController::class, 'showuser'])
-//     ->middleware(['auth', 'role:Admin'])
-//     ->name('admin.user');
+Route::get('/admin/users', [UserController::class, 'index'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users');
 
-// Route::get('/admin/dashboard', [MitraController::class, 'showadmin'])
-//     ->middleware(['auth', 'role:Admin']) // Pastikan hanya admin yang bisa mengakses
-//     ->name('admin.dashboard');
+Route::get('/admin/users/create', [UserController::class, 'create'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.users.create');
 
 
 

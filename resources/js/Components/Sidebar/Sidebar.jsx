@@ -459,7 +459,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                         <img
                             className="w-[150px] h-[150px]"
-                            src="images/logobiru.png"
+                            src="https://pbs.twimg.com/media/FhxhjsAVEAcozXX.jpg"
                             alt="Logo"
                         />
                         <h1 className="font-bold text-4xl text-white -ml-8">

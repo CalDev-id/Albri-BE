@@ -15,18 +15,7 @@ const DropdownUser = () => {
     };
 
 
-    const handleLogout = (e) => {
-      e.preventDefault();
-  
-      Inertia.post(route('logout'), {}, {
-       
-          onSuccess: () => {
-              // Setelah logout berhasil, refresh halaman
-              window.location.reload(); // atau Anda bisa menggunakan window.location.href = '/' untuk redirect ke halaman utama
-          },
-       
-      });
-  };
+
   
 
   
@@ -84,17 +73,12 @@ const DropdownUser = () => {
                             </Link>
                         </li>
                         <li>
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-                            >
-                                Logout
-                            </button>
+                            
 
                             <Link href={route('logout')}
                             method="post"
                             as="button">
-                            Log
+                            Log Out
 
                             </Link>
                         </li>

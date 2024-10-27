@@ -11,8 +11,6 @@ const DefaultLayout = ({ children }) => {
 
       
         <>
-
-
         {/* <!-- ===== Page Wrapper Start ===== --> */}
         <div className="flex">
           {/* <!-- ===== Sidebar Start ===== --> */}
