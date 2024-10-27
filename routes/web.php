@@ -78,6 +78,7 @@ Route::get('/private/dashboard', function () {
     return Inertia::render('Private/Dashboard');
 })->middleware(['auth', 'role:Private'])->name('Private.Dashboard');
 
+
 // Route untuk Mitra
 Route::get('/mitra/dashboard', [MitraController::class, 'index'])
     ->middleware(['auth', 'role:Mitra'])

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Mitra;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,16 +13,21 @@ class MitraController extends Controller
 {
     public function index()
     {
-        // Ambil semua data mitra dari database
-        $mitras = Mitra::all();
-        
+     $mitraData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Mitra');
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Mitra');
+        }])->latest()
+            ->paginate(5, ['*'], 'mitraPage');
 
-        
-        // Kirim data mitra ke tampilan Inertia
+        // Kirim data guru ke tampilan Inertia
         return Inertia::render('Mitra/Dashboard', [
-            'mitras' => $mitras
+            'mitraData' => $mitraData
         ]);
     }
+
+
+
     public function showadmin()
     {
         $mitras = Mitra::all();
