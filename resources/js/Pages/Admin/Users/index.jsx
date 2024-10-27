@@ -54,13 +54,14 @@ const AdminUsers = () => {
                     </td>
                     <td className="py-4 px-4 text-center">
                   <div className="flex justify-center gap-3">
-                    <Link href={''}>
+                    <Link href={'/admin/users/{id}/edit'}>
                       <FaEye className="text-blue-500 hover:text-blue-700 cursor-pointer" />
                     </Link>
 
-                    <Link href={''}>
-                      <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                    </Link>
+                    <Link href={`/admin/users/${user.id}/edit`}>
+    <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
+</Link>
+
 
                     <Link 
                      href={`/admin/users/${user.id}`}
