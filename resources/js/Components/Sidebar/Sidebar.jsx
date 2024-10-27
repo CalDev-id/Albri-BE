@@ -459,7 +459,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                         <img
                             className="w-[150px] h-[150px]"
-                            src="images/logobiru.png"
+                            src="https://pbs.twimg.com/media/FhxhjsAVEAcozXX.jpg"
                             alt="Logo"
                         />
                         <h1 className="font-bold text-4xl text-white -ml-8">
@@ -488,12 +488,74 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     </button>
                 </div>
                 {/* <!-- SIDEBAR HEADER --> */}
+              
 
                 <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
                     {/* Sidebar Menu */}
                     <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
-                        {user.roles.some((role) => role.name === "admin") &&
+                        {user.roles.some((role) => role.name === "Admin") &&
                             menuGroupsAdmin.map((group, groupIndex) => (
+                                <div key={groupIndex}>
+                                    <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                                        {group.name}
+                                    </h3>
+                                    <ul className="mb-6 flex flex-col gap-1.5">
+                                        {group.menuItems.map(
+                                            (menuItem, menuIndex) => (
+                                                <SidebarItem
+                                                    key={menuIndex}
+                                                    item={menuItem}
+                                                    pageName={pageName}
+                                                    setPageName={() => {}} // Sesuaikan fungsinya jika diperlukan
+                                                />
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            ))}
+                            {user.roles.some((role) => role.name === "Guru") &&
+                            menuGroupsGuru.map((group, groupIndex) => (
+                                <div key={groupIndex}>
+                                    <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                                        {group.name}
+                                    </h3>
+                                    <ul className="mb-6 flex flex-col gap-1.5">
+                                        {group.menuItems.map(
+                                            (menuItem, menuIndex) => (
+                                                <SidebarItem
+                                                    key={menuIndex}
+                                                    item={menuItem}
+                                                    pageName={pageName}
+                                                    setPageName={() => {}} // Sesuaikan fungsinya jika diperlukan
+                                                />
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            ))}
+                            {user.roles.some((role) => role.name === "Private") &&
+                            menuGroupsPrivat.map((group, groupIndex) => (
+                                <div key={groupIndex}>
+                                    <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+                                        {group.name}
+                                    </h3>
+                                    <ul className="mb-6 flex flex-col gap-1.5">
+                                        {group.menuItems.map(
+                                            (menuItem, menuIndex) => (
+                                                <SidebarItem
+                                                    key={menuIndex}
+                                                    item={menuItem}
+                                                    pageName={pageName}
+                                                    setPageName={() => {}} // Sesuaikan fungsinya jika diperlukan
+                                                />
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            ))}
+
+                            {user.roles.some((role) => role.name === "Mitra") &&
+                            menuGroupsMitra.map((group, groupIndex) => (
                                 <div key={groupIndex}>
                                     <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                                         {group.name}

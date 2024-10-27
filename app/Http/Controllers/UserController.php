@@ -11,7 +11,8 @@ use Hash;
 use Illuminate\Support\Arr;
     use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-    
+use Inertia\Inertia;
+
 class UserController extends Controller
 {
     /**
@@ -19,12 +20,32 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $data = User::latest()->paginate(5);
+        $userData = User::with('roles')->latest()->paginate(5); 
+
+        $mitraData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Mitra');
+        })
+        ->latest()
+        ->paginate(5, ['*'], 'mitraPage'); // pagination untuk mitra
+
+        $guruData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Guru');
+        })
+        ->with(['roles' => function ($query) {
+            $query->where('name', 'Guru');
+        }])
+        ->latest()
+        ->paginate(5, ['*'], 'guruPage');
+
+
   
-        return view('users.index',compact('data'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        return Inertia::render('Admin/Users/index', [
+            'userData' => $userData,
+            'mitraData' => $mitraData,
+            'guruData' => $guruData,
+        ]);
     }
     
     /**
@@ -32,11 +53,13 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(): View
+    public function create()
     {
         $roles = Role::pluck('name','name')->all();
 
-        return view('users.create',compact('roles'));
+        return Inertia::render('Admin/Users/create', [
+            'roles' => $roles,
+        ]);
     }
     
     /**

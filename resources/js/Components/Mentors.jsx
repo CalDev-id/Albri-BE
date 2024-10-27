@@ -74,8 +74,6 @@ const ChatTable = () => {
               <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Avatar</th>
               <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Name</th>
               <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Role</th>
-              <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Address</th>
-              <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Phone</th>
               <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Email</th>
               <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">Actions</th>
             </tr>
@@ -96,9 +94,7 @@ const ChatTable = () => {
                   </div>
                 </td>
                 <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.name}</td>
-                <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.text}</td>
-                <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.address}</td>
-                <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.phone}</td>
+                <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.role}</td>
                 <td className="py-4 px-4 text-sm text-black dark:text-white">{chat.email}</td>
                 <td className="py-4 px-4 text-center">
                   <div className="flex justify-center gap-3">

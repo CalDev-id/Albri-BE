@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import React from 'react';
 import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
@@ -7,7 +8,12 @@ import DefaultLayout from '@/Layouts/DefaultLayout';
 
 export default function Edit({ mustVerifyEmail, status }) {
     return (
-        <DefaultLayout>
+        
+
+      
+<>
+
+
                     <Head title="Profile" />
 
             <div className="py-12">
@@ -29,6 +35,9 @@ export default function Edit({ mustVerifyEmail, status }) {
                     </div>
                 </div>
             </div>
-        </DefaultLayout>
+
+
+            </>
+        
     );
 }
