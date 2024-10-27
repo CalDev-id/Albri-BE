@@ -90,6 +90,13 @@ const DropdownUser = () => {
                             >
                                 Logout
                             </button>
+
+                            <Link href={route('logout')}
+                            method="post"
+                            as="button">
+                            Log
+
+                            </Link>
                         </li>
                     </ul>
                 </div>

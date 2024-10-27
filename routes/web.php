@@ -16,7 +16,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 use Inertia\Inertia;
 
-Route::get('/', function () {
+Route::get('/login', function () {
     return Inertia::render('Auth/Login', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -174,6 +174,10 @@ Route::group(['middleware' => ['auth']], function () {
 });
 Route::get('/home', function () {
     return Inertia::render('Home');
+});
+
+Route::get('/', function () {
+    return Inertia::render('Albri');
 });
 
 // Route::resource('cabangs', CabangController::class);
