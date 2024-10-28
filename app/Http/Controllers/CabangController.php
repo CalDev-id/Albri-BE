@@ -2,63 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cabang;
+use App\Models\Cabangalbri;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Http\RedirectResponse;
+
 
 class CabangController extends Controller
 {
     public function index()
     {
-        $cabangs = Cabang::all();
-        return Inertia::render('Branch', [
+        $cabangs = Cabangalbri::all();
+        return Inertia::render('Admin/Cabang/index', [
             'cabangs' => $cabangs
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('CreateCabang');
+        return Inertia::render('Admin/Cabang/create');
     }
+
+
 
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required',
-            'pengeluaran' => 'required|numeric',
-            'pendapatan' => 'required|numeric',
-            'jumlah_murid' => 'required|integer',
+           
         ]);
 
-        Cabang::create($request->all());
+        Cabangalbri::create($request->all());   
 
-        return redirect()->route('cabangs.index')->with('success', 'Cabang created successfully.');
+        return redirect()->route('admin.cabangs');
     }
 
-    public function edit(Cabang $cabang)
+    public function edit($id)
     {
-        return Inertia::render('EditCabang', [
+        $cabang = Cabangalbri::find($id);
+        return Inertia::render('Admin/Cabang/edit', [
             'cabang' => $cabang
         ]);
     }
 
-    public function update(Request $request, Cabang $cabang)
+
+    public function update(Request $request,$id): RedirectResponse
     {
         $request->validate([
             'nama' => 'required',
-            'pengeluaran' => 'required|numeric',
-            'pendapatan' => 'required|numeric',
-            'jumlah_murid' => 'required|integer',
+           
         ]);
 
+        $cabang = Cabangalbri::find($id);
         $cabang->update($request->all());
 
-        return redirect()->route('cabangs.index')->with('success', 'Cabang updated successfully.');
+        return redirect()->route('admin.cabangs');
     }
+ 
 
-    public function destroy(Cabang $cabang)
+    public function destroy($id)
+
     {
-        $cabang->delete();
-        return redirect()->route('cabangs.index')->with('success', 'Cabang deleted successfully.');
+        Cabangalbri::find($id)->delete();
+        return redirect()->route('admin.cabangs');
     }
 }

@@ -74,6 +74,27 @@ Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
     ->name('admin.users.destroy');
 
 
+// Admin Controll Cabang
+Route::get('/admin/cabang', [CabangController::class, 'index'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs');
+Route::get('/admin/cabang/create', [CabangController::class, 'create'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.create');
+
+Route::post('/admin/cabang', [CabangController::class, 'store'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.store');
+Route::get('/admin/cabang/{id}/edit', [CabangController::class, 'edit'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.edit');
+Route::put('/admin/cabang/{id}', [CabangController::class, 'update'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.update');
+Route::delete('/admin/cabang/{id}', [CabangController::class, 'destroy'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.destroy');
+
 
 
 
@@ -137,11 +158,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    Route::resource('cabangs', CabangController::class);
 
-    // Route::get('/users', function(){
-    //     return Inertia::render('Users/UsersPage');
-    // });
     Route::get('/laporan', function () {
         return Inertia::render('Laporan/LaporanPage');
     });
