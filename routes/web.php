@@ -96,10 +96,36 @@ Route::delete('/admin/cabang/{id}', [CabangController::class, 'destroy'])
     ->name('admin.cabangs.destroy');
 
 
+Route::get('/admin/mitra', [AdminController::class, 'mitra'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.mitra');
+Route::get('/admin/private', [AdminController::class, 'private'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.private');
+
+Route::get('/admin/settings', [AdminController::class, 'settings'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.settings');
+Route::patch('/admin/settings', [AdminController::class, 'update'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.settings.update');
 
 
 
 
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+
+    Route::get('/laporan', function () {
+        return Inertia::render('Laporan/LaporanPage');
+    });
+});
 
 
 
@@ -152,17 +178,6 @@ Route::put('/mitra/{id}', [MitraController::class, 'update'])
 
 
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-
-
-    Route::get('/laporan', function () {
-        return Inertia::render('Laporan/LaporanPage');
-    });
-});
 
 
 

@@ -198,7 +198,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Settings",
-                route: "route('profile.edit')",
+                route: "/admin/settings",
             },
         ],
     },

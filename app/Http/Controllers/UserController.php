@@ -26,10 +26,13 @@ class UserController extends Controller
 
         $mitraData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Mitra');
-        })
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Mitra');
+        }])
         ->latest()
         ->paginate(5, ['*'], 'mitraPage'); // pagination untuk mitra
 
+        // guru data
         $guruData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Guru');
         })
@@ -39,12 +42,30 @@ class UserController extends Controller
         ->latest()
         ->paginate(5, ['*'], 'guruPage');
 
+        // private data 
+        $privateData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Private');
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Private');
+        }])
+        ->latest()
+        ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
+
+        // admin data
+        $adminData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Admin');
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Admin');
+        }])->latest()->paginate(5, ['*'], 'adminPage'); // pagination untuk admin
+
 
   
         return Inertia::render('Admin/Users/index', [
             'userData' => $userData,
             'mitraData' => $mitraData,
             'guruData' => $guruData,
+            'privateData' => $privateData,
+            'adminData' => $adminData,
         ]);
     }
     
@@ -82,6 +103,8 @@ class UserController extends Controller
     
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
+
+        
     
         // Redirect dengan Inertia::location untuk refresh halaman penuh
         return Inertia::location('/admin/users');
