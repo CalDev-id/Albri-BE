@@ -22,7 +22,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $userData = User::with('roles')->latest()->paginate(5); 
+        $userData = User::with('roles')->latest()->paginate(10); 
 
         $mitraData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Mitra');
