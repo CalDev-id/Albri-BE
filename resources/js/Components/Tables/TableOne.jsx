@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "@inertiajs/react";
 const brandData = [
   {
     logo: "/images/brand/brand-01.svg",
@@ -48,7 +48,7 @@ const brandData = [
   },
 ];
 
-const TableOne = () => {
+const TableOne = ({cabang}) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
@@ -83,40 +83,36 @@ const TableOne = () => {
             </h5>
           </div>
         </div>
-
-        {brandData.map((brand, key) => (
+        {cabang.map((cabang, index) => (
           <div
-            className={`grid grid-cols-3 sm:grid-cols-5 ${
-              key === brandData.length - 1 ? "" : "border-b border-stroke dark:border-strokedark"
-            }`}
-            key={key}
+            className={`grid grid-cols-3 sm:grid-cols-5 `}
           >
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
               <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-blue-800">
                 <h1 className="text-2xl font-bold text-gray-200">
-                  {brand.short}
+                  {"K"}
                 </h1>
               </div>
 
               <p className="hidden text-black dark:text-white sm:block">
-                {brand.name}
+                {cabang.nama}
               </p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{brand.visitors}K</p>
+              <p className="text-black dark:text-white">{"20"}K</p>
             </div>
 
             <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-meta-3">{brand.revenues}</p>
+              <p className="text-meta-3">{"Rp. "+"200"}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-red dark:text-white">{brand.sales}</p>
+              <p className="text-red dark:text-white">{"Rp. "+"200"}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-meta-5">{brand.conversion}%</p>
+              <p className="text-meta-5">{"2"}%</p>
             </div>
           </div>
         ))}

@@ -223,9 +223,9 @@ Route::put('/mitra/{id}', [MitraController::class, 'update'])
 //         ->name('users.destroy')
 //         ->middleware('auth', 'verified', 'role:Admin');
 // });
-Route::get('/home', function () {
-    return Inertia::render('Home');
-});
+// Route::get('/laporan', function () {
+//     return Inertia::render('Laporan.La');
+// });
 
 Route::get('/', function () {
     return Inertia::render('Albri');

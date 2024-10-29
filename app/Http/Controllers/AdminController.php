@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Support\Facades\Redirect;
+use App\Models\Cabangalbri;
 
 
 
@@ -41,13 +42,14 @@ class AdminController extends Controller
         ->latest()
         ->paginate(5, ['*'], 'guruPage');
 
-        
+        $cabangs = Cabangalbri::all();
 
 
         return Inertia::render('Admin/Dashboard', [
             'mitraData' => $mitraData,
             'userData' => $userData,
             'guruData' => $guruData,
+            'cabangs' => $cabangs,
         ]);
     }
 
