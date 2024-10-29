@@ -109,6 +109,9 @@ Route::get('/admin/settings', [AdminController::class, 'settings'])
 Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.settings.update');
+Route::get('/admin/laporan', [AdminController::class, 'laporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan');
 
 
 

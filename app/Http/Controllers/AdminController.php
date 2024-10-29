@@ -102,4 +102,9 @@ class AdminController extends Controller
 
         return Redirect::route('admin.settings');
     }
+
+    public function laporan(): Response
+    {
+        return Inertia::render('Admin/Laporan');
+    }
 }

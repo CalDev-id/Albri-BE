@@ -459,11 +459,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                         <img
                             className="w-[150px] h-[150px]"
-                            src="https://pbs.twimg.com/media/FhxhjsAVEAcozXX.jpg"
+                            src="https://th.bing.com/th/id/OIP.BehQ8mYVHBYSDWX_egdRDgHaHk?w=177&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7"
                             alt="Logo"
                         />
                         <h1 className="font-bold text-4xl text-white -ml-8">
-                            Albri
+                            
                         </h1>
                     </Link>
 
