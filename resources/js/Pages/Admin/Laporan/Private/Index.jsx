@@ -66,14 +66,16 @@ const chatData = [
 const Laporan = () => {
     return (
         <DefaultLayout>
+
+<h1> Laporan Private</h1>
                 <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex justify-between px-7.5 mb-6">
         <h4 className="text-xl font-semibold text-black dark:text-white">
-          Mentors
+          Mentors 
         </h4>
-        <Link href="/admin/laporan/mitra/create">
+        <Link href="/admin/laporan/private/create">
           <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-            Tambah Mitra 
+            Tambah Mentor
           </button>
         </Link>
       </div>

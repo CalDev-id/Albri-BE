@@ -109,9 +109,32 @@ Route::get('/admin/settings', [AdminController::class, 'settings'])
 Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.settings.update');
-Route::get('/admin/laporan', [AdminController::class, 'laporan'])
+
+Route::get('/admin/laporan/cabang', [AdminController::class, 'cabanglaporan'])
     ->middleware(['auth', 'role:Admin'])
-    ->name('admin.laporan');
+    ->name('admin.laporan.cabang');
+Route::get('/admin/laporan/cabang/create', [AdminController::class, 'createcabanglaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.create');
+
+Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.mitra');
+    Route::get('/admin/laporan/mitra/create', [AdminController::class, 'createmitralaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.create');
+
+Route::get('/admin/laporan/private', [AdminController::class, 'privatelaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.private');
+Route::get('/admin/laporan/private/create', [AdminController::class, 'createprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.create');
+
+
+
+
+
 
 
 

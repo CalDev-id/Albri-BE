@@ -103,8 +103,32 @@ class AdminController extends Controller
         return Redirect::route('admin.settings');
     }
 
-    public function laporan(): Response
+    public function cabanglaporan(): Response
     {
-        return Inertia::render('Admin/Laporan');
+        return Inertia::render('Admin/Laporan/Cabang/Index');
     }
+    public function createcabanglaporan(): Response
+    {
+        return Inertia::render('Admin/Laporan/Cabang/create');
+    }
+
+    public function mitralaporan(): Response
+    {
+        return Inertia::render('Admin/Laporan/Mitra/Index');
+    }
+
+    public function createmitralaporan(): Response
+    {
+        return Inertia::render('Admin/Laporan/Mitra/Create');
+    }
+
+    public function privatelaporan(): Response
+    {
+        return Inertia::render('Admin/Laporan/Private/Index');
+    }
+    public function createprivate(): Response
+    {
+        return Inertia::render('Admin/Laporan/Private/Create');
+    }
+
 }
