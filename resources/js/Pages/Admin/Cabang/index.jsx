@@ -14,7 +14,7 @@ const AdminCabang = () => {
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
   <div className="flex justify-between px-7.5 mb-6">
     <h4 className="text-xl font-semibold text-black dark:text-white">
-      Users
+      Cabang
     </h4>
     <Link href="/admin/cabang/create">
       <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
