@@ -11,7 +11,14 @@ const AdminCabang = () => {
 
     return (
         <DefaultLayout>
-            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+        <h1> cabang laporan</h1>
+
+        <Link href="/admin/laporan/cabang/create">
+          <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+            Tambah Mitra 
+          </button>
+        </Link>
+            {/* <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
   <div className="flex justify-between px-7.5 mb-6">
     <h4 className="text-xl font-semibold text-black dark:text-white">
       Cabang
@@ -44,11 +51,11 @@ const AdminCabang = () => {
                     </td>
                     
                     <td className="py-4 px-4 text-center">
-                  <div className="flex justify-center gap-3">
+                  <div className="flex justify-center gap-3"> */}
                     {/* <Link href={'/admin/users/{id}/edit'}>
                       <FaEye className="text-blue-500 hover:text-blue-700 cursor-pointer" />
                     </Link> */}
-                    <Link href={`/admin/cabang/${cabang.id}/edit`}>
+                    {/* <Link href={`/admin/cabang/${cabang.id}/edit`}>
                       <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
                     </Link>
 
@@ -77,7 +84,7 @@ const AdminCabang = () => {
                
             </table>
         </div>
-        </div>
+        </div> */}
 
         
 

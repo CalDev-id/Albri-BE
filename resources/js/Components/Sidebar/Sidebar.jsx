@@ -163,7 +163,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Laporan Cabang",
-                route: "/admin/laporan",
+                route: "/admin/laporan/cabang",
             },
             {
                 icon: (
@@ -198,7 +198,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Laporan Mitra",
-                route: "/admin/laporan",
+                route: "/admin/laporan/mitra",  
             },
             {
                 icon: (
@@ -233,7 +233,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Laporan Private",
-                route: "/admin/laporan",
+                route: "/admin/laporan/private",
             },
             {
                 icon: (
