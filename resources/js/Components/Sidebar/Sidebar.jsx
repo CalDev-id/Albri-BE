@@ -67,7 +67,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Cabang",
-                route: "/admin/cabang",
+                route: "/admin/cabangs",
             },
             {
                 icon: (
