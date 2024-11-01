@@ -13,7 +13,7 @@ class CabangController extends Controller
     public function index()
     {
         $cabangs = Cabangalbri::all();
-        return Inertia::render('Admin/Cabang/index', [
+        return Inertia::render('Admin/Cabang/Index', [
             'cabangs' => $cabangs
         ]);
     }
