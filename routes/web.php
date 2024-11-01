@@ -110,12 +110,12 @@ Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.settings.update');
 
-// Route::get('/admin/laporan/cabang', [AdminController::class, 'cabanglaporan'])
-//     ->middleware(['auth', 'role:Admin'])
-//     ->name('admin.laporan.cabang');
-// Route::get('/admin/laporan/cabang/create', [AdminController::class, 'createcabanglaporan'])
-//     ->middleware(['auth', 'role:Admin'])
-//     ->name('admin.laporan.create');
+Route::get('/admin/laporan/cabang', [AdminController::class, 'cabanglaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.cabang');
+Route::get('/admin/laporan/cabang/create', [AdminController::class, 'createcabanglaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.create');
 
 Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])
     ->middleware(['auth', 'role:Admin'])
