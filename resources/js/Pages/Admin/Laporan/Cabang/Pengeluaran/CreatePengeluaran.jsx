@@ -26,7 +26,7 @@ const Laporan = () => {
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                         <h3 className="font-medium text-black dark:text-white">
-                            Laporan Pemasukan Cabang
+                            Laporan Pengeluaran Cabang
                         </h3>
                     </div>
                     <form action="#">
@@ -78,21 +78,21 @@ const Laporan = () => {
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full">
                                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                        Cabang
+                                        Nama Guru
                                     </label>
                                     <select className="select select-bordered w-full">
                                         <option disabled selected>
-                                            Jakarta
+                                            Agus
                                         </option>
-                                        <option>Jakarta</option>
-                                        <option>Solo</option>
-                                        <option>BalikPapan</option>
+                                        <option>Asep</option>
+                                        <option>Ical</option>
+                                        <option>Fajril</option>
                                     </select>
                                 </div>
                                 <div className="w-full">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            5000
+                                            Gaji
                                         </label>
                                         <input
                                             type="text"
@@ -106,7 +106,7 @@ const Laporan = () => {
                                 <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            10.000
+                                            ATK
                                         </label>
                                         <input
                                             type="text"
@@ -118,7 +118,7 @@ const Laporan = () => {
                                 <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            12.000
+                                            Sewa
                                         </label>
                                         <input
                                             type="text"
@@ -133,7 +133,7 @@ const Laporan = () => {
                             <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Pendaftaran
+                                            Intensif
                                         </label>
                                         <input
                                             type="text"
@@ -145,7 +145,7 @@ const Laporan = () => {
                             <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Modul
+                                            Lisensi
                                         </label>
                                         <input
                                             type="text"
@@ -162,7 +162,7 @@ const Laporan = () => {
                             <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Kaos
+                                            THR
                                         </label>
                                         <input
                                             type="text"
@@ -173,20 +173,6 @@ const Laporan = () => {
                                 </div>
 
                                 <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Kas
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             Lain Lain
