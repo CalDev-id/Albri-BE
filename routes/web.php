@@ -74,7 +74,7 @@ Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
     ->name('admin.users.destroy');
 
 
-// Admin Controll Cabang
+// Admin Controll Cabanggit
 Route::get('/admin/cabangs', [CabangController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.cabangs');
@@ -85,6 +85,7 @@ Route::get('/admin/cabang/create', [CabangController::class, 'create'])
 Route::post('/admin/cabang', [CabangController::class, 'store'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.cabangs.store');
+
 Route::get('/admin/cabang/{id}/edit', [CabangController::class, 'edit'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.cabangs.edit');
@@ -110,12 +111,43 @@ Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.settings.update');
 
+// Laporan Cabang Admin
 Route::get('/admin/laporan/cabang', [AdminController::class, 'cabanglaporan'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.laporan.cabang');
 Route::get('/admin/laporan/cabang/create', [AdminController::class, 'createcabanglaporan'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.laporan.create');
+Route::post('/admin/laporan/cabang/store', [AdminController::class, 'storelaporancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.store');
+Route::get('/admin/laporan/cabang/{id}/edit', [AdminController::class, 'editlaporancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.show');
+Route::put('/admin/laporan/cabang/{id}', [AdminController::class, 'updatelaporancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.update');
+Route::delete('/admin/laporan/cabang/{id}', [AdminController::class, 'destroylaporancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.destroy');
+
+// Laporan Pengeluaran Cabang Admin
+Route::get('/admin/laporan/pengeluaran/create', [AdminController::class, 'createcabanpengeluaranlaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.create');
+Route::post('/admin/laporan/pengeluaran/store', [AdminController::class, 'storelaporanpengeluaran'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.store');
+Route::get('/admin/laporan/pengeluaran/{id}/edit', [AdminController::class, 'editpengeluarancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.show');
+Route::put('/admin/laporan/pengeluaran/{id}', [AdminController::class, 'updatepengeluarancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.update');
+Route::delete('/admin/laporan/pengeluaran/{id}', [AdminController::class, 'destroypengeluarancabang'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.destroy');
+
 
 Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])
     ->middleware(['auth', 'role:Admin'])

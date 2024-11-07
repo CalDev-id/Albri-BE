@@ -1,24 +1,36 @@
 import React, { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 // import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "@inertiajs/react";
 
-import DatePickerOne from "@/components/DatePickerOne";
-import SelectGroupTwo from "@/components/SelectGroupTwo";
-import { useEffect } from "react";
+
 
 import "flowbite/dist/flowbite.min.js";
 
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
 const Laporan = () => {
-    useEffect(() => {
-        // Pastikan inisialisasi dijalankan setelah komponen dimuat
-        if (typeof window !== "undefined" && window.Datepicker) {
-            new window.Datepicker(document.getElementById("datepicker-format"));
-        }
-    }, []);
+    const { cabangs } = usePage().props;
+
+    const{ data, setData, post, errors }=useForm({
+        hari: "",
+        tanggal: "",
+        cabang_id: "",
+        biaya_5000: "",
+        biaya_10000: "",
+        biaya_12000: "",
+        daftar: "",
+        modul: "",
+        kaos: "",
+        kas: "",
+        lainlain: "",
+    });
+
+
+    const handlesubmit = (e) => {
+        e.preventDefault();
+
+        post("/admin/laporan/cabang/store");
+    };
     return (
         <DefaultLayout>
             <div className="flex flex-col gap-9">
@@ -29,66 +41,62 @@ const Laporan = () => {
                             Laporan Pemasukan Cabang
                         </h3>
                     </div>
-                    <form action="#">
+                    <form onSubmit={handlesubmit}>
                         <div className="p-6.5">
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full">
                                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                         Hari
                                     </label>
-                                    <select className="select select-bordered w-full">
+                                    <select
+                                        className="select select-bordered w-full"
+                                        value={data.hari}
+                                        onChange={(e) => setData("hari", e.target.value)}
+                                    >
                                         <option disabled selected>
-                                            Senin
+                                            Pilih Hari
                                         </option>
-                                        <option>Selasa</option>
-                                        <option>Rabu</option>
-                                        <option>Kamis</option>
-                                        <option>Jumat</option>
-                                        <option>Sabtu</option>
-                                        <option>Minggu</option>
+                                        <option value="Senin">Senin</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
+                                        <option value="Jumat">Jumat</option>
+                                        <option value="Sabtu">Sabtu</option>
+                                        <option value="Minggu">Minggu</option>
                                     </select>
                                 </div>
                                 <div className="w-full">
                                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                        Hari/Tanggal
+                                        Tanggal
                                     </label>
-                                    <div className="relative w-full">
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <svg
-                                                className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            id="datepicker-format"
-                                            datepicker
-                                            datepicker-format="mm-dd-yyyy"
-                                            type="text"
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            placeholder="Select date"
-                                        />
-                                    </div>
+                                    <input
+                    type="date"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    value={data.tanggal}
+                    onChange={(e) => setData("tanggal", e.target.value)}
+                    placeholder="Select date"
+                />
                                 </div>
                             </div>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full">
-                                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                        Cabang
-                                    </label>
-                                    <select className="select select-bordered w-full">
-                                        <option disabled selected>
-                                            Jakarta
+                                                <div className="w-full">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    Cabang
+                                </label>
+                                <select className="select select-bordered w-full"
+                                    value={data.cabang_id}
+                                    onChange={(e) => setData("cabang_id", e.target.value)}
+                                >
+                                    <option disabled selected>
+                                        Pilih Cabang
+                                    </option>
+                                    {cabangs.map((cabang) => (
+                                        <option key={cabang.id} value={cabang.id}>
+                                            {cabang.nama}
                                         </option>
-                                        <option>Jakarta</option>
-                                        <option>Solo</option>
-                                        <option>BalikPapan</option>
-                                    </select>
-                                </div>
+                                    ))}
+                                </select>
+                            </div>
                                 <div className="w-full">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -96,7 +104,9 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder=""
+                                            value={data.biaya_5000}
+                                            onChange={(e) => setData("biaya_5000", e.target.value)}
+                                            placeholder="jumlah biaya"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
@@ -110,6 +120,8 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
+                                            value={data.biaya_10000}
+                                            onChange={(e) => setData("biaya_10000", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -122,6 +134,8 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
+                                            value={data.biaya_12000}
+                                            onChange={(e) => setData("biaya_12000", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -137,6 +151,8 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
+                                            value={data.daftar}
+                                            onChange={(e) => setData("daftar", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -149,6 +165,8 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
+                                            value={data.modul}
+                                            onChange={(e) => setData("modul", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -166,6 +184,8 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="text"
+                                            value={data.kaos}
+                                            onChange={(e) => setData("kaos", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -178,7 +198,10 @@ const Laporan = () => {
                                             Kas
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
+
+                                            value={data.kas}
+                                            onChange={(e) => setData("kas", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -192,7 +215,9 @@ const Laporan = () => {
                                             Lain Lain
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
+                                            value={data.lainlain}
+                                            onChange={(e) => setData("lainlain", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -200,7 +225,7 @@ const Laporan = () => {
                                 </div>
                             </div>
 
-                            <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                            <button  type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                                 Submit
                             </button>
                         </div>
