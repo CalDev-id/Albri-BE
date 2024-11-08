@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 // import { FaEdit, FaTrash } from "react-icons/fa";
+import { useEffect } from "react";
 
 
 
@@ -11,10 +12,12 @@ import "flowbite/dist/flowbite.min.js";
 const Laporan = () => {
     const { cabangs } = usePage().props;
 
+ 
+
     const{ data, setData, post, errors }=useForm({
-        hari: "",
+        hari: "Senin",
         tanggal: "",
-        cabang_id: "",
+        cabang_id: cabangs.length > 0 ? cabangs[0].id : "", // Set the default value to the first cabang's id if available
         biaya_5000: "",
         biaya_10000: "",
         biaya_12000: "",
@@ -24,7 +27,15 @@ const Laporan = () => {
         kas: "",
         lainlain: "",
     });
-
+ 
+    useEffect(() => {
+        if (cabangs.length > 0 && !data.cabang_id) {
+          setData((prevData) => ({
+            ...prevData,
+            cabang_id: cabangs[0].id,
+          }));
+        }
+      }, [cabangs]);
 
     const handlesubmit = (e) => {
         e.preventDefault();
@@ -79,7 +90,7 @@ const Laporan = () => {
                                 </div>
                             </div>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                                <div className="w-full">
+                            <div className="w-full">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                     Cabang
                                 </label>

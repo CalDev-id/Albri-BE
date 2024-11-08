@@ -10,10 +10,10 @@ const CreatePengeluaran = () => {
 
     const { cabangs, users } = usePage().props;
     const { data, setData, post, errors } = useForm({
-        hari : "",
+        hari : "senin",
         tanggal : "",
-        cabang_id : "",
-        guru_id : "",
+        cabang_id: cabangs.length > 0 ? cabangs[0].id : "", // Set the default value to the first cabang's id if available
+        guru_id : users.length > 0 ? users[0].id : "", // Set the default value to the first user's id if available
         gaji : "",
         atk: "",
         sewa: "",
@@ -21,9 +21,18 @@ const CreatePengeluaran = () => {
         lisensi: "",
         thr: "",
         lainlain: "",
-        totalpengeluaran: "",
 
     });
+
+    useEffect(() => {
+        if (cabangs.length > 0 && !data.cabang_id) {
+          setData((prevData) => ({
+            ...prevData,
+            cabang_id: cabangs[0].id,
+          }));
+        }
+      }, [cabangs]);
+
 
     const handlesubmit = (e) => {
         e.preventDefault();
