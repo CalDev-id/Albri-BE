@@ -131,6 +131,7 @@ class AdminController extends Controller
     public function storelaporancabang(Request $request)
     {
 
+
         // Validasi data input
         $validatedData = $request->validate([
             'cabang_id' => 'required|exists:cabangalbris,id',
@@ -271,6 +272,7 @@ class AdminController extends Controller
 
     public function storelaporanpengeluaran(Request $request)
     {
+
 
 
         $validatedData = $request->validate([
