@@ -107,45 +107,28 @@ class AdminController extends Controller
     }
 
     // Laporan Controller Cabang
-
-    // public function cabanglaporan(): Response
-    // {
-    //     // $laporanCabang = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
-    //     $laporanCabang = LapPemasukanCabang::with('cabang')
-    //     ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-    //     ->paginate(5, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
-
-    //     $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
-    //     ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-    //     ->paginate(5, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
-    //     // $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
-
-    //     return Inertia::render('Admin/Laporan/Cabang/Index', [
-
-    //         'laporanCabang' => $laporanCabang,
-    //         'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
-
-    //     ]);
-    // }
-    public function cabanglaporan(): Response
-{
-    // Mengambil data laporan cabang dengan paginasi dan pengurutan berdasarkan tanggal terbaru
-    $laporanCabang = LapPemasukanCabang::with('cabang')
+    
+        public function cabanglaporan(): Response
+    {
+        $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
+        $laporanCabang = LapPemasukanCabang::with('cabang')
         ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(5, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
+        ->paginate(8, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
 
-    // Mengambil data laporan pengeluaran cabang dengan paginasi dan pengurutan berdasarkan tanggal terbaru
-    $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
+        $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
         ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(5, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
+        ->paginate(8, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
+        $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
 
-    // Mengirimkan data ke view Inertia
-    return Inertia::render('Admin/Laporan/Cabang/Index', [
-        'laporanCabang' => $laporanCabang,
-        'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
-    ]);
-}
+        return Inertia::render('Admin/Laporan/Cabang/Index', [
 
+            'laporanCabang' => $laporanCabang,
+            'laporanCabangFull' => $laporanCabangFull,
+            'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
+            'laporanPengeluaranCabangFull' => $laporanPengeluaranCabangFull,
+
+        ]);
+    }
 
     public function createcabanglaporan(): Response
     {
