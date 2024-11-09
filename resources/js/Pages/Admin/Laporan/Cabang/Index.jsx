@@ -14,57 +14,47 @@ import "flowbite/dist/flowbite.min.js";
 
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
+import TablePengeluaran from "./TablePengeluaran";
+import TablePemasukan from "./TablePemasukan";
 
 const Laporan = () => {
-    const { laporanCabang, laporanPengeluaranCabang } = usePage().props;
+    const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
+    // const { current_page, last_page, data } = laporanCabang;
 
-    
-    const { current_page_laporanCabang, last_page_laporanCabang, data_laporanCabang } = laporanCabang;
-    const { current_page_pengeluaran, last_page_pengeluaran, data_pengeluaran } = laporanPengeluaranCabang;
-    
-    // Fungsi untuk menangani perubahan halaman laporan cabang
-    const handlePageChangeCabang = (page) => {
-        if (page !== current_page_laporanCabang) {
-            Inertia.get(route("admin.laporan.cabang"), {
-                page,  // Kirim halaman baru untuk laporan cabang
-                laporanCabangPage: page,  // Pastikan nama parameter sesuai dengan yang di backend
-            });
-        }
-    };
-    
-    // Fungsi untuk menangani perubahan halaman laporan pengeluaran
-    const handlePageChangePengeluaran = (page) => {
-        if (page !== current_page_pengeluaran) {
-            Inertia.get(route("admin.laporan.cabang"), {
-                page,  // Kirim halaman baru untuk laporan pengeluaran
-                laporanCabangPagePengeluaran: page,  // Pastikan nama parameter sesuai dengan yang di backend
-            });
-        }
-    };
-    
-    // const calculateTotals = (laporanCabang, laporanPengeluaranCabang) => {
-    //     const totalProfit = laporanCabang.reduce(
-    //         (sum, laporan) => sum + laporan.totalpemasukan,
-    //         0
-    //     );
-    //     const totalOutcome = laporanPengeluaranCabang.reduce(
-    //         (sum, pengeluaran) => sum + pengeluaran.totalpengeluaran,
-    //         0
-    //     );
-    //     const totalLaba = totalProfit - totalOutcome;
-    //     const totalStudents = laporanCabang.reduce(
-    //         (sum, laporan) =>
-    //             sum +
-    //             (laporan.biaya_5000 +
-    //                 laporan.biaya_10000 +
-    //                 laporan.biaya_12000),
-    //         0
-    //     );
-
-    //     return { totalLaba, totalProfit, totalOutcome, totalStudents };
+    // // Fungsi untuk menangani perubahan halaman
+    // const handlePageChange = (page) => {
+    //   if (page !== current_page) {
+    //     Inertia.get(route('admin.laporan.cabang'), { 
+    //       page, 
+    //       laporanCabangPage: page // Menggunakan 'laporanCabangPage' untuk pagination
+    //     });
+    //   }
     // };
-    // const { totalLaba, totalProfit, totalOutcome, totalStudents } =
-    //     calculateTotals(laporanCabang, laporanPengeluaranCabang);
+
+    //---------------------------------------------------------------------------------
+    const calculateTotals = (laporanCabangFull, laporanPengeluaranCabangFull) => {
+        const totalProfit = laporanCabangFull.reduce(
+            (sum, laporan) => sum + laporan.totalpemasukan,
+            0
+        );
+        const totalOutcome = laporanPengeluaranCabangFull.reduce(
+            (sum, pengeluaran) => sum + pengeluaran.totalpengeluaran,
+            0
+        );
+        const totalLaba = totalProfit - totalOutcome;
+        const totalStudents = laporanCabangFull.reduce(
+            (sum, laporan) =>
+                sum +
+                (laporan.biaya_5000 +
+                    laporan.biaya_10000 +
+                    laporan.biaya_12000),
+            0
+        );
+
+        return { totalLaba, totalProfit, totalOutcome, totalStudents };
+    };
+    const { totalLaba, totalProfit, totalOutcome, totalStudents } =
+        calculateTotals(laporanCabangFull, laporanPengeluaranCabangFull);
 
     const downloadExcel = () => {
         // Prepare the data for the Excel file
@@ -160,7 +150,7 @@ const Laporan = () => {
 
     return (
         <DefaultLayout>
-            {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
                     total={`Rp ${totalLaba.toLocaleString()}`}
@@ -265,428 +255,12 @@ const Laporan = () => {
                         />
                     </svg>
                 </CardDataStats>
-            </div> */}
-            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div className="flex justify-between px-7.5 mb-6">
-                    <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Cabang
-                    </h4>
-                    <div>
-                        <Link href="/admin/laporan/cabang/create">
-                            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                                Tambah Laporan
-                            </button>
-                        </Link>
-                        <button
-                            // onClick={downloadExcel}
-                            onClick={() =>
-                                downloadExcel2(
-                                    laporanCabang,
-                                    laporanPengeluaranCabang
-                                )
-                            }
-                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                        >
-                            Download Excel
-                        </button>
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full table-auto">
-                        <thead>
-                            <tr className="bg-gray-2 dark:bg-meta-4">
-                                {/* Header cells */}
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
-                                    Hari
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Tanggal
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Cabang
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    5000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    10.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    12.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Total Biaya
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Daftar
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Modul
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Kaos
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Kas
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Lain Lain
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Total
-                                </th>
-                                <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data_laporanCabang.map((laporan, key) => (
-                                <tr
-                                    key={key}
-                                    className="border-b border-stroke dark:border-strokedark"
-                                >
-                                    {/* Table rows with data */}
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
-                                        {laporan.hari}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.tanggal}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.cabang
-                                            ? laporan.cabang.nama
-                                            : "N/A"}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_5000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_10000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_12000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan}
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                        {/* Action buttons */}
-                                        <div className="flex justify-center gap-3">
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}/edit`}
-                                            >
-                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                            </Link>
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: laporan.id }}
-                                                onClick={(e) => {
-                                                    if (
-                                                        !confirm(
-                                                            "Are you sure you want to delete this user?"
-                                                        )
-                                                    ) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                            >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                        {/* <tfoot>
-                            <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td
-                                    colSpan="3"
-                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
-                                >
-                                    Total
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.biaya_5000 || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.biaya_10000 || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.biaya_12000 || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.totalbiaya || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.daftar || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.modul || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.kaos || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.kas || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.lainlain || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {laporanCabang.reduce(
-                                        (sum, laporan) =>
-                                            sum + (laporan.totalpemasukan || 0),
-                                        0
-                                    )}
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tfoot> */}
-                    </table>
-                    {/* Pagination Controls */}
-                    <div className="pagination">
-    <button
-        onClick={() => handlePageChangeCabang(current_page_laporanCabang - 1)}
-        disabled={current_page_laporanCabang <= 1}
-    >
-        Previous
-    </button>
-    <span>{current_page_laporanCabang} / {last_page_laporanCabang}</span>
-    <button
-        onClick={() => handlePageChangeCabang(current_page_laporanCabang + 1)}
-        disabled={current_page_laporanCabang >= last_page_laporanCabang}
-    >
-        Next
-    </button>
-</div>
-                </div>
             </div>
+            <TablePemasukan laporanCabang={laporanCabang} />
 
             {/* P E N G E L U A R A N */}
 
-            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
-                <div className="flex justify-between px-7.5 mb-6">
-                    <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pengeluaran Cabang
-                    </h4>
-                    <Link href="/admin/laporan/pengeluaran/create">
-                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                            Tambah Pengeluaran
-                        </button>
-                    </Link>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full table-auto">
-                        <thead>
-                            <tr className="bg-gray-2 dark:bg-meta-4">
-                                {/* Table Headers */}
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
-                                    Hari
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Tanggal
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Cabang
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Nama Guru
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Gaji
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    ATK
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Sewa
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Intensif
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Lisensi
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    THR
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Lain Lain
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Total
-                                </th>
-                                <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {data_pengeluaran && data_pengeluaran.length > 0 ? (
-    data_pengeluaran.map((pengeluaran, key) => (
-        <tr key={key} className="border-b border-stroke dark:border-strokedark">
-            {/* Data Rows */}
-            <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
-                {pengeluaran.hari}
-            </td>
-            <td className="py-4 px-4 text-sm text-black dark:text-white">
-                {pengeluaran.tanggal}
-            </td>
-            {/* More Data Cells */}
-        </tr>
-    ))
-) : (
-    <tr>
-        <td colSpan="12" className="text-center">No data available</td>
-    </tr>
-)}
-                        </tbody>
-                        {/* Footer Row for Totals */}
-                        {/* <tfoot>
-                            <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td
-                                    colSpan="4"
-                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
-                                >
-                                    Total
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.gaji,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.atk,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.sewa,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.intensif,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.lisensi,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.thr,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.lainlain,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporanPengeluaranCabang.reduce(
-                                        (sum, pengeluaran) =>
-                                            sum + pengeluaran.totalpengeluaran,
-                                        0
-                                    )}
-                                </td>
-                                <td className="py-4 px-4"></td>
-                            </tr>
-                        </tfoot> */}
-                    </table>
-                    {/* Pagination Controls */}
-                    <div className="pagination">
-    <button
-        onClick={() => handlePageChangePengeluaran(current_page_pengeluaran - 1)}
-        disabled={current_page_pengeluaran <= 1}
-    >
-        Previous
-    </button>
-    <span>{current_page_pengeluaran} / {last_page_pengeluaran}</span>
-    <button
-        onClick={() => handlePageChangePengeluaran(current_page_pengeluaran + 1)}
-        disabled={current_page_pengeluaran >= last_page_pengeluaran}
-    >
-        Next
-    </button>
-</div>
-                </div>
-            </div>
+            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} />
         </DefaultLayout>
     );
 };
