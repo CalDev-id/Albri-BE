@@ -13,53 +13,158 @@ import * as XLSX from "xlsx";
 import "flowbite/dist/flowbite.min.js";
 
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
-
-
+import { Inertia } from "@inertiajs/inertia";
 
 const Laporan = () => {
+    const { laporanCabang, laporanPengeluaranCabang } = usePage().props;
 
-    const { laporanCabang, laporanPengeluaranCabang} = usePage().props;
+    
+    const { current_page_laporanCabang, last_page_laporanCabang, data_laporanCabang } = laporanCabang;
+    const { current_page_pengeluaran, last_page_pengeluaran, data_pengeluaran } = laporanPengeluaranCabang;
+    
+    // Fungsi untuk menangani perubahan halaman laporan cabang
+    const handlePageChangeCabang = (page) => {
+        if (page !== current_page_laporanCabang) {
+            Inertia.get(route("admin.laporan.cabang"), {
+                page,  // Kirim halaman baru untuk laporan cabang
+                laporanCabangPage: page,  // Pastikan nama parameter sesuai dengan yang di backend
+            });
+        }
+    };
+    
+    // Fungsi untuk menangani perubahan halaman laporan pengeluaran
+    const handlePageChangePengeluaran = (page) => {
+        if (page !== current_page_pengeluaran) {
+            Inertia.get(route("admin.laporan.cabang"), {
+                page,  // Kirim halaman baru untuk laporan pengeluaran
+                laporanCabangPagePengeluaran: page,  // Pastikan nama parameter sesuai dengan yang di backend
+            });
+        }
+    };
+    
+    // const calculateTotals = (laporanCabang, laporanPengeluaranCabang) => {
+    //     const totalProfit = laporanCabang.reduce(
+    //         (sum, laporan) => sum + laporan.totalpemasukan,
+    //         0
+    //     );
+    //     const totalOutcome = laporanPengeluaranCabang.reduce(
+    //         (sum, pengeluaran) => sum + pengeluaran.totalpengeluaran,
+    //         0
+    //     );
+    //     const totalLaba = totalProfit - totalOutcome;
+    //     const totalStudents = laporanCabang.reduce(
+    //         (sum, laporan) =>
+    //             sum +
+    //             (laporan.biaya_5000 +
+    //                 laporan.biaya_10000 +
+    //                 laporan.biaya_12000),
+    //         0
+    //     );
 
-    const handleDownloadExcel = () => {
-        // Prepare data for Excel
-        // const worksheetData = chatData.map((chat, index) => ({
-        //     "Hari": "senin", 
-        //     "Tanggal": "20/21/2111",
-        //     "7000": chat.column3 || 0,
-        //     "8000": chat.column4 || 0,
-        //     "10.000": chat.column5 || 0,
-        //     "15.000": chat.column6 || 0,
-        //     "Total Biaya": chat.totalBiaya || 0,
-        //     "Daftar": chat.daftar || 0,
-        //     "Modul": chat.modul || 0,
-        //     "Kaos": chat.kaos || 0,
-        //     "Kas": chat.kas || 0,
-        //     "Lain Lain": chat.lainLain || 0,
-        //     "Total": chat.Total || 0,
-        // }));
+    //     return { totalLaba, totalProfit, totalOutcome, totalStudents };
+    // };
+    // const { totalLaba, totalProfit, totalOutcome, totalStudents } =
+    //     calculateTotals(laporanCabang, laporanPengeluaranCabang);
 
-        // Create a worksheet
-        // const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const downloadExcel = () => {
+        // Prepare the data for the Excel file
+        const data = laporanCabang.map((laporan) => ({
+            Hari: laporan.hari,
+            Tanggal: laporan.tanggal,
+            Cabang: laporan.cabang ? laporan.cabang.nama : "N/A",
+            5000: laporan.biaya_5000,
+            10000: laporan.biaya_10000,
+            12000: laporan.biaya_12000,
+            "Total Biaya": laporan.totalbiaya,
+            Daftar: laporan.daftar,
+            Modul: laporan.modul,
+            Kaos: laporan.kaos,
+            Kas: laporan.kas,
+            "Lain Lain": laporan.lainlain,
+            Total: laporan.totalpemasukan,
+        }));
+
+        // Create a worksheet from the data
+        const worksheet = XLSX.utils.json_to_sheet(data);
 
         // Create a workbook and add the worksheet
-        // const workbook = XLSX.utils.book_new();
-        // XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "LaporanCabang");
 
-        // Trigger file download
-        // XLSX.writeFile(workbook, "LaporanPemasukanCabang.xlsx");
+        // Generate and download the Excel file
+        XLSX.writeFile(workbook, "LaporanCabang.xlsx");
     };
+    const downloadExcel2 = (laporanCabang, laporanPengeluaranCabang) => {
+        const combinedData = [];
 
+        // Menambahkan tabel pertama: laporanCabang
+        const laporanCabangData = laporanCabang.map((laporan) => ({
+            Jenis_Laporan: "Laporan Cabang",
+            Hari: laporan.hari,
+            Tanggal: laporan.tanggal,
+            Cabang: laporan.cabang ? laporan.cabang.nama : "N/A",
+            Biaya_5000: laporan.biaya_5000,
+            Biaya_10000: laporan.biaya_10000,
+            Biaya_12000: laporan.biaya_12000,
+            Total_Biaya: laporan.totalbiaya,
+            Daftar: laporan.daftar,
+            Modul: laporan.modul,
+            Kaos: laporan.kaos,
+            Kas: laporan.kas,
+            Lainlain: laporan.lainlain,
+            Total_Pemasukan: laporan.totalpemasukan,
+        }));
 
+        // Menambahkan tabel kedua: laporanPengeluaranCabang
+        const laporanPengeluaranData = laporanPengeluaranCabang.map(
+            (pengeluaran) => ({
+                Jenis_Laporan: "Laporan Pengeluaran Cabang",
+                Hari: pengeluaran.hari,
+                Tanggal: pengeluaran.tanggal,
+                Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
+                User: pengeluaran.user ? pengeluaran.user.name : "N/A",
+                Gaji: pengeluaran.gaji,
+                ATK: pengeluaran.atk,
+                Sewa: pengeluaran.sewa,
+                Intensif: pengeluaran.intensif,
+                Lisensi: pengeluaran.lisensi,
+                Thr: pengeluaran.thr,
+                Lainlain: pengeluaran.lainlain,
+                Total_Pengeluaran: pengeluaran.totalpengeluaran,
+            })
+        );
 
+        // Membuat worksheet untuk laporanCabang
+        const wsLaporanCabang = XLSX.utils.json_to_sheet(laporanCabangData, {
+            header: Object.keys(laporanCabangData[0]),
+        });
 
+        // Membuat worksheet untuk laporanPengeluaranCabang
+        const wsLaporanPengeluaranCabang = XLSX.utils.json_to_sheet(
+            laporanPengeluaranData,
+            { header: Object.keys(laporanPengeluaranData[0]) }
+        );
+
+        // Membuat workbook dan menambahkan kedua sheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsLaporanCabang, "Laporan Cabang");
+        XLSX.utils.book_append_sheet(
+            wb,
+            wsLaporanPengeluaranCabang,
+            "Laporan Pengeluaran Cabang"
+        );
+
+        // Menyimpan file Excel
+        XLSX.writeFile(wb, "laporan_combined.xlsx");
+    };
 
     return (
         <DefaultLayout>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
+            {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total="2.500.000"
-                    rate="0.43%"
+                    total={`Rp ${totalLaba.toLocaleString()}`}
+                    rate=""
                     levelUp
                 >
                     <svg
@@ -82,8 +187,8 @@ const Laporan = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Profit"
-                    total="Rp. 4.250.000"
-                    rate="4.35%"
+                    total={`Rp ${totalProfit.toLocaleString()}`}
+                    rate=""
                     levelUp
                 >
                     <svg
@@ -110,8 +215,8 @@ const Laporan = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Outcome"
-                    total="Rp. 2.450.000"
-                    rate="2.59%"
+                    total={`Rp ${totalOutcome.toLocaleString()}`}
+                    rate=""
                     levelUp
                 >
                     <svg
@@ -134,9 +239,9 @@ const Laporan = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Students"
-                    total="456"
-                    rate="0.95%"
-                    levelDown
+                    total={totalStudents}
+                    rate=""
+                    levelUp
                 >
                     <svg
                         className="fill-primary dark:fill-white"
@@ -160,32 +265,38 @@ const Laporan = () => {
                         />
                     </svg>
                 </CardDataStats>
-            </div>
+            </div> */}
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
                         Laporan Pemasukan Cabang
                     </h4>
                     <div>
-                    <Link href="/admin/laporan/cabang/create">
-                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                            Tambah Laporan
+                        <Link href="/admin/laporan/cabang/create">
+                            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                                Tambah Laporan
+                            </button>
+                        </Link>
+                        <button
+                            // onClick={downloadExcel}
+                            onClick={() =>
+                                downloadExcel2(
+                                    laporanCabang,
+                                    laporanPengeluaranCabang
+                                )
+                            }
+                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                        >
+                            Download Excel
                         </button>
-                    </Link>
-                    <button
-                        onClick={handleDownloadExcel}
-                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                    >
-                        Download Excel
-                    </button>
                     </div>
-
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">
                         <thead>
                             <tr className="bg-gray-2 dark:bg-meta-4">
+                                {/* Header cells */}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Hari
                                 </th>
@@ -207,7 +318,6 @@ const Laporan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total Biaya
                                 </th>
-
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Daftar
                                 </th>
@@ -232,11 +342,12 @@ const Laporan = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {laporanCabang.map((laporan, key) => (
+                            {data_laporanCabang.map((laporan, key) => (
                                 <tr
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"
                                 >
+                                    {/* Table rows with data */}
                                     <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
                                         {laporan.hari}
                                     </td>
@@ -244,8 +355,9 @@ const Laporan = () => {
                                         {laporan.tanggal}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.cabang ? laporan.cabang.nama : 'N/A'}
-
+                                        {laporan.cabang
+                                            ? laporan.cabang.nama
+                                            : "N/A"}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.biaya_5000}
@@ -278,31 +390,133 @@ const Laporan = () => {
                                         {laporan.totalpemasukan}
                                     </td>
                                     <td className="py-4 px-4 text-center">
+                                        {/* Action buttons */}
                                         <div className="flex justify-center gap-3">
-                                                 <Link href={`/admin/laporan/cabang/${laporan.id}/edit`}>
-                                                 <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                                 </Link>
-
-                                                 <Link 
-                    href={`/admin/laporan/cabang/${laporan.id}`}
-                    method="delete"
-                    as="button"
-                    data={{ id: laporan.id }}
-                    onClick={(e) => {
-                        if (!confirm('Are you sure you want to delete this user?')) {
-                        e.preventDefault();
-                        }
-                    }
-                    }
-                        >
-                      <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                    </Link>                                        </div>
+                                            <Link
+                                                href={`/admin/laporan/cabang/${laporan.id}/edit`}
+                                            >
+                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
+                                            </Link>
+                                            <Link
+                                                href={`/admin/laporan/cabang/${laporan.id}`}
+                                                method="delete"
+                                                as="button"
+                                                data={{ id: laporan.id }}
+                                                onClick={(e) => {
+                                                    if (
+                                                        !confirm(
+                                                            "Are you sure you want to delete this user?"
+                                                        )
+                                                    ) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                            >
+                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
-                            
                         </tbody>
+                        {/* <tfoot>
+                            <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                                <td
+                                    colSpan="3"
+                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
+                                >
+                                    Total
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.biaya_5000 || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.biaya_10000 || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.biaya_12000 || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.totalbiaya || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.daftar || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.modul || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.kaos || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.kas || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.lainlain || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {laporanCabang.reduce(
+                                        (sum, laporan) =>
+                                            sum + (laporan.totalpemasukan || 0),
+                                        0
+                                    )}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot> */}
                     </table>
+                    {/* Pagination Controls */}
+                    <div className="pagination">
+    <button
+        onClick={() => handlePageChangeCabang(current_page_laporanCabang - 1)}
+        disabled={current_page_laporanCabang <= 1}
+    >
+        Previous
+    </button>
+    <span>{current_page_laporanCabang} / {last_page_laporanCabang}</span>
+    <button
+        onClick={() => handlePageChangeCabang(current_page_laporanCabang + 1)}
+        disabled={current_page_laporanCabang >= last_page_laporanCabang}
+    >
+        Next
+    </button>
+</div>
                 </div>
             </div>
 
@@ -324,6 +538,7 @@ const Laporan = () => {
                     <table className="w-full table-auto">
                         <thead>
                             <tr className="bg-gray-2 dark:bg-meta-4">
+                                {/* Table Headers */}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Hari
                                 </th>
@@ -333,7 +548,6 @@ const Laporan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Cabang
                                 </th>
-
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Nama Guru
                                 </th>
@@ -367,77 +581,110 @@ const Laporan = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {laporanPengeluaranCabang.map((pengeluaran, key) => (
-                                <tr
-                                    key={key}
-                                    className="border-b border-stroke dark:border-strokedark"
-                                >
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
-                                        {pengeluaran.hari}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.tanggal}
-                                    </td>
-
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.cabang ? pengeluaran.cabang.nama : 'N/A'}
-                                    </td>
-
-
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.user ? pengeluaran.user.name : 'N/A'}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.gaji}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.atk}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.sewa}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.intensif}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.lisensi}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.thr}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.lainlain}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {pengeluaran.totalpengeluaran}
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                        <div className="flex justify-center gap-3">
-                                            <Link href={`/admin/laporan/pengeluaran/${pengeluaran.id}/edit`}>
-                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                            </Link>
-
-                                            <Link 
-                    href={`/admin/laporan/pengeluaran/${pengeluaran.id}`}
-                    method="delete"
-                    as="button"
-                    data={{ id: pengeluaran.id }}
-                    onClick={(e) => {
-                        if (!confirm('Are you sure you want to delete this user?')) {
-                        e.preventDefault();
-                        }
-                    }
-                    }
-                        >
-                      <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                    </Link>                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-
-                          
+                        {data_pengeluaran && data_pengeluaran.length > 0 ? (
+    data_pengeluaran.map((pengeluaran, key) => (
+        <tr key={key} className="border-b border-stroke dark:border-strokedark">
+            {/* Data Rows */}
+            <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                {pengeluaran.hari}
+            </td>
+            <td className="py-4 px-4 text-sm text-black dark:text-white">
+                {pengeluaran.tanggal}
+            </td>
+            {/* More Data Cells */}
+        </tr>
+    ))
+) : (
+    <tr>
+        <td colSpan="12" className="text-center">No data available</td>
+    </tr>
+)}
                         </tbody>
+                        {/* Footer Row for Totals */}
+                        {/* <tfoot>
+                            <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                                <td
+                                    colSpan="4"
+                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
+                                >
+                                    Total
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.gaji,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.atk,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.sewa,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.intensif,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.lisensi,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.thr,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.lainlain,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {laporanPengeluaranCabang.reduce(
+                                        (sum, pengeluaran) =>
+                                            sum + pengeluaran.totalpengeluaran,
+                                        0
+                                    )}
+                                </td>
+                                <td className="py-4 px-4"></td>
+                            </tr>
+                        </tfoot> */}
                     </table>
+                    {/* Pagination Controls */}
+                    <div className="pagination">
+    <button
+        onClick={() => handlePageChangePengeluaran(current_page_pengeluaran - 1)}
+        disabled={current_page_pengeluaran <= 1}
+    >
+        Previous
+    </button>
+    <span>{current_page_pengeluaran} / {last_page_pengeluaran}</span>
+    <button
+        onClick={() => handlePageChangePengeluaran(current_page_pengeluaran + 1)}
+        disabled={current_page_pengeluaran >= last_page_pengeluaran}
+    >
+        Next
+    </button>
+</div>
                 </div>
             </div>
         </DefaultLayout>
