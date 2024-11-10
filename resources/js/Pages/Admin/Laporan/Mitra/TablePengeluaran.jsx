@@ -3,18 +3,19 @@ import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { Inertia } from "@inertiajs/inertia";
 
-const TablePengeluaran = ({ laporanPengeluaranCabang }) => {
-    const { current_page, last_page, data } = laporanPengeluaranCabang;
+const TablePengeluaran = ({ laporanPengeluaranMitra = {} }) => {
+    const { current_page, last_page, data } = laporanPengeluaranMitra || {};
 
     // Fungsi untuk menangani perubahan halaman
     const handlePageChange = (page) => {
-      if (page !== current_page) {
-        Inertia.get(route('admin.laporan.cabang'), { 
-          page, 
-          laporanCabangPagePengeluaran: page // Menggunakan 'laporanCabangPage' untuk pagination
-        });
-      }
+        if (page !== current_page) {
+            Inertia.get(route('admin.laporan.mitra'), {
+                page,
+                laporanMitraPagePengeluaran: page
+            });
+        }
     };
+    
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
@@ -27,7 +28,7 @@ const TablePengeluaran = ({ laporanPengeluaranCabang }) => {
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Laporan Pengeluaran Cabang
                 </h4>
-                <Link href="/admin/laporan/pengeluaran/create">
+                <Link href="/admin/laporan/pengeluaranmitra/create">
                     <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                         Tambah Pengeluaran
                     </button>
@@ -41,14 +42,11 @@ const TablePengeluaran = ({ laporanPengeluaranCabang }) => {
                             {/* Table Headers */}
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Cabang</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Nama Guru</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Gaji</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">ATK</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Sewa</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Intensif</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Lisensi</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">THR</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Lain Lain</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Total</th>
                             <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">Actions</th>
@@ -60,24 +58,21 @@ const TablePengeluaran = ({ laporanPengeluaranCabang }) => {
                                 {/* Data Rows */}
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.thr}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran}</td>
                                 <td className="py-4 px-4 text-center">
                                     {/* Actions */}
                                     <div className="flex justify-center gap-3">
-                                        <Link href={`/admin/laporan/pengeluaran/${pengeluaran.id}/edit`}>
+                                        <Link href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}/edit`}>
                                             <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
                                         </Link>
                                         <Link
-                                            href={`/admin/laporan/pengeluaran/${pengeluaran.id}`}
+                                            href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}`}
                                             method="delete"
                                             as="button"
                                             data={{ id: pengeluaran.id }}
@@ -97,13 +92,11 @@ const TablePengeluaran = ({ laporanPengeluaranCabang }) => {
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                            <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
+                            <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji')}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk')}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('sewa')}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif')}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi')}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('thr')}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain')}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran')}</td>
                             <td className="py-4 px-4"></td>
