@@ -1,19 +1,9 @@
 import React, { useState } from "react";
 import { usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-// import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
-
-import DatePickerOne from "@/components/DatePickerOne";
-import SelectGroupTwo from "@/components/SelectGroupTwo";
-import { useEffect } from "react";
 import * as XLSX from "xlsx";
-
 import "flowbite/dist/flowbite.min.js";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
-import { Inertia } from "@inertiajs/inertia";
 import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
 
@@ -21,7 +11,7 @@ const Laporan = () => {
     const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
     // const { current_page, last_page, data } = laporanCabang;
 
-    // // Fungsi untuk menangani perubahan halaman
+    // Fungsi untuk menangani perubahan halaman
     // const handlePageChange = (page) => {
     //   if (page !== current_page) {
     //     Inertia.get(route('admin.laporan.cabang'), { 
@@ -29,6 +19,12 @@ const Laporan = () => {
     //       laporanCabangPage: page // Menggunakan 'laporanCabangPage' untuk pagination
     //     });
     //   }
+    // };
+
+    
+    // // Calculate total values for each column
+    // const getTotal = (key) => {
+    //     return data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
     // };
 
     //---------------------------------------------------------------------------------
@@ -256,11 +252,16 @@ const Laporan = () => {
                     </svg>
                 </CardDataStats>
             </div>
+
             <TablePemasukan laporanCabang={laporanCabang} />
+          
+
+
 
             {/* P E N G E L U A R A N */}
 
             <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} />
+
         </DefaultLayout>
     );
 };

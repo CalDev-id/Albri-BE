@@ -8,15 +8,17 @@ import "flowbite/dist/flowbite.min.js";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
-const TablePemasukan = ({ laporanCabang }) => {
-    const { current_page, last_page, data } = laporanCabang;
+const TablePemasukan = ({ laporanMitra }) => {
+    const { current_page, last_page, data } = laporanMitra;
+
+    
 
     // Fungsi untuk menangani perubahan halaman
     const handlePageChange = (page) => {
       if (page !== current_page) {
-        Inertia.get(route('admin.laporan.cabang'), { 
+        Inertia.get(route('admin.laporan.mitra'), { 
           page, 
-          laporanCabangPage: page // Menggunakan 'laporanCabangPage' untuk pagination
+          laporanMitraPage: page // Menggunakan 'laporanCabangPage' untuk pagination
         });
       }
     };
@@ -31,10 +33,10 @@ const TablePemasukan = ({ laporanCabang }) => {
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Cabang
+                        Laporan Pemasukan Mitra
                     </h4>
                     <div>
-                        <Link href="/admin/laporan/cabang/create">
+                        <Link href="/admin/laporan/mitra/create">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                                 Tambah Laporan
                             </button>
@@ -43,8 +45,8 @@ const TablePemasukan = ({ laporanCabang }) => {
                             // onClick={downloadExcel}
                             onClick={() =>
                                 downloadExcel2(
-                                    laporanCabang,
-                                    laporanPengeluaranCabang
+                                    // laporanCabang,
+                                    // laporanPengeluaranCabang
                                 )
                             }
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
@@ -65,17 +67,18 @@ const TablePemasukan = ({ laporanCabang }) => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
+                          
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Cabang
+                                    7000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    5000
+                                    8000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     10.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    12.000
+                                    15.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total Biaya
@@ -117,18 +120,16 @@ const TablePemasukan = ({ laporanCabang }) => {
                                         {laporan.tanggal}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.cabang
-                                            ? laporan.cabang.nama
-                                            : "N/A"}
+                                        {laporan.biaya_5000}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_5000}
+                                        {laporan.biaya_8000}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.biaya_10000}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_12000}
+                                        {laporan.biaya_15000}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.totalbiaya}
@@ -155,12 +156,12 @@ const TablePemasukan = ({ laporanCabang }) => {
                                         {/* Action buttons */}
                                         <div className="flex justify-center gap-3">
                                             <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}/edit`}
+                                                href={`/admin/laporan/mitra/${laporan.id}/edit`}
                                             >
                                                 <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
                                             </Link>
                                             <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}`}
+                                                href={`/admin/laporan/mitra/${laporan.id}`}
                                                 method="delete"
                                                 as="button"
                                                 data={{ id: laporan.id }}

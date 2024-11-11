@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Cabangalbri;
 use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
+use App\Models\LapPemasukanMitra;
+use App\Models\LapPengeluaranMitra;
 
 
 
@@ -106,6 +108,10 @@ class AdminController extends Controller
         return Redirect::route('admin.settings');
     }
 
+
+
+ 
+
     // Laporan Controller Cabang
     
         public function cabanglaporan(): Response
@@ -113,11 +119,11 @@ class AdminController extends Controller
         $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
         $laporanCabang = LapPemasukanCabang::with('cabang')
         ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(8, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
+        ->paginate(2, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
 
         $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
         ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(8, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
+        ->paginate(2, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
         $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
 
         return Inertia::render('Admin/Laporan/Cabang/Index', [
@@ -172,7 +178,7 @@ class AdminController extends Controller
         // Buat laporan pemasukan cabang baru
         LapPemasukanCabang::create([
             'cabang_id' => $validatedData['cabang_id'],
-            'hari' => $validatedData['hari'],
+            'hari' => $validatedData['hari'], 
             'tanggal' => $validatedData['tanggal'],
             'biaya_5000' => $validatedData['biaya_5000'],
             'biaya_10000' => $validatedData['biaya_10000'],
@@ -397,12 +403,239 @@ class AdminController extends Controller
     // Laporan Controller Mitra
     public function mitralaporan(): Response
     {
-        return Inertia::render('Admin/Laporan/Mitra/Index');
+
+        $laporanMitraFull = LapPemasukanMitra::all(); // Mengambil semua data laporan pemasukan mitra
+        $laporanMitra = LapPemasukanMitra::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        ->paginate(2, ['*'], 'laporanMitraPage');  // Menggunakan paginasi
+
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        ->paginate(2, ['*'], 'laporanMitraPagePengeluaran');  // Menggunakan paginasi
+        $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get(); // Mengambil semua data laporan pengeluaran mitra
+
+
+        return Inertia::render('Admin/Laporan/Mitra/Index',
+            [
+                'laporanMitra' => $laporanMitra,
+                'laporanMitraFull' => $laporanMitraFull,
+                'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
+                'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
+            ]);
     }
 
     public function createmitralaporan(): Response
     {
         return Inertia::render('Admin/Laporan/Mitra/Create');
+    }
+
+    public function storelaporanmitra(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'biaya_5000' => 'required|integer',
+            'biaya_8000' => 'required|integer',
+            'biaya_10000' => 'required|integer',
+            'biaya_15000' => 'required|integer',
+            'daftar' => 'required|integer',
+            'modul' => 'required|integer',
+            'kaos' => 'required|integer',
+            'kas' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+        $totalbiaya = ($validatedData['biaya_5000'] * 7000) +
+            ($validatedData['biaya_8000'] * 8000) +
+            ($validatedData['biaya_10000'] * 10000) +
+            ($validatedData['biaya_15000'] * 15000);
+        $totalpemasukan = $totalbiaya +
+            $validatedData['daftar'] +
+            $validatedData['modul'] +
+            $validatedData['kaos'] +
+            $validatedData['kas'] +
+            $validatedData['lainlain'];
+
+
+        LapPemasukanMitra::create([
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'biaya_5000' => $validatedData['biaya_5000'],
+            'biaya_8000' => $validatedData['biaya_8000'],
+            'biaya_10000' => $validatedData['biaya_10000'],
+            'biaya_15000' => $validatedData['biaya_15000'],
+            'totalbiaya' => $totalbiaya,
+            'daftar' => $validatedData['daftar'],
+            'modul' => $validatedData['modul'],
+            'kaos' => $validatedData['kaos'],
+            'kas' => $validatedData['kas'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpemasukan' => $totalpemasukan,
+            'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+
+        ]);
+
+        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
+    }
+
+    public function editlaporanmitra($id): Response
+    {
+        $laporanMitra = LapPemasukanMitra::findOrFail($id); // Mengambil data laporan pemasukan mitra berdasarkan id
+        return Inertia::render('Admin/Laporan/Mitra/edit', ['laporanMitra' => $laporanMitra]);
+    }
+
+    public function updatelaporanmitra(Request $request, $id): RedirectResponse
+    {
+        $validatedData = $request->validate([
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'biaya_5000' => 'required|integer',
+            'biaya_8000' => 'required|integer',
+            'biaya_10000' => 'required|integer',
+            'biaya_15000' => 'required|integer',
+            'daftar' => 'required|integer',
+            'modul' => 'required|integer',
+            'kaos' => 'required|integer',
+            'kas' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+        $totalbiaya = ($validatedData['biaya_5000'] * 7000) +
+            ($validatedData['biaya_8000'] * 8000) +
+            ($validatedData['biaya_10000'] * 10000) +
+            ($validatedData['biaya_15000'] * 15000);
+        $totalpemasukan = $totalbiaya +
+            $validatedData['daftar'] +
+            $validatedData['modul'] +
+            $validatedData['kaos'] +
+            $validatedData['kas'] +
+            $validatedData['lainlain'];
+
+        $laporanMitra = LapPemasukanMitra::findOrFail($id);
+        $laporanMitra->update([
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'biaya_5000' => $validatedData['biaya_5000'],
+            'biaya_8000' => $validatedData['biaya_8000'],
+            'biaya_10000' => $validatedData['biaya_10000'],
+            'biaya_15000' => $validatedData['biaya_15000'],
+            'totalbiaya' => $totalbiaya,
+            'daftar' => $validatedData['daftar'],
+            'modul' => $validatedData['modul'],
+            'kaos' => $validatedData['kaos'],
+            'kas' => $validatedData['kas'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpemasukan' => $totalpemasukan,
+            'updated_by' => Auth::user()->id, // Assuming you are using
+        ]);
+
+        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil diupdate.');
+    }
+
+    public function destroylaporanmitra($id)
+    {
+        LapPemasukanMitra::find($id)->delete();
+        return redirect()->route('admin.laporan.mitra');
+    }
+
+    // Laporan Pengeluaran Mitra Admin
+    public function createpengeluaranmitralaporan(): Response
+    {
+        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+
+        return Inertia::render('Admin/Laporan/Mitra/Pengeluaran/CreatePengeluaran', [
+            'users' => $users,
+
+        ]);
+    }
+
+    public function storelaporanpengeluaranmitra(Request $request)
+    {
+
+
+        $validatedData = $request->validate([
+            'guru_id' => 'required|exists:users,id',
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'gaji' => 'required|integer',
+            'atk' => 'required|integer',
+            'intensif' => 'required|integer',
+            'lisensi' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalpengeluaran = $validatedData['gaji'] +
+            $validatedData['atk'] +
+            $validatedData['intensif'] +
+            $validatedData['lisensi'] +
+            $validatedData['lainlain'];
+
+        LapPengeluaranMitra::create([
+            'guru_id' => $validatedData['guru_id'],
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'gaji' => $validatedData['gaji'],
+            'atk' => $validatedData['atk'],
+            'intensif' => $validatedData['intensif'],
+            'lisensi' => $validatedData['lisensi'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpengeluaran' => $totalpengeluaran,
+            'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+
+        ]);
+
+        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
+    }
+
+    public function editpengeluaranmitra($id): Response
+    {
+        $laporanMitra = LapPengeluaranMitra::with('user')->findOrFail($id);  // Mengambil semua data laporan pengeluaran mitra
+        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+
+        return Inertia::render('Admin/Laporan/Mitra/Pengeluaran/EditPengeluaran', [
+            'laporanMitra' => $laporanMitra,
+            'users' => $users,
+        ]);
+    }
+
+    public function updatepengeluaranmitra(Request $request, $id): RedirectResponse
+    {
+
+        $validatedData = $request->validate([
+            'guru_id' => 'required|exists:users,id',
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'gaji' => 'required|integer',
+            'atk' => 'required|integer',
+            'intensif' => 'required|integer',
+            'lisensi' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalpengeluaran = $validatedData['gaji'] +
+            $validatedData['atk'] +
+            $validatedData['intensif'] +
+            $validatedData['lisensi'] +
+            $validatedData['lainlain'];
+
+        $laporanMitra = LapPengeluaranMitra::findOrFail($id);
+        $laporanMitra->update([
+            'guru_id' => $validatedData['guru_id'],
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'gaji' => $validatedData['gaji'],
+            'atk' => $validatedData['atk'],
+            'intensif' => $validatedData['intensif'],
+            'lisensi' => $validatedData['lisensi'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpengeluaran' => $totalpengeluaran,
+            'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+        ]);
+        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil diupdate.');
+    }
+
+    public function destroypengeluaranmitra($id)
+    {
+        LapPengeluaranMitra::find($id)->delete();
+        return redirect()->route('admin.laporan.mitra');
     }
 
     // Laporan Controller Private
