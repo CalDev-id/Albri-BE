@@ -1,52 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
 import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-// import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "@inertiajs/react";
 
-import DatePickerOne from "@/components/DatePickerOne";
-import SelectGroupTwo from "@/components/SelectGroupTwo";
-import { useEffect } from "react";
+const EditCabang = () => {
+    const { pengeluaranprivate, users } = usePage().props
+    const{ data, setData, put, errors }=useForm({
+        hari:pengeluaranprivate.hari,
+        tanggal :pengeluaranprivate.tanggal,
+        guru_id :pengeluaranprivate.guru_id, // Set the default value to the first user's id if available
+        gaji : pengeluaranprivate.gaji,
+        atk: pengeluaranprivate.atk,
+        sewa: pengeluaranprivate.sewa,
+        thr: pengeluaranprivate.thr,
+        intensif: pengeluaranprivate.intensif,
+        lisensi: pengeluaranprivate.lisensi,
+        lainlain: pengeluaranprivate.lainlain,
 
-import "flowbite/dist/flowbite.min.js";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
-
-const Laporan = () => {
-
-    const{ data, setData, post, errors }=useForm({
-        hari: "Senin",
-        tanggal: "",
-        biaya_30: "",
-        biaya_35: "",
-        biaya_40: "",
-        biaya_45: "",
-        daftar: "",
-        modul: "",
-        kaos: "",
-        kas: "",
-        lainlain: "",
     });
 
     const handlesubmit = (e) => {
         e.preventDefault();
-        post("/admin/laporan/private/store");
+        put(`/admin/laporan/pengeluaranprivate/${pengeluaranprivate .id}`);
     };
 
-    // useEffect(() => {
-    //     // Pastikan inisialisasi dijalankan setelah komponen dimuat
-    //     if (typeof window !== "undefined" && window.Datepicker) {
-    //         new window.Datepicker(document.getElementById("datepicker-format"));
-    //     }
-    // }, []);
     return (
         <DefaultLayout>
-          <div className="flex flex-col gap-9">
+        <div className="flex flex-col gap-9">
                 {/* <!-- Contact Form --> */}
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                         <h3 className="font-medium text-black dark:text-white">
-                            Laporan Pemasukan Cabang
+                            Laporan Pengeluaran private
                         </h3>
                     </div>
                     <form onSubmit={handlesubmit}>
@@ -87,112 +71,102 @@ const Laporan = () => {
                                 </div>
                             </div>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                       
-                                <div className="w-full  xl:w-1/2">
+                                               
+
+
+                            <div className="w-full xl:w-1/2">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    guru
+                                </label>
+                                <select className="select select-bordered w-full"
+                                    value={data.guru_id}
+                                    onChange={(e) => setData("guru_id", e.target.value)}
+                                >
+                                    <option disabled selected>
+                                    </option>
+                                    {users.map((user) => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            30.000
+                                            Gaji
                                         </label>
                                         <input
                                             type="text"
-                                            value={data.biaya_30}
-                                            onChange={(e) => setData("biaya_30", e.target.value)}
-                                            placeholder="jumlah biaya"
+                                            value={data.gaji}
+                                            onChange={(e) => setData("gaji", e.target.value)}
+                                            placeholder=""
+                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                        />
+                                    </div>
+                                </div>
+
+                         
+                            </div>
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                             
+                                <div className="w-full xl:w-1/2">
+                                    <div className="mb-4.5">
+                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                            ATK
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={data.atk}
+                                            onChange={(e) => setData("atk", e.target.value)}
+                                            placeholder=""
+                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                        />
+                                    </div>
+                                </div>
+
+               
+
+
+                                <div className="w-full xl:w-1/2">
+                                    <div className="mb-4.5">
+                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                            Intensif
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={data.intensif}
+                                            onChange={(e) => setData("intensif", e.target.value)}
+                                            placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
                                     
                                 </div>
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            35.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_35}
-                                            onChange={(e) => setData("biaya_35", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
                                 
+
+
                             </div>
+
+                      
+
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            40.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_40}
-                                            onChange={(e) => setData("biaya_40", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            45.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_45}
-                                            onChange={(e) => setData("biaya_45", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
+                          
+
+                              
                             </div>
 
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Pendaftaran
+                                            Sewa
                                         </label>
                                         <input
                                             type="text"
-                                            value={data.daftar}
-                                            onChange={(e) => setData("daftar", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Modul
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.modul}
-                                            onChange={(e) => setData("modul", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-
-
-                            </div>
-
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Kaos
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.kaos}
-                                            onChange={(e) => setData("kaos", e.target.value)}
+                                            value={data.sewa}
+                                            onChange={(e) => setData("sewa", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -202,19 +176,19 @@ const Laporan = () => {
                                 <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Kas
+                                            THR
                                         </label>
                                         <input
-                                            type="number"
-
-                                            value={data.kas}
-                                            onChange={(e) => setData("kas", e.target.value)}
+                                            type="text"
+                                            value={data.thr}
+                                            onChange={(e) => setData("thr", e.target.value)}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
                                 </div>
                             </div>
+
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                             <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
@@ -230,6 +204,21 @@ const Laporan = () => {
                                         />
                                     </div>
                                 </div>
+
+                                <div className="w-full xl:w-1/2">
+                                    <div className="mb-4.5">
+                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                            Lisensi
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={data.lisensi}
+                                            onChange={(e) => setData("lisensi", e.target.value)}
+                                            placeholder=""
+                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <button  type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
@@ -239,9 +228,9 @@ const Laporan = () => {
                     </form>
                 </div>
             </div>
-           
+        
+         
         </DefaultLayout>
     );
-};
-
-export default Laporan;
+}
+export default EditCabang;
