@@ -619,7 +619,7 @@ class AdminController extends Controller
     // Laporan Pengeluaran Mitra Admin
     public function createpengeluaranmitralaporan(): Response
     {
-        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+        $users =  User::role('Mitra')->get(); // Mengambil semua data user dengan role Admin
 
         return Inertia::render('Admin/Laporan/Mitra/Pengeluaran/CreatePengeluaran', [
             'users' => $users,
@@ -668,7 +668,7 @@ class AdminController extends Controller
     public function editpengeluaranmitra($id): Response
     {
         $laporanMitra = LapPengeluaranMitra::with('user')->findOrFail($id);  // Mengambil semua data laporan pengeluaran mitra
-        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+        $users =  User::role('Mitra')->get(); // Mengambil semua data user dengan role Admin
 
         return Inertia::render('Admin/Laporan/Mitra/Pengeluaran/EditPengeluaran', [
             'laporanMitra' => $laporanMitra,
@@ -895,7 +895,7 @@ class AdminController extends Controller
     // Laporan Pengeluaran Private Admin
     public function createpengeluaranprivatelaporan(): Response
     {
-        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+        $users =  User::role('Private')->get(); // Mengambil semua data user dengan role Admin
 
         return Inertia::render('Admin/Laporan/Private/Pengeluaran/CreatePengeluaran', [
             'users' => $users,
@@ -948,7 +948,7 @@ class AdminController extends Controller
     public function editpengeluaranprivate($id): Response
     {
         $pengeluaranprivate=LapPengeluaranPrivate::findOrFail($id);
-        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+        $users =  User::role('Private')->get(); // Mengambil semua data user dengan role Admin
 
 
         
