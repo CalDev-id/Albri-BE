@@ -8,141 +8,56 @@ import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
 
 const Laporan = () => {
-    const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
-    // const { current_page, last_page, data } = laporanCabang;
-
-    // Fungsi untuk menangani perubahan halaman
-    // const handlePageChange = (page) => {
-    //   if (page !== current_page) {
-    //     Inertia.get(route('admin.laporan.cabang'), { 
-    //       page, 
-    //       laporanCabangPage: page // Menggunakan 'laporanCabangPage' untuk pagination
-    //     });
-    //   }
-    // };
-
-    
-    // // Calculate total values for each column
-    // const getTotal = (key) => {
-    //     return data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
-    // };
-
+    // const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
+    const {
+        laporanMitraFull,
+        laporanPengeluaranCabang,
+        laporanCabang, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+    } = usePage().props;
+    // console.log(laporanCabang);
+    // console.log(laporanPengeluaranCabang);
+    const goToWeek = (weekOffset) => {
+        Inertia.get(route('admin.laporan.cabang'), { weekOffset });
+    };
     //---------------------------------------------------------------------------------
-    const calculateTotals = (laporanCabangFull, laporanPengeluaranCabangFull) => {
-        const totalProfit = laporanCabangFull.reduce(
-            (sum, laporan) => sum + laporan.totalpemasukan,
+    const calculateTotals = (laporanCabangData, laporanPengeluaranCabangData) => {
+        // Pastikan data adalah array
+        if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
+        if (!Array.isArray(laporanPengeluaranCabangData)) laporanPengeluaranCabangData = [];
+    
+        // Hitung total pemasukan
+        const totalProfit = laporanCabangData.reduce(
+            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-        const totalOutcome = laporanPengeluaranCabangFull.reduce(
-            (sum, pengeluaran) => sum + pengeluaran.totalpengeluaran,
+    
+        // Hitung total pengeluaran
+        const totalOutcome = laporanPengeluaranCabangData.reduce(
+            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
+    
+        // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-        const totalStudents = laporanCabangFull.reduce(
+    
+        // Hitung total students (biaya)
+        const totalStudents = laporanCabangData.reduce(
             (sum, laporan) =>
                 sum +
-                (laporan.biaya_5000 +
-                    laporan.biaya_10000 +
-                    laporan.biaya_12000),
+                ((laporan.biaya_5000 || 0) +
+                    (laporan.biaya_10000 || 0) +
+                    (laporan.biaya_12000 || 0)),
             0
         );
-
+    
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    const { totalLaba, totalProfit, totalOutcome, totalStudents } =
-        calculateTotals(laporanCabangFull, laporanPengeluaranCabangFull);
-
-    const downloadExcel = () => {
-        // Prepare the data for the Excel file
-        const data = laporanCabang.map((laporan) => ({
-            Hari: laporan.hari,
-            Tanggal: laporan.tanggal,
-            Cabang: laporan.cabang ? laporan.cabang.nama : "N/A",
-            5000: laporan.biaya_5000,
-            10000: laporan.biaya_10000,
-            12000: laporan.biaya_12000,
-            "Total Biaya": laporan.totalbiaya,
-            Daftar: laporan.daftar,
-            Modul: laporan.modul,
-            Kaos: laporan.kaos,
-            Kas: laporan.kas,
-            "Lain Lain": laporan.lainlain,
-            Total: laporan.totalpemasukan,
-        }));
-
-        // Create a worksheet from the data
-        const worksheet = XLSX.utils.json_to_sheet(data);
-
-        // Create a workbook and add the worksheet
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "LaporanCabang");
-
-        // Generate and download the Excel file
-        XLSX.writeFile(workbook, "LaporanCabang.xlsx");
-    };
-    const downloadExcel2 = (laporanCabang, laporanPengeluaranCabang) => {
-        const combinedData = [];
-
-        // Menambahkan tabel pertama: laporanCabang
-        const laporanCabangData = laporanCabang.map((laporan) => ({
-            Jenis_Laporan: "Laporan Cabang",
-            Hari: laporan.hari,
-            Tanggal: laporan.tanggal,
-            Cabang: laporan.cabang ? laporan.cabang.nama : "N/A",
-            Biaya_5000: laporan.biaya_5000,
-            Biaya_10000: laporan.biaya_10000,
-            Biaya_12000: laporan.biaya_12000,
-            Total_Biaya: laporan.totalbiaya,
-            Daftar: laporan.daftar,
-            Modul: laporan.modul,
-            Kaos: laporan.kaos,
-            Kas: laporan.kas,
-            Lainlain: laporan.lainlain,
-            Total_Pemasukan: laporan.totalpemasukan,
-        }));
-
-        // Menambahkan tabel kedua: laporanPengeluaranCabang
-        const laporanPengeluaranData = laporanPengeluaranCabang.map(
-            (pengeluaran) => ({
-                Jenis_Laporan: "Laporan Pengeluaran Cabang",
-                Hari: pengeluaran.hari,
-                Tanggal: pengeluaran.tanggal,
-                Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
-                User: pengeluaran.user ? pengeluaran.user.name : "N/A",
-                Gaji: pengeluaran.gaji,
-                ATK: pengeluaran.atk,
-                Sewa: pengeluaran.sewa,
-                Intensif: pengeluaran.intensif,
-                Lisensi: pengeluaran.lisensi,
-                Thr: pengeluaran.thr,
-                Lainlain: pengeluaran.lainlain,
-                Total_Pengeluaran: pengeluaran.totalpengeluaran,
-            })
-        );
-
-        // Membuat worksheet untuk laporanCabang
-        const wsLaporanCabang = XLSX.utils.json_to_sheet(laporanCabangData, {
-            header: Object.keys(laporanCabangData[0]),
-        });
-
-        // Membuat worksheet untuk laporanPengeluaranCabang
-        const wsLaporanPengeluaranCabang = XLSX.utils.json_to_sheet(
-            laporanPengeluaranData,
-            { header: Object.keys(laporanPengeluaranData[0]) }
-        );
-
-        // Membuat workbook dan menambahkan kedua sheet
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, wsLaporanCabang, "Laporan Cabang");
-        XLSX.utils.book_append_sheet(
-            wb,
-            wsLaporanPengeluaranCabang,
-            "Laporan Pengeluaran Cabang"
-        );
-
-        // Menyimpan file Excel
-        XLSX.writeFile(wb, "laporan_combined.xlsx");
-    };
+    
+    // Memastikan .data digunakan saat memanggil fungsi
+    const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
+        laporanCabang.data,
+        laporanPengeluaranCabang.data
+    );
 
     return (
         <DefaultLayout>
@@ -253,14 +168,14 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanCabang={laporanCabang} />
+            <TablePemasukan laporanCabang={laporanCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
           
 
 
 
             {/* P E N G E L U A R A N */}
 
-            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} />
+            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang}  startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
 
         </DefaultLayout>
     );

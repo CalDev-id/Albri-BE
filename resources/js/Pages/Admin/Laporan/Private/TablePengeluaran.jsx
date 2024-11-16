@@ -2,31 +2,32 @@ import React from "react";
 import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { Inertia } from "@inertiajs/inertia";
+import { usePage } from "@inertiajs/react";
 
-const TablePengeluaran = ({ laporanPengeluaranPrivate = {} }) => {
-    const { current_page, last_page, data } = laporanPengeluaranPrivate || {};
+const TablePengeluaran = () => {
+    const {
+        laporanPengeluaranPrivate,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
+        prevWeekOffset,
+    } = usePage().props;
 
-    // Fungsi untuk menangani perubahan halaman
-    const handlePageChange = (page) => {
-        if (page !== current_page) {
-            Inertia.get(route('admin.laporan.private'), {
-                page,
-                laporanPrivatePagePengeluaran: page
-            });
-        }
+    const goToWeek = (weekOffset) => {
+        Inertia.get(route("admin.laporan.private"), { weekOffset });
     };
     
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
-        return data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
+        return laporanPengeluaranPrivate.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
     };
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
             <div className="flex justify-between px-7.5 mb-6">
                 <h4 className="text-xl font-semibold text-black dark:text-white">
-                    Laporan Pengeluaran Cabang
+                    Laporan Pengeluaran Private
                 </h4>
                 <Link href="/admin/laporan/pengeluaranprivate/create">
                     <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
@@ -53,7 +54,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate = {} }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((pengeluaran, key) => (
+                        {laporanPengeluaranPrivate.data.map((pengeluaran, key) => (
                             <tr key={key} className="border-b border-stroke dark:border-strokedark">
                                 {/* Data Rows */}
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
@@ -108,15 +109,15 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate = {} }) => {
             {/* Pagination */}
             <div className="flex justify-center gap-3 mt-4">
                         <button
-                            onClick={() => handlePageChange(current_page - 1)}
-                            disabled={current_page === 1}
+                            onClick={() => goToWeek(prevWeekOffset)}
+                            // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Previous
                         </button>
 
                         {/* Menampilkan nomor halaman */}
-                        {[...Array(last_page)].map((_, index) => (
+                        {/* {[...Array(last_page)].map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => handlePageChange(index + 1)}
@@ -128,11 +129,11 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate = {} }) => {
                             >
                                 {index + 1}
                             </button>
-                        ))}
+                        ))} */}
 
                         <button
-                            onClick={() => handlePageChange(current_page + 1)}
-                            disabled={current_page === last_page}
+                            onClick={() => goToWeek(nextWeekOffset)}
+                            // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Next

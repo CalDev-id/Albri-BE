@@ -131,24 +131,51 @@ class AdminController extends Controller
 
     // Laporan Controller Cabang
     
-        public function cabanglaporan(): Response
+        public function cabanglaporan(Request $request): Response
     {
-        $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
-        $laporanCabang = LapPemasukanCabang::with('cabang')
-        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
+        // $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
+        // $laporanCabang = LapPemasukanCabang::with('cabang')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
 
-        $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
-        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
-        $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
+        // $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
+        // $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
+        
+        $weekOffset = (int) $request->input('weekOffset', 0);
+
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+    
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanCabang = LapPemasukanCabang::with('cabang')
+        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanCabangPage');
+        
+            $laporanPengeluaranCabang = LapPengeluaranCabang::with('user')
+            ->with('cabang')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranCabangPage');
+
+
 
         return Inertia::render('Admin/Laporan/Cabang/Index', [
 
+            // 'laporanCabang' => $laporanCabang,
+            // 'laporanCabangFull' => $laporanCabangFull,
+            // 'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
+            // 'laporanPengeluaranCabangFull' => $laporanPengeluaranCabangFull,
+
             'laporanCabang' => $laporanCabang,
-            'laporanCabangFull' => $laporanCabangFull,
+            'startOfWeek' => $startOfWeek->format('Y-m-d'),
+            'endOfWeek' => $endOfWeek->format('Y-m-d'),
+            'nextWeekOffset' => $weekOffset + 1,
+            'prevWeekOffset' => $weekOffset - 1,
             'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
-            'laporanPengeluaranCabangFull' => $laporanPengeluaranCabangFull,
 
         ]);
     }
@@ -413,33 +440,69 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.cabang');
     }
 
+    public function mitralaporan(Request $request): Response
+{
+    // Ambil parameter `weekOffset` dari request, default ke 0 (minggu ini), dan pastikan tipe datanya integer
+    $weekOffset = (int) $request->input('weekOffset', 0);
 
+    // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+    $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+    $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
 
-
-
-    // Laporan Controller Mitra
-    public function mitralaporan(): Response
-    {
-
-        $laporanMitraFull = LapPemasukanMitra::all(); // Mengambil semua data laporan pemasukan mitra
-        $laporanMitra = LapPemasukanMitra::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanMitraPage');  // Menggunakan paginasi
-
+    // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+    $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+        ->orderBy('tanggal', 'desc')
+        ->paginate(50, ['*'], 'laporanMitraPage');
+    
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
-        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanMitraPagePengeluaran');  // Menggunakan paginasi
-        $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get(); // Mengambil semua data laporan pengeluaran mitra
+        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+        ->orderBy('tanggal', 'desc')
+        ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
+        $laporanMitraFull = LapPemasukanMitra::all();
+        $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get();
 
 
-        return Inertia::render('Admin/Laporan/Mitra/Index',
-            [
-                'laporanMitra' => $laporanMitra,
-                'laporanMitraFull' => $laporanMitraFull,
-                'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
-                'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
-            ]);
-    }
 
+    return Inertia::render('Admin/Laporan/Mitra/Index', [
+        'laporanMitra' => $laporanMitra,
+        'startOfWeek' => $startOfWeek->format('Y-m-d'),
+        'endOfWeek' => $endOfWeek->format('Y-m-d'),
+        'nextWeekOffset' => $weekOffset + 1,
+        'prevWeekOffset' => $weekOffset - 1,
+        'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
+
+
+        'laporanMitraFull' => $laporanMitraFull,
+        'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
+    ]);
+}
+
+
+// ini buat rekap bulanan
+//     public function mitralaporan(Request $request): Response
+// {
+//     // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+//     $bulan = $request->input('bulan', date('m'));
+//     $tahun = $request->input('tahun', date('Y'));
+
+//     // Filter data berdasarkan bulan dan tahun
+//     $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
+//         ->whereYear('tanggal', $tahun)
+//         ->orderBy('tanggal', 'desc')
+//         ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+
+//     // Kirim data dan info bulan/tahun saat ini ke frontend
+//     return Inertia::render('Admin/Laporan/Mitra/Index', [
+//         'laporanMitra' => $laporanMitra,
+//         'bulan' => $bulan,
+//         'tahun' => $tahun,
+//         'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+//         'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+//         'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+//         'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+//     ]);
+// }
+// test ----------------------------------------------
     public function createmitralaporan(): Response
     {
         return Inertia::render('Admin/Laporan/Mitra/Create');
@@ -657,27 +720,54 @@ class AdminController extends Controller
 
     // Laporan Controller Private
 
-    public function privatelaporan(): Response
+    public function privatelaporan(Request $request): Response
     {
+        $weekOffset = (int) $request->input('weekOffset', 0);
 
-        $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
-        $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+    
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPrivatePage');
+        
+            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
+        
+            $laporanPrivateFull = LapPemasukanPrivate::all();
+            $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
 
-        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
-        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
-        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
+
+
+        // $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
+        // $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
+
+        // $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
+        // $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
 
 
 
 
         return Inertia::render('Admin/Laporan/Private/Index',
             [
+                // 'laporanPrivate' => $laporanPrivate,
+                // 'laporanPrivateFull' => $laporanPrivateFull,
+                // 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+                // 'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
+
                 'laporanPrivate' => $laporanPrivate,
-                'laporanPrivateFull' => $laporanPrivateFull,
+                'startOfWeek' => $startOfWeek->format('Y-m-d'),
+                'endOfWeek' => $endOfWeek->format('Y-m-d'),
+                'nextWeekOffset' => $weekOffset + 1,
+                'prevWeekOffset' => $weekOffset - 1,
                 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-                'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
             ]);
     }
 
