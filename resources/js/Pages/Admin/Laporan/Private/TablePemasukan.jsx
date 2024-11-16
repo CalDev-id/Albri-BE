@@ -2,30 +2,30 @@ import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
+import { usePage } from "@inertiajs/react";
 
 import "flowbite/dist/flowbite.min.js";
 
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
-const TablePemasukan = ({ laporanPrivate }) => {
-    const { current_page, last_page, data } = laporanPrivate;
+const TablePemasukan = () => {
+    // const { current_page, last_page, data } = laporanPrivate;
+    const {
+        laporanPrivate,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
+        prevWeekOffset,
+    } = usePage().props;
 
-    
-
-    // Fungsi untuk menangani perubahan halaman
-    const handlePageChange = (page) => {
-      if (page !== current_page) {
-        Inertia.get(route('admin.laporan.private'), { 
-          page, 
-          laporanPrivatePage: page // Menggunakan 'laporanCabangPage' untuk pagination
-        });
-      }
+    const goToWeek = (weekOffset) => {
+        Inertia.get(route("admin.laporan.private"), { weekOffset });
     };
 
     // Calculate total values for each column
     const getTotal = (key) => {
-        return data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
+        return laporanPrivate.data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
     };
 
     return (
@@ -33,7 +33,8 @@ const TablePemasukan = ({ laporanPrivate }) => {
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Mitra
+                        Laporan Pemasukan Private ( {startOfWeek} sampai{" "}
+                            {endOfWeek} )
                     </h4>
                     <div>
                         <Link href="/admin/laporan/private/create">
@@ -107,7 +108,7 @@ const TablePemasukan = ({ laporanPrivate }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((laporan, key) => (
+                            {laporanPrivate.data.map((laporan, key) => (
                                 <tr
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"
@@ -202,15 +203,15 @@ const TablePemasukan = ({ laporanPrivate }) => {
                     {/* Pagination Controls */}
                     <div className="flex justify-center gap-3 mt-4">
                         <button
-                            onClick={() => handlePageChange(current_page - 1)}
-                            disabled={current_page === 1}
+                            onClick={() => goToWeek(prevWeekOffset)}
+                            // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Previous
                         </button>
 
                         {/* Menampilkan nomor halaman */}
-                        {[...Array(last_page)].map((_, index) => (
+                        {/* {[...Array(last_page)].map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => handlePageChange(index + 1)}
@@ -222,11 +223,11 @@ const TablePemasukan = ({ laporanPrivate }) => {
                             >
                                 {index + 1}
                             </button>
-                        ))}
+                        ))} */}
 
                         <button
-                            onClick={() => handlePageChange(current_page + 1)}
-                            disabled={current_page === last_page}
+                            onClick={() => goToWeek(nextWeekOffset)}
+                            // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Next
