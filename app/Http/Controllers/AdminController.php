@@ -478,30 +478,7 @@ class AdminController extends Controller
 }
 
 
-// ini buat rekap bulanan
-//     public function mitralaporan(Request $request): Response
-// {
-//     // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
-//     $bulan = $request->input('bulan', date('m'));
-//     $tahun = $request->input('tahun', date('Y'));
 
-//     // Filter data berdasarkan bulan dan tahun
-//     $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
-//         ->whereYear('tanggal', $tahun)
-//         ->orderBy('tanggal', 'desc')
-//         ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
-
-//     // Kirim data dan info bulan/tahun saat ini ke frontend
-//     return Inertia::render('Admin/Laporan/Mitra/Index', [
-//         'laporanMitra' => $laporanMitra,
-//         'bulan' => $bulan,
-//         'tahun' => $tahun,
-//         'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
-//         'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
-//         'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
-//         'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
-//     ]);
-// }
 // test ----------------------------------------------
     public function createmitralaporan(): Response
     {
@@ -1003,6 +980,78 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.private');
     }
 
-    
+    // ini buat rekap bulanan
+    public function RekapCabang(Request $request): Response
+{
+    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+    $bulan = $request->input('bulan', date('m'));
+    $tahun = $request->input('tahun', date('Y'));
+
+    // Filter data berdasarkan bulan dan tahun
+    $laporanMitra = LapPemasukanCabang::whereMonth('tanggal', $bulan)
+        ->whereYear('tanggal', $tahun)
+        ->orderBy('tanggal', 'desc')
+        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+
+    // Kirim data dan info bulan/tahun saat ini ke frontend
+    return Inertia::render('Admin/Laporan/Mitra/Index', [
+        'laporanMitra' => $laporanMitra,
+        'bulan' => $bulan,
+        'tahun' => $tahun,
+        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+    ]);
+}
+// ini buat rekap bulanan
+public function Rekapmitra(Request $request): Response
+{
+    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+    $bulan = $request->input('bulan', date('m'));
+    $tahun = $request->input('tahun', date('Y'));
+
+    // Filter data berdasarkan bulan dan tahun
+    $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
+        ->whereYear('tanggal', $tahun)
+        ->orderBy('tanggal', 'desc')
+        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+
+    // Kirim data dan info bulan/tahun saat ini ke frontend
+    return Inertia::render('Admin/Laporan/Mitra/Index', [
+        'laporanMitra' => $laporanMitra,
+        'bulan' => $bulan,
+        'tahun' => $tahun,
+        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+    ]);
+}
+
+// ini buat rekap bulanan
+public function RekapPrivate(Request $request): Response
+{
+    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+    $bulan = $request->input('bulan', date('m'));
+    $tahun = $request->input('tahun', date('Y'));
+
+    // Filter data berdasarkan bulan dan tahun
+    $laporanMitra = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
+        ->whereYear('tanggal', $tahun)
+        ->orderBy('tanggal', 'desc')
+        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+
+    // Kirim data dan info bulan/tahun saat ini ke frontend
+    return Inertia::render('Admin/Laporan/Mitra/Index', [
+        'laporanMitra' => $laporanMitra,
+        'bulan' => $bulan,
+        'tahun' => $tahun,
+        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+    ]);
+}
 
 }
