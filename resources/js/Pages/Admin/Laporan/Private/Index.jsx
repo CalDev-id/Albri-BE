@@ -43,10 +43,10 @@ const Laporan = () => {
         const totalStudents = laporanPrivateData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_8000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_15000 || 0)),
+                ((laporan.biaya_30 || 0) +
+                    (laporan.biaya_35 || 0) +
+                    (laporan.biaya_40 || 0) +
+                    (laporan.biaya_45 || 0)),
             0
         );
     

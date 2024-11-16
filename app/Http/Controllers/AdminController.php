@@ -150,13 +150,18 @@ class AdminController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
     
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
-        $laporanCabang = LapPemasukanCabang::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+        $laporanCabang = LapPemasukanCabang::with('cabang')
+        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanCabangPage');
         
-            $laporanPengeluaranCabang = LapPengeluaranCabang::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            $laporanPengeluaranCabang = LapPengeluaranCabang::with('user')
+            ->with('cabang')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranCabangPage');
+
+
 
         return Inertia::render('Admin/Laporan/Cabang/Index', [
 
@@ -449,11 +454,14 @@ class AdminController extends Controller
         ->orderBy('tanggal', 'desc')
         ->paginate(50, ['*'], 'laporanMitraPage');
     
-        $laporanPengeluaranMitra = LapPengeluaranMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
         ->orderBy('tanggal', 'desc')
         ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
         $laporanMitraFull = LapPemasukanMitra::all();
         $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get();
+
+
 
     return Inertia::render('Admin/Laporan/Mitra/Index', [
         'laporanMitra' => $laporanMitra,
@@ -725,9 +733,11 @@ class AdminController extends Controller
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
         
-            $laporanPengeluaranPrivate = LapPengeluaranPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
+        
             $laporanPrivateFull = LapPemasukanPrivate::all();
             $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
 

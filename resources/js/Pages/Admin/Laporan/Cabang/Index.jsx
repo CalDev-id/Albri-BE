@@ -45,9 +45,8 @@ const Laporan = () => {
             (sum, laporan) =>
                 sum +
                 ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_8000 || 0) +
                     (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_15000 || 0)),
+                    (laporan.biaya_12000 || 0)),
             0
         );
     

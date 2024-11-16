@@ -185,10 +185,11 @@ const TablePemasukan = () => {
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_5000")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_10000")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_12000")}</td>
+                                <td colSpan="2" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_30")}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_35")}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_40")}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_45")}</td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalbiaya")}</td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("daftar")}</td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("modul")}</td>
