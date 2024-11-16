@@ -103,6 +103,9 @@ Route::get('/admin/mitra', [AdminController::class, 'mitra'])
 Route::get('/admin/private', [AdminController::class, 'private'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.private');
+Route::get('/admin/guru', [AdminController::class, 'guru'])
+    ->middleware(['auth','role:Admin'])
+    ->name('admin.guru');
 
 Route::get('/admin/settings', [AdminController::class, 'settings'])
     ->middleware(['auth', 'role:Admin'])
@@ -198,7 +201,35 @@ Route::get('/admin/laporan/private', [AdminController::class, 'privatelaporan'])
 Route::get('/admin/laporan/private/create', [AdminController::class, 'createprivate'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.laporan.create');
+Route::post('/admin/laporan/private/store', [AdminController::class, 'storelaporanprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.private.store');
+Route::get('/admin/laporan/private/{id}/edit', [AdminController::class, 'editlaporanprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.show');
+Route::put('/admin/laporan/private/{id}', [AdminController::class, 'updatelaporanprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.update');
+Route::delete('/admin/laporan/private/{id}', [AdminController::class, 'destroylaporanprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.destroy');
 
+// Laporan Pengeluaran Private Admin
+Route::get('/admin/laporan/pengeluaranprivate/create', [AdminController::class, 'createpengeluaranprivatelaporan'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.create');
+Route::post('/admin/laporan/pengeluaranprivate/store', [AdminController::class, 'storelaporanpengeluaranprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.store');
+Route::get('admin/laporan/pengeluaranprivate/{id}/edit', [AdminController::class, 'editpengeluaranprivate'])
+    ->middleware(['auth','role:Admin'])
+    ->name('admin.laporan.pengeluaran.edit');
+Route::put('/admin/laporan/pengeluaranprivate/{id}', [AdminController::class, 'updatepengeluaranprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.update');
+Route::delete('/admin/laporan/pengeluaranprivate/{id}', [AdminController::class, 'destroypengeluaranprivate'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.laporan.pengeluaran.destroy');
 
 
 

@@ -1,47 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-// import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "@inertiajs/react";
 
-import DatePickerOne from "@/components/DatePickerOne";
-import SelectGroupTwo from "@/components/SelectGroupTwo";
-import { useEffect } from "react";
+const EditCabang = () => {
+    const {laporanprivate  } = usePage().props
+    const{ data, setData, put, errors }=useForm({
+        hari: laporanprivate.hari,
+        tanggal: laporanprivate.tanggal,
+        biaya_30: laporanprivate.biaya_30,
+        biaya_35: laporanprivate.biaya_35,
+        biaya_40: laporanprivate.biaya_40,
+        biaya_45: laporanprivate.biaya_45,
+        daftar: laporanprivate.daftar,
+        modul: laporanprivate.modul,
+        kaos: laporanprivate.kaos,
+        kas: laporanprivate.kas,
+        lainlain: laporanprivate.lainlain,
 
-import "flowbite/dist/flowbite.min.js";
 
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
-const Laporan = () => {
 
-    const{ data, setData, post, errors }=useForm({
-        hari: "Senin",
-        tanggal: "",
-        biaya_30: "",
-        biaya_35: "",
-        biaya_40: "",
-        biaya_45: "",
-        daftar: "",
-        modul: "",
-        kaos: "",
-        kas: "",
-        lainlain: "",
     });
 
     const handlesubmit = (e) => {
         e.preventDefault();
-        post("/admin/laporan/private/store");
+        put(`/admin/laporan/private/${laporanprivate.id}`);
     };
 
-    // useEffect(() => {
-    //     // Pastikan inisialisasi dijalankan setelah komponen dimuat
-    //     if (typeof window !== "undefined" && window.Datepicker) {
-    //         new window.Datepicker(document.getElementById("datepicker-format"));
-    //     }
-    // }, []);
     return (
         <DefaultLayout>
-          <div className="flex flex-col gap-9">
+           <div className="flex flex-col gap-9">
                 {/* <!-- Contact Form --> */}
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
@@ -239,9 +227,8 @@ const Laporan = () => {
                     </form>
                 </div>
             </div>
-           
-        </DefaultLayout>
+         
+      </DefaultLayout>
     );
-};
-
-export default Laporan;
+}
+export default EditCabang;

@@ -18,6 +18,8 @@ use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 use App\Models\LapPemasukanMitra;
 use App\Models\LapPengeluaranMitra;
+use App\Models\LapPemasukanPrivate;
+use App\Models\LapPengeluaranPrivate;
 
 
 
@@ -86,6 +88,21 @@ class AdminController extends Controller
             'privateData' => $privateData,
         ]);
     }
+
+    public function guru()
+    {
+        $privateData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Guru');
+        })->with(['roles' => function ($query) {
+            $query->where('name', 'Guru');
+        }])
+            ->latest()
+            ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
+        return Inertia::render('Admin/Guru', [
+            'privateData' => $privateData,
+        ]);
+    }
+
 
     public function settings(Request $request): Response
     {
@@ -642,10 +659,260 @@ class AdminController extends Controller
 
     public function privatelaporan(): Response
     {
-        return Inertia::render('Admin/Laporan/Private/Index');
+
+        $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
+        $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
+
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+        ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
+        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
+
+
+
+
+        return Inertia::render('Admin/Laporan/Private/Index',
+            [
+                'laporanPrivate' => $laporanPrivate,
+                'laporanPrivateFull' => $laporanPrivateFull,
+                'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+                'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
+            ]);
     }
+
+
     public function createprivate(): Response
     {
         return Inertia::render('Admin/Laporan/Private/Create');
     }
+
+    public function storelaporanprivate(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'biaya_30' => 'required|integer',
+            'biaya_35' => 'required|integer',
+            'biaya_40' => 'required|integer',
+            'biaya_45' => 'required|integer',
+            'daftar' => 'required|integer',
+            'modul' => 'required|integer',
+            'kaos' => 'required|integer',
+            'kas' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalbiaya = ($validatedData['biaya_30'] * 30000) +
+            ($validatedData['biaya_35'] * 35000) +
+            ($validatedData['biaya_40'] * 40000) +
+            ($validatedData['biaya_45'] * 45000);
+
+        $totalpemasukan = $totalbiaya +
+            $validatedData['daftar'] +
+            $validatedData['modul'] +
+            $validatedData['kaos'] +
+            $validatedData['kas'] +
+            $validatedData['lainlain'];
+
+        LapPemasukanPrivate::create([
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'biaya_30' => $validatedData['biaya_30'],
+            'biaya_35' => $validatedData['biaya_35'],
+            'biaya_40' => $validatedData['biaya_40'],
+            'biaya_45' => $validatedData['biaya_45'],
+            'totalbiaya' => $totalbiaya,
+            'daftar' => $validatedData['daftar'],
+            'modul' => $validatedData['modul'],
+            'kaos' => $validatedData['kaos'],
+            'kas' => $validatedData['kas'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpemasukan' => $totalpemasukan,
+            'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+
+        ]);
+
+        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+
+    }
+
+
+    public function editlaporanprivate($id): Response
+    {
+        $laporanprivate = LapPemasukanPrivate::findOrFail($id); // Mengambil data laporan pemasukan private berdasarkan id
+        
+        return Inertia::render('Admin/Laporan/Private/edit', ['laporanprivate' => $laporanprivate]);
+    }   
+
+    public function updatelaporanprivate(Request $request, $id): RedirectResponse
+    {
+        $validatedData = $request->validate([
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'biaya_30' => 'required|integer',
+            'biaya_35' => 'required|integer',
+            'biaya_40' => 'required|integer',
+            'biaya_45' => 'required|integer',
+            'daftar' => 'required|integer',
+            'modul' => 'required|integer',
+            'kaos' => 'required|integer',
+            'kas' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalbiaya = ($validatedData['biaya_30'] * 30000) +
+            ($validatedData['biaya_35'] * 35000) +
+            ($validatedData['biaya_40'] * 40000) +
+            ($validatedData['biaya_45'] * 45000);
+
+        $totalpemasukan = $totalbiaya +
+            $validatedData['daftar'] +
+            $validatedData['modul'] +
+            $validatedData['kaos'] +
+            $validatedData['kas'] +
+            $validatedData['lainlain'];
+
+        $laporanPrivate = LapPemasukanPrivate::findOrFail($id);
+        $laporanPrivate->update([
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'biaya_30' => $validatedData['biaya_30'],
+            'biaya_35' => $validatedData['biaya_35'],
+            'biaya_40' => $validatedData['biaya_40'],
+            'biaya_45' => $validatedData['biaya_45'],
+            'totalbiaya' => $totalbiaya,
+            'daftar' => $validatedData['daftar'],
+            'modul' => $validatedData['modul'],
+            'kaos' => $validatedData['kaos'],
+            'kas' => $validatedData['kas'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpemasukan' => $totalpemasukan,
+            'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+        ]);
+
+        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+    }
+
+    public function destroylaporanprivate($id)
+    {
+        LapPemasukanPrivate::find($id)->delete();
+        return redirect()->route('admin.laporan.private');
+    }
+
+
+    // Laporan Pengeluaran Private Admin
+    public function createpengeluaranprivatelaporan(): Response
+    {
+        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+
+        return Inertia::render('Admin/Laporan/Private/Pengeluaran/CreatePengeluaran', [
+            'users' => $users,
+
+        ]);
+    }
+
+    public function storelaporanpengeluaranprivate(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'guru_id' => 'required|exists:users,id',
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'gaji' => 'required|integer',
+            'atk' => 'required|integer',
+            'sewa' => 'required|integer',
+            'intensif' => 'required|integer',
+            'lisensi' => 'required|integer',
+            'thr' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalpengeluaran = $validatedData['gaji'] +
+            $validatedData['atk'] +
+            $validatedData['sewa'] +
+            $validatedData['intensif'] +
+            $validatedData['lisensi'] +
+            $validatedData['thr'] +
+            $validatedData['lainlain'];
+
+        LapPengeluaranPrivate::create([
+            'guru_id' => $validatedData['guru_id'],
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'gaji' => $validatedData['gaji'],
+            'atk' => $validatedData['atk'],
+            'sewa' => $validatedData['sewa'],
+            'intensif' => $validatedData['intensif'],
+            'lisensi' => $validatedData['lisensi'],
+            'thr' => $validatedData['thr'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpengeluaran' => $totalpengeluaran,
+            'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+
+        ]);
+        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+    }
+
+    public function editpengeluaranprivate($id): Response
+    {
+        $pengeluaranprivate=LapPengeluaranPrivate::findOrFail($id);
+        $users =  User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
+
+
+        
+        return Inertia::render('Admin/Laporan/Private/Pengeluaran/EditPengeluaran', ['pengeluaranprivate' => $pengeluaranprivate, 'users'=> $users]);
+    }  
+    
+    public function updatepengeluaranprivate(Request $request, $id): RedirectResponse
+    {
+      
+        $validatedData = $request->validate([
+            'guru_id' => 'required|exists:users,id',
+            'hari' => 'required|string',
+            'tanggal' => 'required|date',
+            'gaji' => 'required|integer',
+            'atk' => 'required|integer',
+            'sewa' => 'required|integer',
+            'intensif' => 'required|integer',
+            'lisensi' => 'required|integer',
+            'thr' => 'required|integer',
+            'lainlain' => 'required|integer',
+        ]);
+
+        $totalpengeluaran = $validatedData['gaji'] +
+            $validatedData['atk'] +
+            $validatedData['sewa'] +
+            $validatedData['intensif'] +
+            $validatedData['lisensi'] +
+            $validatedData['thr'] +
+            $validatedData['lainlain'];
+
+        $laporanPrivate = LapPengeluaranPrivate::findOrFail($id);
+        $laporanPrivate->update([
+            'guru_id' => $validatedData['guru_id'],
+            'hari' => $validatedData['hari'],
+            'tanggal' => $validatedData['tanggal'],
+            'gaji' => $validatedData['gaji'],
+            'atk' => $validatedData['atk'],
+            'sewa' => $validatedData['sewa'],
+            'intensif' => $validatedData['intensif'],
+            'lisensi' => $validatedData['lisensi'],
+            'thr' => $validatedData['thr'],
+            'lainlain' => $validatedData['lainlain'],
+            'totalpengeluaran' => $totalpengeluaran,
+            'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
+        ]);
+        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+    }
+
+    public function destroypengeluaranprivate($id)
+    {
+        LapPengeluaranPrivate::find($id)->delete();
+        return redirect()->route('admin.laporan.private');
+    }
+
+    
+
 }
