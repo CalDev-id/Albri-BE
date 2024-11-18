@@ -231,6 +231,19 @@ Route::delete('/admin/laporan/pengeluaranprivate/{id}', [AdminController::class,
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.laporan.pengeluaran.destroy');
 
+            /* -----------------------------------------
+                Rekap Bulanan 
+            -------------------------------------------- */
+Route::get('/cabang/rekap', [AdminController::class, 'rekapcabang'])
+->middleware(['auth', 'role:Admin'])
+->name('admin.rekap.cabang');
+Route::get('/mitra/rekap', [AdminController::class, 'rekapmitra'])
+->middleware(['auth', 'role:Admin'])
+->name('admin.rekap.mitra');
+Route::get('/private/rekap', [AdminController::class, 'rekapprivate'])
+->middleware(['auth', 'role:Admin'])
+->name('admin.rekap.private');
+
 
 
 
@@ -293,6 +306,8 @@ Route::get('/mitra/{id}/edit', [MitraController::class, 'edit'])
 Route::put('/mitra/{id}', [MitraController::class, 'update'])
     ->middleware(['auth', 'role:Mitra|Admin'])
     ->name('mitra.update'); // Ubah jadi lowercase
+
+
 
 
 
