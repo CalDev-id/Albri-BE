@@ -5,12 +5,11 @@ import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
 import "flowbite/dist/flowbite.min.js";
 import { Inertia } from '@inertiajs/inertia';
-import TablePengeluaran from "./TablePengeluaran";
-import TablePemasukan from "./TablePemasukan";
+
 import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
-const Laporan = ({ laporanMitra, bulan, tahun, nextMonth, nextYear, prevMonth, prevYear }) => {
+const Laporan = ({ laporanCabang, bulan, tahun, nextMonth, nextYear, prevMonth, prevYear }) => {
     // const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
         // Fungsi untuk mengubah bulan ke bulan sebelumnya atau selanjutnya
     const goToMonth = (month, year) => {
@@ -177,9 +176,9 @@ const Laporan = ({ laporanMitra, bulan, tahun, nextMonth, nextYear, prevMonth, p
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Mitra
+                        Laporan Pemasukan Cabang
                     </h4>
-                    <h1>Laporan Mitra - {bulan}/{tahun}</h1>
+                    <h1>Laporan Cabang - {bulan}/{tahun}</h1>
                     <div>
                         <Link href="/admin/laporan/mitra/create">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
@@ -252,7 +251,7 @@ const Laporan = ({ laporanMitra, bulan, tahun, nextMonth, nextYear, prevMonth, p
                             </tr>
                         </thead>
                         <tbody>
-                            {laporanMitra.data.map((laporan, key) => (
+                            {laporanCabang.data.map((laporan, key) => (
                                 <tr
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"

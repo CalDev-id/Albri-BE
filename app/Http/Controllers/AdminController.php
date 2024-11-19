@@ -127,11 +127,12 @@ class AdminController extends Controller
 
 
 
- 
 
-    // Laporan Controller Cabang
-    
-        public function cabanglaporan(Request $request): Response
+    /* -----------------------------------------
+            Laporan Controller Cabang
+    -------------------------------------------- */
+
+    public function cabanglaporan(Request $request): Response
     {
         // $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
         // $laporanCabang = LapPemasukanCabang::with('cabang')
@@ -142,20 +143,20 @@ class AdminController extends Controller
         // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
         // ->paginate(2, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
         // $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
-        
+
         $weekOffset = (int) $request->input('weekOffset', 0);
 
         // Hitung tanggal awal dan akhir dari minggu yang diinginkan
         $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
-    
+
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanCabang = LapPemasukanCabang::with('cabang')
-        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanCabangPage');
-        
-            $laporanPengeluaranCabang = LapPengeluaranCabang::with('user')
+
+        $laporanPengeluaranCabang = LapPengeluaranCabang::with('user')
             ->with('cabang')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
@@ -205,12 +206,10 @@ class AdminController extends Controller
             'kas' => 'required|integer',
             'lainlain' => 'required|integer',
         ]);
-
         // Hitung total biaya berdasarkan input biaya
         $totalbiaya = ($validatedData['biaya_5000'] * 5000) +
             ($validatedData['biaya_10000'] * 10000) +
             ($validatedData['biaya_12000'] * 12000);
-
         // Hitung total pemasukan berdasarkan total biaya dan input lainnya
         $totalpemasukan = $totalbiaya +
             $validatedData['daftar'] +
@@ -222,7 +221,7 @@ class AdminController extends Controller
         // Buat laporan pemasukan cabang baru
         LapPemasukanCabang::create([
             'cabang_id' => $validatedData['cabang_id'],
-            'hari' => $validatedData['hari'], 
+            'hari' => $validatedData['hari'],
             'tanggal' => $validatedData['tanggal'],
             'biaya_5000' => $validatedData['biaya_5000'],
             'biaya_10000' => $validatedData['biaya_10000'],
@@ -285,9 +284,6 @@ class AdminController extends Controller
             $validatedData['kaos'] +
             $validatedData['kas'] +
             $validatedData['lainlain'];
-
-
-
         // Update laporan pemasukan cabang
         $laporanCabang = LapPemasukanCabang::findOrFail($id);
         $laporanCabang->update([
@@ -316,7 +312,11 @@ class AdminController extends Controller
     }
 
 
-    // Laporan Pengeluaran Cabang Admin
+
+    /* -----------------------------------------
+            Laporan Pengeluaran Cabang Admin
+    -------------------------------------------- */
+
     public function createcabanpengeluaranlaporan(): Response
     {
         $cabangs = CabangAlbri::all(); // Mengambil semua data cabang
@@ -376,7 +376,8 @@ class AdminController extends Controller
         return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
     }
 
-    public function editpengeluarancabang($id): Response{
+    public function editpengeluarancabang($id): Response
+    {
 
         $laporanCabang = LapPengeluaranCabang::with('cabang', 'user')->findOrFail($id);  // Mengambil semua data laporan pengeluaran cabang
         $cabangs = CabangAlbri::all(); // Mengambil semua data cabang
@@ -387,8 +388,6 @@ class AdminController extends Controller
             'cabangs' => $cabangs,
             'users' => $users,
         ]);
-
-
     }
 
     public function updatepengeluarancabang(Request $request, $id): RedirectResponse
@@ -440,46 +439,40 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.cabang');
     }
 
+
+
+    /* -----------------------------------------
+            Rekap Bulanan Mitra
+        -------------------------------------------- */
+
     public function mitralaporan(Request $request): Response
-{
-    // Ambil parameter `weekOffset` dari request, default ke 0 (minggu ini), dan pastikan tipe datanya integer
-    $weekOffset = (int) $request->input('weekOffset', 0);
-
-    // Hitung tanggal awal dan akhir dari minggu yang diinginkan
-    $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
-    $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
-
-    // Filter data berdasarkan tanggal dalam minggu yang diinginkan
-    $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
-        ->orderBy('tanggal', 'desc')
-        ->paginate(50, ['*'], 'laporanMitraPage');
-    
+    {
+        // Ambil parameter `weekOffset` dari request, default ke 0 (minggu ini), dan pastikan tipe datanya integer
+        $weekOffset = (int) $request->input('weekOffset', 0);
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanMitraPage');
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
-        ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
-        ->orderBy('tanggal', 'desc')
-        ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
         $laporanMitraFull = LapPemasukanMitra::all();
         $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get();
-
-
-
-    return Inertia::render('Admin/Laporan/Mitra/Index', [
-        'laporanMitra' => $laporanMitra,
-        'startOfWeek' => $startOfWeek->format('Y-m-d'),
-        'endOfWeek' => $endOfWeek->format('Y-m-d'),
-        'nextWeekOffset' => $weekOffset + 1,
-        'prevWeekOffset' => $weekOffset - 1,
-        'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
-
-
-        'laporanMitraFull' => $laporanMitraFull,
-        'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
-    ]);
-}
-
-
-
-// test ----------------------------------------------
+        return Inertia::render('Admin/Laporan/Mitra/Index', [
+            'laporanMitra' => $laporanMitra,
+            'startOfWeek' => $startOfWeek->format('Y-m-d'),
+            'endOfWeek' => $endOfWeek->format('Y-m-d'),
+            'nextWeekOffset' => $weekOffset + 1,
+            'prevWeekOffset' => $weekOffset - 1,
+            'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
+            'laporanMitraFull' => $laporanMitraFull,
+            'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
+        ]);
+    }
     public function createmitralaporan(): Response
     {
         return Inertia::render('Admin/Laporan/Mitra/Create');
@@ -487,7 +480,6 @@ class AdminController extends Controller
 
     public function storelaporanmitra(Request $request)
     {
-
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
@@ -511,8 +503,6 @@ class AdminController extends Controller
             $validatedData['kaos'] +
             $validatedData['kas'] +
             $validatedData['lainlain'];
-
-
         LapPemasukanMitra::create([
             'hari' => $validatedData['hari'],
             'tanggal' => $validatedData['tanggal'],
@@ -528,9 +518,7 @@ class AdminController extends Controller
             'lainlain' => $validatedData['lainlain'],
             'totalpemasukan' => $totalpemasukan,
             'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
-
         ]);
-
         return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
     }
 
@@ -565,7 +553,6 @@ class AdminController extends Controller
             $validatedData['kaos'] +
             $validatedData['kas'] +
             $validatedData['lainlain'];
-
         $laporanMitra = LapPemasukanMitra::findOrFail($id);
         $laporanMitra->update([
             'hari' => $validatedData['hari'],
@@ -704,19 +691,19 @@ class AdminController extends Controller
         // Hitung tanggal awal dan akhir dari minggu yang diinginkan
         $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
-    
+
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
-        
-            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
-        
-            $laporanPrivateFull = LapPemasukanPrivate::all();
-            $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
+
+        $laporanPrivateFull = LapPemasukanPrivate::all();
+        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
 
 
 
@@ -732,7 +719,8 @@ class AdminController extends Controller
 
 
 
-        return Inertia::render('Admin/Laporan/Private/Index',
+        return Inertia::render(
+            'Admin/Laporan/Private/Index',
             [
                 // 'laporanPrivate' => $laporanPrivate,
                 // 'laporanPrivateFull' => $laporanPrivateFull,
@@ -745,7 +733,8 @@ class AdminController extends Controller
                 'nextWeekOffset' => $weekOffset + 1,
                 'prevWeekOffset' => $weekOffset - 1,
                 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-            ]);
+            ]
+        );
     }
 
 
@@ -770,19 +759,16 @@ class AdminController extends Controller
             'kas' => 'required|integer',
             'lainlain' => 'required|integer',
         ]);
-
         $totalbiaya = ($validatedData['biaya_30'] * 30000) +
             ($validatedData['biaya_35'] * 35000) +
             ($validatedData['biaya_40'] * 40000) +
             ($validatedData['biaya_45'] * 45000);
-
         $totalpemasukan = $totalbiaya +
             $validatedData['daftar'] +
             $validatedData['modul'] +
             $validatedData['kaos'] +
             $validatedData['kas'] +
             $validatedData['lainlain'];
-
         LapPemasukanPrivate::create([
             'hari' => $validatedData['hari'],
             'tanggal' => $validatedData['tanggal'],
@@ -802,16 +788,15 @@ class AdminController extends Controller
         ]);
 
         return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
-
     }
 
 
     public function editlaporanprivate($id): Response
     {
         $laporanprivate = LapPemasukanPrivate::findOrFail($id); // Mengambil data laporan pemasukan private berdasarkan id
-        
+
         return Inertia::render('Admin/Laporan/Private/edit', ['laporanprivate' => $laporanprivate]);
-    }   
+    }
 
     public function updatelaporanprivate(Request $request, $id): RedirectResponse
     {
@@ -828,19 +813,16 @@ class AdminController extends Controller
             'kas' => 'required|integer',
             'lainlain' => 'required|integer',
         ]);
-
         $totalbiaya = ($validatedData['biaya_30'] * 30000) +
             ($validatedData['biaya_35'] * 35000) +
             ($validatedData['biaya_40'] * 40000) +
             ($validatedData['biaya_45'] * 45000);
-
         $totalpemasukan = $totalbiaya +
             $validatedData['daftar'] +
             $validatedData['modul'] +
             $validatedData['kaos'] +
             $validatedData['kas'] +
             $validatedData['lainlain'];
-
         $laporanPrivate = LapPemasukanPrivate::findOrFail($id);
         $laporanPrivate->update([
             'hari' => $validatedData['hari'],
@@ -924,17 +906,17 @@ class AdminController extends Controller
 
     public function editpengeluaranprivate($id): Response
     {
-        $pengeluaranprivate=LapPengeluaranPrivate::findOrFail($id);
+        $pengeluaranprivate = LapPengeluaranPrivate::findOrFail($id);
         $users =  User::role('Private')->get(); // Mengambil semua data user dengan role Admin
 
 
-        
-        return Inertia::render('Admin/Laporan/Private/Pengeluaran/EditPengeluaran', ['pengeluaranprivate' => $pengeluaranprivate, 'users'=> $users]);
-    }  
-    
+
+        return Inertia::render('Admin/Laporan/Private/Pengeluaran/EditPengeluaran', ['pengeluaranprivate' => $pengeluaranprivate, 'users' => $users]);
+    }
+
     public function updatepengeluaranprivate(Request $request, $id): RedirectResponse
     {
-      
+
         $validatedData = $request->validate([
             'guru_id' => 'required|exists:users,id',
             'hari' => 'required|string',
@@ -980,78 +962,87 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.private');
     }
 
-    // ini buat rekap bulanan
-    public function RekapCabang(Request $request): Response
-{
-    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
-    $bulan = $request->input('bulan', date('m'));
-    $tahun = $request->input('tahun', date('Y'));
 
-    // Filter data berdasarkan bulan dan tahun
-    $laporanMitra = LapPemasukanCabang::whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->orderBy('tanggal', 'desc')
-        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
 
-    // Kirim data dan info bulan/tahun saat ini ke frontend
-    return Inertia::render('Admin/Laporan/Mitra/Index', [
-        'laporanMitra' => $laporanMitra,
-        'bulan' => $bulan,
-        'tahun' => $tahun,
-        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
-        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
-        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
-        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
-    ]);
-}
-// ini buat rekap bulanan
-public function Rekapmitra(Request $request): Response
-{
-    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
-    $bulan = $request->input('bulan', date('m'));
-    $tahun = $request->input('tahun', date('Y'));
+    /* -----------------------------------------
+            Rekap Bulanan Cabang
+        --------------------------------------- */
 
-    // Filter data berdasarkan bulan dan tahun
-    $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->orderBy('tanggal', 'desc')
-        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+    public function rekapcabang(Request $request): Response
+    {
+        // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
 
-    // Kirim data dan info bulan/tahun saat ini ke frontend
-    return Inertia::render('Admin/Laporan/Mitra/Index', [
-        'laporanMitra' => $laporanMitra,
-        'bulan' => $bulan,
-        'tahun' => $tahun,
-        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
-        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
-        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
-        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
-    ]);
-}
+        // Filter data berdasarkan bulan dan tahun
+        $laporanCabang = LapPemasukanCabang::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanCabangPage'); // Sesuaikan jumlah per halaman
 
-// ini buat rekap bulanan
-public function RekapPrivate(Request $request): Response
-{
-    // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
-    $bulan = $request->input('bulan', date('m'));
-    $tahun = $request->input('tahun', date('Y'));
+        // Kirim data dan info bulan/tahun saat ini ke frontend
+        return Inertia::render('Admin/Laporan/Cabang/RekapBulanan/index', [
+            'laporanCabang' => $laporanCabang,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+            'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+            'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+            'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+        ]);
+    }
+    /* -----------------------------------------
+            Rekap Bulanan Mitra
+        -------------------------------------------- */
+    public function rekapmitra(Request $request): Response
+    {
+        // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
 
-    // Filter data berdasarkan bulan dan tahun
-    $laporanMitra = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->orderBy('tanggal', 'desc')
-        ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+        // Filter data berdasarkan bulan dan tahun
+        $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
 
-    // Kirim data dan info bulan/tahun saat ini ke frontend
-    return Inertia::render('Admin/Laporan/Mitra/Index', [
-        'laporanMitra' => $laporanMitra,
-        'bulan' => $bulan,
-        'tahun' => $tahun,
-        'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
-        'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
-        'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
-        'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
-    ]);
-}
 
+        // Kirim data dan info bulan/tahun saat ini ke frontend
+        return Inertia::render('Admin/Laporan/Mitra/RekapBulanan/index', [
+            'laporanMitra' => $laporanMitra,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+            'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+            'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+            'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+        ]);
+    }
+
+    /* -----------------------------------------
+        Rekap Bulanan Private
+    -------------------------------------------- */
+    public function rekapprivate(Request $request): Response
+    {
+        // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        // Filter data berdasarkan bulan dan tahun
+        $laporanPrivate = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
+
+        // Kirim data dan info bulan/tahun saat ini ke frontend
+        return Inertia::render('Admin/Laporan/Private/RekapBulanan/index', [
+            'laporanPrivate' => $laporanPrivate,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
+            'nextYear' => $bulan < 12 ? $tahun : $tahun + 1,
+            'prevMonth' => $bulan > 1 ? $bulan - 1 : 12,
+            'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
+        ]);
+    }
 }

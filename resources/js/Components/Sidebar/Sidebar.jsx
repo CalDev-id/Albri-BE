@@ -303,7 +303,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Cabang",
-                route: "/admin/settings",
+                route: "/cabang/rekap",
             },
             {
                 icon: (
@@ -334,7 +334,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Mitra",
-                route: "/admin/settings",
+                route: "/mitra/rekap",
             },
             {
                 icon: (
@@ -365,7 +365,8 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Private",
-                route: "/admin/settings",
+                route: "/private/rekap",
+                
             },
             {
                 icon: (
@@ -520,7 +521,7 @@ const menuGroupsMitra = [
                         />
                     </svg>
                 ),
-                label: "Laporan",
+                label: "Laporan Mitra",
                 route: "/mitra/laporan",
             },
             {
