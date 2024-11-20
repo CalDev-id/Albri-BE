@@ -43,9 +43,9 @@ public function store(LoginRequest $request): RedirectResponse
     } elseif ($user->hasRole('Guru')) {
         return redirect()->route('guru.dashboard');
     } elseif ($user->hasRole('Private')) {
-        return redirect()->route('Private.Dashboard');
+        return redirect()->route('private.dashboard');
     } elseif ($user->hasRole('Mitra')) {
-        return redirect()->route('Mitra.Dashboard');
+        return redirect()->route('mitra.dashboard');
     }
 
     // Jika user tidak punya role khusus, arahkan ke dashboard umum

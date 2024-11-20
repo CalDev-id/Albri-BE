@@ -34,7 +34,7 @@ export default function Edit({ mustVerifyEmail, status }) {
             </div>
 
 
-           </DefaultLayout>
+</DefaultLayout>
         
     );
 }
