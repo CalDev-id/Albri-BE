@@ -3,6 +3,7 @@ import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
+import * as XLSX from "xlsx";
 
 const TablePengeluaran = () => {
     const {
@@ -23,17 +24,84 @@ const TablePengeluaran = () => {
         return laporanPengeluaranPrivate.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
     };
 
+    const downloadExcelPengeluaran = (laporanPengeluaranPrivate, judul) => {
+        const data = laporanPengeluaranPrivate.data.map((pengeluaran) => ({
+            Hari: pengeluaran.hari,
+            Tanggal: pengeluaran.tanggal,
+            "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
+            Gaji: pengeluaran.gaji || 0,
+            ATK: pengeluaran.atk || 0,
+            Intensif: pengeluaran.intensif || 0,
+            Lisensi: pengeluaran.lisensi || 0,
+            "Lain Lain": pengeluaran.lainlain || 0,
+            Total: pengeluaran.totalpengeluaran || 0,
+        }));
+    
+        // Hitung total untuk setiap kolom numerik
+        const totals = {
+            Hari: "Total",
+            Tanggal: "",
+            "Nama Guru": "",
+            Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
+            ATK: data.reduce((sum, row) => sum + row.ATK, 0),
+            Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
+            Lisensi: data.reduce((sum, row) => sum + row.Lisensi, 0),
+            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
+            Total: data.reduce((sum, row) => sum + row.Total, 0),
+        };
+    
+        // Tambahkan total sebagai baris terakhir
+        data.push(totals);
+    
+        // Urutan kolom yang diinginkan
+        const headers = [
+            "Hari",
+            "Tanggal",
+            "Nama Guru",
+            "Gaji",
+            "ATK",
+            "Intensif",
+            "Lisensi",
+            "Lain Lain",
+            "Total",
+        ];
+    
+        // Membuat worksheet dengan header khusus
+        const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+    
+        // Menambahkan header secara eksplisit (jika perlu)
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
+    
+        // Membuat workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
+    
+        // Tentukan nama file
+        const fileName = `Laporan_Pengeluaran_Private_${judul}.xlsx`;
+    
+        // Simpan file
+        XLSX.writeFile(workbook, fileName);
+    };
+
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
             <div className="flex justify-between px-7.5 mb-6">
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Laporan Pengeluaran Private
                 </h4>
+                <div>
                 <Link href="/admin/laporan/pengeluaranprivate/create">
                     <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                         Tambah Pengeluaran
                     </button>
                 </Link>
+                <button
+                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranPrivate, `${startOfWeek} sampai ${endOfWeek}`)}
+                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                        >
+                            Download Excel
+                        </button>
+                        </div>
             </div>
 
             <div className="overflow-x-auto">

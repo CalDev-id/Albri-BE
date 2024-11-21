@@ -25,7 +25,84 @@ const TablePemasukan = () => {
 
     // Calculate total values for each column
     const getTotal = (key) => {
-        return laporanPrivate.data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
+        return laporanPrivate.data.reduce(
+            (sum, laporan) => sum + (laporan[key] || 0),
+            0
+        );
+    };
+    const downloadExcel = (laporanPrivate, judul) => {
+        const data = laporanPrivate.data.map((laporan) => ({
+            Hari: laporan.hari,
+            Tanggal: laporan.tanggal,
+            "30.000": laporan.biaya_30 || 0,
+            "35.000": laporan.biaya_35 || 0,
+            "40.000": laporan.biaya_40 || 0,
+            "45.000": laporan.biaya_45 || 0,
+            "Total Biaya": laporan.totalbiaya || 0,
+            Daftar: laporan.daftar || 0,
+            Modul: laporan.modul || 0,
+            Kaos: laporan.kaos || 0,
+            Kas: laporan.kas || 0,
+            "Lain Lain": laporan.lainlain || 0,
+            "Total Pemasukan": laporan.totalpemasukan || 0,
+        }));
+
+        // Hitung total untuk setiap kolom numerik
+        const totals = {
+            Hari: "Total",
+            Tanggal: "",
+            "30.000": data.reduce((sum, row) => sum + row["30.000"], 0),
+            "35.000": data.reduce((sum, row) => sum + row["35.000"], 0),
+            "40.000": data.reduce((sum, row) => sum + row["40.000"], 0),
+            "45.000": data.reduce((sum, row) => sum + row["45.000"], 0),
+            "Total Biaya": data.reduce(
+                (sum, row) => sum + row["Total Biaya"],
+                0
+            ),
+            Daftar: data.reduce((sum, row) => sum + row.Daftar, 0),
+            Modul: data.reduce((sum, row) => sum + row.Modul, 0),
+            Kaos: data.reduce((sum, row) => sum + row.Kaos, 0),
+            Kas: data.reduce((sum, row) => sum + row.Kas, 0),
+            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
+            "Total Pemasukan": data.reduce(
+                (sum, row) => sum + row["Total Pemasukan"],
+                0
+            ),
+        };
+
+        // Tambahkan total sebagai baris terakhir
+        data.push(totals);
+
+        // Urutan kolom yang diinginkan
+        const headers = [
+            "Hari",
+            "Tanggal",
+            "30.000",
+            "35.000",
+            "40.000",
+            "45.000",
+            "Total Biaya",
+            "Daftar",
+            "Modul",
+            "Kaos",
+            "Kas",
+            "Lain Lain",
+            "Total Pemasukan",
+        ];
+
+        // Membuat worksheet dengan header khusus
+        const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+
+        // Menambahkan header secara eksplisit (jika perlu)
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
+
+        // Membuat workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+
+        // Menentukan nama file dan mendownload
+        const fileName = `Laporan_Pemasukan_private_${judul}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
     };
 
     return (
@@ -34,7 +111,7 @@ const TablePemasukan = () => {
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
                         Laporan Pemasukan Private ( {startOfWeek} sampai{" "}
-                            {endOfWeek} )
+                        {endOfWeek} )
                     </h4>
                     <div>
                         <Link href="/admin/laporan/private/create">
@@ -43,11 +120,10 @@ const TablePemasukan = () => {
                             </button>
                         </Link>
                         <button
-                            // onClick={downloadExcel}
                             onClick={() =>
-                                downloadExcel2(
-                                    // laporanCabang,
-                                    // laporanPengeluaranCabang
+                                downloadExcel(
+                                    laporanPrivate,
+                                    `${startOfWeek} sampai ${endOfWeek}`
                                 )
                             }
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
@@ -68,7 +144,7 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
-                          
+
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     30.000
                                 </th>
@@ -185,18 +261,45 @@ const TablePemasukan = () => {
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td colSpan="2" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_30")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_35")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_40")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_45")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalbiaya")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("daftar")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("modul")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kaos")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kas")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("lainlain")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalpemasukan")}</td>
+                                <td
+                                    colSpan="2"
+                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
+                                >
+                                    Total
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_30")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_35")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_40")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_45")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("totalbiaya")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("daftar")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("modul")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("kaos")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("kas")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("lainlain")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("totalpemasukan")}
+                                </td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
                         </tfoot>

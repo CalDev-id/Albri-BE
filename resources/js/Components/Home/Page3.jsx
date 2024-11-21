@@ -32,9 +32,7 @@ const Page3 = () => {
                                     Berhitung cepat secepat kalkulator
                                 </h3>
                                 <p className="text-white text-sm">
-                                    At Incredible Kids GFDC, We Believe A Good
-                                    Preschool Can Make A Huge Difference In A
-                                    Child's Future School Years.
+                                Melatih anak untuk menguasai keterampilan berhitung secara cepat dan akurat menggunakan teknik unik yang memadukan logika dan kreativitas, sehingga mereka dapat menyelesaikan operasi matematika dengan kecepatan tinggi seperti kalkulator.
                                 </p>
                             </div>
 
@@ -51,9 +49,7 @@ const Page3 = () => {
                                     Membaca tanpa mengeja
                                 </h3>
                                 <p className="text-sm">
-                                    We Use Creative, Educational, And Fun
-                                    Enrichment Activities To Keep Our Children
-                                    Engaged In The Learning Process.
+                                Mengajarkan anak membaca dengan metode yang praktis dan efektif, tanpa harus mengeja huruf per huruf, sehingga proses membaca menjadi lebih mudah, cepat, dan menyenangkan.
                                 </p>
                             </div>
 
@@ -70,9 +66,7 @@ const Page3 = () => {
                                     Mata Pelajaran Sekolah
                                 </h3>
                                 <p className="text-white text-sm">
-                                    We Provide A Warm, Welcoming Environment
-                                    Where Your Baby Grows From A Bundle Of Joy
-                                    To A Bundle Of Curiosity.
+                                Membantu anak memahami dan menguasai berbagai mata pelajaran sekolah, termasuk Matematika, Bahasa Indonesia, IPA, IPS, dan lainnya, dengan pendekatan yang interaktif dan berorientasi pada kebutuhan individu.
                                 </p>
                             </div>
                         </div>

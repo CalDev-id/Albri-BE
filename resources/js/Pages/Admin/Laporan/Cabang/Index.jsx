@@ -168,7 +168,7 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanCabang={laporanCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
+            <TablePemasukan laporanCabang={laporanCabang} laporanPengeluaranCabang={laporanPengeluaranCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
           
 
 

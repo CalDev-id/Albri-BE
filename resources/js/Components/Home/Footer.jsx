@@ -16,7 +16,7 @@ const Footer = () => {
     <p>
       Yayasan Pendidikan Albri
       <br />
-        Jl. Raya Cipadung No. 9, Cibiru Wetan, Cileunyi, Bandung, Jawa Barat
+      Kemiri Lor, RT 2 RW 3 , Kemiri, Purworejo
     </p>
   </aside>
   <nav>

@@ -2,41 +2,41 @@ import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
+import { usePage } from "@inertiajs/react";
 
 import "flowbite/dist/flowbite.min.js";
-import { usePage } from "@inertiajs/react";
 
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
-const TablePemasukan = () => {
-    const {
-        laporanCabang,
-        laporanPengeluaranCabang,
-        startOfWeek,
-        endOfWeek,
-        nextWeekOffset,
-        prevWeekOffset,
-    } = usePage().props;
-
-    // console.log(laporanCabang.data);
-    const goToWeek = (weekOffset) => {
-        Inertia.get(route("admin.laporan.cabang"), { weekOffset });
+const RekapPemasukan = ({    laporanPrivate,
+    bulan,
+    tahun,
+    nextMonth,
+    nextYear,
+    prevMonth,
+    prevYear,}) => {
+    const goToMonth = (month, year) => {
+        Inertia.get(route("admin.rekap.private"), {
+            bulan: month,
+            tahun: year,
+        });
     };
 
-    // Calculate total values for each column
     const getTotal = (key) => {
-        return laporanCabang.data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
+        return laporanPrivate.data.reduce(
+            (sum, laporan) => sum + (laporan[key] || 0),
+            0
+        );
     };
-
-    const downloadExcel = (laporanCabang, judul) => {
-        const data = laporanCabang.data.map((laporan) => ({
+    const downloadExcel = (laporanPrivate, judul) => {
+        const data = laporanPrivate.data.map((laporan) => ({
             Hari: laporan.hari,
             Tanggal: laporan.tanggal,
-            Cabang: laporan.cabang ? laporan.cabang.nama : "N/A",
-            "5000": laporan.biaya_5000 || 0,
-            "10.000": laporan.biaya_10000 || 0,
-            "12.000": laporan.biaya_12000 || 0,
+            "30.000": laporan.biaya_30 || 0,
+            "35.000": laporan.biaya_35 || 0,
+            "40.000": laporan.biaya_40 || 0,
+            "45.000": laporan.biaya_45 || 0,
             "Total Biaya": laporan.totalbiaya || 0,
             Daftar: laporan.daftar || 0,
             Modul: laporan.modul || 0,
@@ -45,35 +45,41 @@ const TablePemasukan = () => {
             "Lain Lain": laporan.lainlain || 0,
             "Total Pemasukan": laporan.totalpemasukan || 0,
         }));
-    
+
         // Hitung total untuk setiap kolom numerik
         const totals = {
             Hari: "Total",
             Tanggal: "",
-            Cabang: "",
-            "5000": data.reduce((sum, row) => sum + row["5000"], 0),
-            "10.000": data.reduce((sum, row) => sum + row["10.000"], 0),
-            "12.000": data.reduce((sum, row) => sum + row["12.000"], 0),
-            "Total Biaya": data.reduce((sum, row) => sum + row["Total Biaya"], 0),
+            "30.000": data.reduce((sum, row) => sum + row["30.000"], 0),
+            "35.000": data.reduce((sum, row) => sum + row["35.000"], 0),
+            "40.000": data.reduce((sum, row) => sum + row["40.000"], 0),
+            "45.000": data.reduce((sum, row) => sum + row["45.000"], 0),
+            "Total Biaya": data.reduce(
+                (sum, row) => sum + row["Total Biaya"],
+                0
+            ),
             Daftar: data.reduce((sum, row) => sum + row.Daftar, 0),
             Modul: data.reduce((sum, row) => sum + row.Modul, 0),
             Kaos: data.reduce((sum, row) => sum + row.Kaos, 0),
             Kas: data.reduce((sum, row) => sum + row.Kas, 0),
             "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            "Total Pemasukan": data.reduce((sum, row) => sum + row["Total Pemasukan"], 0),
+            "Total Pemasukan": data.reduce(
+                (sum, row) => sum + row["Total Pemasukan"],
+                0
+            ),
         };
-    
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
+
         // Urutan kolom yang diinginkan
         const headers = [
             "Hari",
             "Tanggal",
-            "Cabang",
-            "5000",
-            "10.000",
-            "12.000",
+            "30.000",
+            "35.000",
+            "40.000",
+            "45.000",
             "Total Biaya",
             "Daftar",
             "Modul",
@@ -82,41 +88,42 @@ const TablePemasukan = () => {
             "Lain Lain",
             "Total Pemasukan",
         ];
-    
+
         // Membuat worksheet dengan header khusus
         const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
-    
+
         // Menambahkan header secara eksplisit (jika perlu)
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
-    
+
         // Membuat workbook
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
-    
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap");
+
         // Menentukan nama file dan mendownload
-        const fileName = `Laporan_Pemasukan_cabang_${judul}.xlsx`;
+        const fileName = `Rekap_Pemasukan_private_${judul}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
-    
-    
 
     return (
         <div>
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Cabang  ( {startOfWeek} sampai{" "}
-                            {endOfWeek} )
+                        Rekap Pemasukan Private - {bulan} / {tahun}
                     </h4>
                     <div>
-                        <Link href="/admin/laporan/cabang/create">
+                        {/* <Link href="/admin/laporan/private/create">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                                 Tambah Laporan
                             </button>
-                        </Link>
+                        </Link> */}
                         <button
-                            // onClick={downloadExcel}
-                            onClick={() => downloadExcel(laporanCabang, `${startOfWeek} sampai ${endOfWeek}`)}
+                            onClick={() =>
+                                downloadExcel(
+                                    laporanPrivate,
+                                    `${bulan} / ${tahun}`
+                                )
+                            }
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
                         >
                             Download Excel
@@ -135,17 +142,18 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
+
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    Cabang
+                                    30.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    5000
+                                    35.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    10.000
+                                    40.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    12.000
+                                    45.000
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total Biaya
@@ -168,13 +176,10 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total
                                 </th>
-                                <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">
-                                    Actions
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {laporanCabang.data.map((laporan, key) => (
+                            {laporanPrivate.data.map((laporan, key) => (
                                 <tr
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"
@@ -187,18 +192,16 @@ const TablePemasukan = () => {
                                         {laporan.tanggal}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.cabang
-                                            ? laporan.cabang.nama
-                                            : "N/A"}
+                                        {laporan.biaya_30}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_5000}
+                                        {laporan.biaya_35}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_10000}
+                                        {laporan.biaya_40}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_12000}
+                                        {laporan.biaya_45}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.totalbiaya}
@@ -221,49 +224,50 @@ const TablePemasukan = () => {
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.totalpemasukan}
                                     </td>
-                                    <td className="py-4 px-4 text-center">
-                                        {/* Action buttons */}
-                                        <div className="flex justify-center gap-3">
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}/edit`}
-                                            >
-                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                            </Link>
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: laporan.id }}
-                                                onClick={(e) => {
-                                                    if (
-                                                        !confirm(
-                                                            "Are you sure you want to delete this user?"
-                                                        )
-                                                    ) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                            >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
-                                        </div>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_5000")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_10000")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_12000")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalbiaya")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("daftar")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("modul")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kaos")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kas")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("lainlain")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalpemasukan")}</td>
+                                <td
+                                    colSpan="2"
+                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
+                                >
+                                    Total
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_30")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_35")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_40")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("biaya_45")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("totalbiaya")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("daftar")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("modul")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("kaos")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("kas")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("lainlain")}
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                    {getTotal("totalpemasukan")}
+                                </td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
                         </tfoot>
@@ -271,30 +275,14 @@ const TablePemasukan = () => {
                     {/* Pagination Controls */}
                     <div className="flex justify-center gap-3 mt-4">
                         <button
-                            onClick={() => goToWeek(prevWeekOffset)}
+                            onClick={() => goToMonth(prevMonth, prevYear)}
                             // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Previous
                         </button>
-
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={`py-2 px-4 rounded ${
-                                    current_page === index + 1
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                } hover:bg-blue-400`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))} */}
-
                         <button
-                            onClick={() => goToWeek(nextWeekOffset)}
+                            onClick={() => goToMonth(nextMonth, nextYear)}
                             // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
@@ -305,6 +293,6 @@ const TablePemasukan = () => {
             </div>
         </div>
     );
-};
+}
 
-export default TablePemasukan;
+export default RekapPemasukan;

@@ -3,6 +3,7 @@ import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
+import * as XLSX from "xlsx";
 
 const TablePengeluaran = () => {
     const {
@@ -21,6 +22,54 @@ const TablePengeluaran = () => {
     const calculateTotal = (field) => {
         return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
     };
+    const downloadExcelPengeluaran = (laporanPengeluaranCabang, judul) => {
+        // Data pengeluaran
+        const data = laporanPengeluaranCabang.data.map((pengeluaran) => ({
+            Hari: pengeluaran.hari,
+            Tanggal: pengeluaran.tanggal,
+            Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
+            "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
+            Gaji: pengeluaran.gaji || 0,
+            ATK: pengeluaran.atk || 0,
+            Sewa: pengeluaran.sewa || 0,
+            Intensif: pengeluaran.intensif || 0,
+            Lisensi: pengeluaran.lisensi || 0,
+            THR: pengeluaran.thr || 0,
+            "Lain Lain": pengeluaran.lainlain || 0,
+            Total: pengeluaran.totalpengeluaran || 0,
+        }));
+    
+        // Hitung total untuk setiap kolom numerik
+        const totals = {
+            Hari: "Total", // Label di kolom pertama
+            Tanggal: "",
+            Cabang: "",
+            "Nama Guru": "",
+            Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
+            ATK: data.reduce((sum, row) => sum + row.ATK, 0),
+            Sewa: data.reduce((sum, row) => sum + row.Sewa, 0),
+            Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
+            Lisensi: data.reduce((sum, row) => sum + row.Lisensi, 0),
+            THR: data.reduce((sum, row) => sum + row.THR, 0),
+            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
+            Total: data.reduce((sum, row) => sum + row.Total, 0),
+        };
+    
+        // Tambahkan total sebagai baris terakhir
+        data.push(totals);
+    
+        // Buat worksheet dan workbook
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
+    
+        // Tentukan nama file
+        const fileName = `Laporan_Pengeluaran_cabang_${judul}.xlsx`;
+    
+        // Simpan file
+        XLSX.writeFile(workbook, fileName);
+    };
+    
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
@@ -28,11 +77,20 @@ const TablePengeluaran = () => {
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Laporan Pengeluaran Cabang
                 </h4>
+                <div>
                 <Link href="/admin/laporan/pengeluaran/create">
                     <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                         Tambah Pengeluaran
                     </button>
                 </Link>
+                <button
+                            // onClick={downloadExcel}
+                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranCabang, `${startOfWeek} sampai ${endOfWeek}`)}
+                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                        >
+                            Download Excel
+                        </button>
+                        </div>
             </div>
 
             <div className="overflow-x-auto">

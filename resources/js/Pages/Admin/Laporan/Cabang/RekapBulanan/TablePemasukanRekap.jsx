@@ -12,18 +12,21 @@ import { Inertia } from "@inertiajs/inertia";
 const TablePemasukan = () => {
     const {
         laporanCabang,
-        laporanPengeluaranCabang,
-        startOfWeek,
-        endOfWeek,
-        nextWeekOffset,
-        prevWeekOffset,
+        bulan,
+        tahun,
+        nextMonth,
+        nextYear,
+        prevMonth,
+        prevYear,
     } = usePage().props;
 
     // console.log(laporanCabang.data);
-    const goToWeek = (weekOffset) => {
-        Inertia.get(route("admin.laporan.cabang"), { weekOffset });
+    const goToMonth = (month, year) => {
+        Inertia.get(route("admin.rekap.cabang"), {
+            bulan: month,
+            tahun: year,
+        });
     };
-
     // Calculate total values for each column
     const getTotal = (key) => {
         return laporanCabang.data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
@@ -105,15 +108,14 @@ const TablePemasukan = () => {
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
-                        Laporan Pemasukan Cabang  ( {startOfWeek} sampai{" "}
-                            {endOfWeek} )
+                        Rekap Pemasukan Cabang - {bulan}/{tahun}
                     </h4>
                     <div>
-                        <Link href="/admin/laporan/cabang/create">
+                        {/* <Link href="/admin/laporan/cabang/create">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                                 Tambah Laporan
                             </button>
-                        </Link>
+                        </Link> */}
                         <button
                             // onClick={downloadExcel}
                             onClick={() => downloadExcel(laporanCabang, `${startOfWeek} sampai ${endOfWeek}`)}
@@ -168,9 +170,7 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total
                                 </th>
-                                <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">
-                                    Actions
-                                </th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -221,33 +221,7 @@ const TablePemasukan = () => {
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.totalpemasukan}
                                     </td>
-                                    <td className="py-4 px-4 text-center">
-                                        {/* Action buttons */}
-                                        <div className="flex justify-center gap-3">
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}/edit`}
-                                            >
-                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                            </Link>
-                                            <Link
-                                                href={`/admin/laporan/cabang/${laporan.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: laporan.id }}
-                                                onClick={(e) => {
-                                                    if (
-                                                        !confirm(
-                                                            "Are you sure you want to delete this user?"
-                                                        )
-                                                    ) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                            >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
-                                        </div>
-                                    </td>
+
                                 </tr>
                             ))}
                         </tbody>
@@ -271,30 +245,14 @@ const TablePemasukan = () => {
                     {/* Pagination Controls */}
                     <div className="flex justify-center gap-3 mt-4">
                         <button
-                            onClick={() => goToWeek(prevWeekOffset)}
+                            onClick={() => goToMonth(prevMonth, prevYear)}
                             // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Previous
                         </button>
-
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={`py-2 px-4 rounded ${
-                                    current_page === index + 1
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                } hover:bg-blue-400`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))} */}
-
                         <button
-                            onClick={() => goToWeek(nextWeekOffset)}
+                            onClick={() => goToMonth(nextMonth, nextYear)}
                             // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >

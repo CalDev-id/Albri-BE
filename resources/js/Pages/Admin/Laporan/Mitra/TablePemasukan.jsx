@@ -30,6 +30,76 @@ const TablePemasukan = () => {
         );
     };
 
+    const downloadExcel = (laporanMitra, judul) => {
+        const data = laporanMitra.data.map((laporan) => ({
+            Hari: laporan.hari,
+            Tanggal: laporan.tanggal,
+            "7000": laporan.biaya_5000 || 0,
+            "8.000": laporan.biaya_8000 || 0,
+            "10.000": laporan.biaya_10000 || 0,
+            "15.000": laporan.biaya_15000 || 0,
+            "Total Biaya": laporan.totalbiaya || 0,
+            Daftar: laporan.daftar || 0,
+            Modul: laporan.modul || 0,
+            Kaos: laporan.kaos || 0,
+            Kas: laporan.kas || 0,
+            "Lain Lain": laporan.lainlain || 0,
+            "Total Pemasukan": laporan.totalpemasukan || 0,
+        }));
+    
+        // Hitung total untuk setiap kolom numerik
+        const totals = {
+            Hari: "Total",
+            Tanggal: "",
+            "7000": data.reduce((sum, row) => sum + row["7000"], 0),
+            "8.000": data.reduce((sum, row) => sum + row["8.000"], 0),
+            "10.000": data.reduce((sum, row) => sum + row["10.000"], 0),
+            "15.000": data.reduce((sum, row) => sum + row["15.000"], 0),
+            "Total Biaya": data.reduce((sum, row) => sum + row["Total Biaya"], 0),
+            Daftar: data.reduce((sum, row) => sum + row.Daftar, 0),
+            Modul: data.reduce((sum, row) => sum + row.Modul, 0),
+            Kaos: data.reduce((sum, row) => sum + row.Kaos, 0),
+            Kas: data.reduce((sum, row) => sum + row.Kas, 0),
+            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
+            "Total Pemasukan": data.reduce((sum, row) => sum + row["Total Pemasukan"], 0),
+        };
+    
+        // Tambahkan total sebagai baris terakhir
+        data.push(totals);
+    
+        // Urutan kolom yang diinginkan
+        const headers = [
+            "Hari",
+            "Tanggal",
+            "7000",
+            "8.000",
+            "10.000",
+            "15.000",
+            "Total Biaya",
+            "Daftar",
+            "Modul",
+            "Kaos",
+            "Kas",
+            "Lain Lain",
+            "Total Pemasukan",
+        ];
+    
+        // Membuat worksheet dengan header khusus
+        const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+    
+        // Menambahkan header secara eksplisit (jika perlu)
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
+    
+        // Membuat workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+    
+        // Menentukan nama file dan mendownload
+        const fileName = `Laporan_Pemasukan_mitra_${judul}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    };
+    
+
     return (
         <div>
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -45,12 +115,7 @@ const TablePemasukan = () => {
                             </button>
                         </Link>
                         <button
-                            // onClick={downloadExcel}
-                            onClick={() =>
-                                downloadExcel2()
-                                // laporanCabang,
-                                // laporanPengeluaranCabang
-                            }
+                            onClick={() => downloadExcel(laporanMitra, `${startOfWeek} sampai ${endOfWeek}`)}
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
                         >
                             Download Excel

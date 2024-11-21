@@ -1031,14 +1031,21 @@ class AdminController extends Controller
         $tahun = $request->input('tahun', date('Y'));
 
         // Filter data berdasarkan bulan dan tahun
-        $laporanCabang = LapPemasukanCabang::whereMonth('tanggal', $bulan)
+        $laporanCabang = LapPemasukanCabang::with('cabang')
+            ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanCabangPage'); // Sesuaikan jumlah per halaman
 
+            $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanCabangPage');
         // Kirim data dan info bulan/tahun saat ini ke frontend
         return Inertia::render('Admin/Laporan/Cabang/RekapBulanan/index', [
             'laporanCabang' => $laporanCabang,
+            'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
             'bulan' => $bulan,
             'tahun' => $tahun,
             'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
@@ -1061,11 +1068,16 @@ class AdminController extends Controller
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
-
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanMitraPage');
 
         // Kirim data dan info bulan/tahun saat ini ke frontend
         return Inertia::render('Admin/Laporan/Mitra/RekapBulanan/index', [
             'laporanMitra' => $laporanMitra,
+            'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
             'bulan' => $bulan,
             'tahun' => $tahun,
             'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
@@ -1089,10 +1101,15 @@ class AdminController extends Controller
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
-
+            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanPrivatePage');
         // Kirim data dan info bulan/tahun saat ini ke frontend
         return Inertia::render('Admin/Laporan/Private/RekapBulanan/index', [
             'laporanPrivate' => $laporanPrivate,
+            'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
             'bulan' => $bulan,
             'tahun' => $tahun,
             'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,

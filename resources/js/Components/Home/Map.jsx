@@ -27,14 +27,14 @@ const Map = () => {
                 <div className="flex flex-col justify-center md:w-1/2">
                     <h1 className="text-3xl font-semibold text-gray-800 mb-4">Yayasan Pendidikan Albri</h1>
                     <p className="text-lg text-gray-600 mb-6">
-                        Jl. Jend. Sudirman No. 1, Purworejo, Jawa Tengah 54111
+                    Kemiri Lor, RT 2 RW 3 , Kemiri, Purworejo
                     </p>
                     
                     {/* Additional Info */}
                     <div className="mb-4">
                         <h3 className="text-xl font-semibold text-gray-800">Kontak Kami</h3>
-                        <p className="text-gray-600">Telp: (0275) 123456</p>
-                        <p className="text-gray-600">Email: info@albrifoundation.org</p>
+                        <p className="text-gray-600">Telp: 0852 2827 0200 </p>
+                        <p className="text-gray-600">Email: bimbelalbri@gmail.com</p>
                     </div>
 
                     <div className="mb-4">
