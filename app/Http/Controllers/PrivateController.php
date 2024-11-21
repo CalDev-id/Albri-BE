@@ -5,21 +5,64 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\LapPemasukanPrivate;
+use App\Models\LapPengeluaranPrivate;
+use Inertia\Response;
+
 
 class PrivateController extends Controller
 {
-    public function index()
+    public function index(Request $request): Response
     {
-        $privateData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Private');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Private');
-        }])->latest()
-            ->paginate(5, ['*'], 'privatePage');
+        $weekOffset = (int) $request->input('weekOffset', 0);
 
-        // Kirim data guru ke tampilan Inertia
-        return Inertia::render('Private/Dashboard', [
-            'privateData' => $privateData
-        ]);
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPrivatePage');
+
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
+
+        $laporanPrivateFull = LapPemasukanPrivate::all();
+        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
+
+
+
+        // $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
+        // $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
+
+        // $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
+        // $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
+
+
+
+
+        return Inertia::render(
+            'Private/Index',
+            [
+                // 'laporanPrivate' => $laporanPrivate,
+                // 'laporanPrivateFull' => $laporanPrivateFull,
+                // 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+                // 'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
+
+                'laporanPrivate' => $laporanPrivate,
+                'startOfWeek' => $startOfWeek->format('Y-m-d'),
+                'endOfWeek' => $endOfWeek->format('Y-m-d'),
+                'nextWeekOffset' => $weekOffset + 1,
+                'prevWeekOffset' => $weekOffset - 1,
+                'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+            ]
+        );
     }
+
 }

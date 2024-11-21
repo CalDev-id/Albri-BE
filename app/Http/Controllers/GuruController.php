@@ -8,105 +8,62 @@ use App\Models\Guru;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\LapPemasukanCabang;
+use App\Models\LapPengeluaranCabang;
+use Inertia\Response;
+
+
+
 
 
 class GuruController extends Controller
 {
-    public function index()
+    public function index(Request $request): Response
     {
+        // $laporanCabangFull = LapPemasukanCabang::with('cabang')->get(); // Mengambil semua data laporan pemasukan cabang
+        // $laporanCabang = LapPemasukanCabang::with('cabang')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanCabangPage');  // Menggunakan paginasi
 
-        $guruData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Guru');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Guru');
-        }])->latest()
-            ->paginate(5, ['*'], 'guruPage');
+        // $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
+        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
+        // ->paginate(2, ['*'], 'laporanCabangPagePengeluaran');  // Menggunakan paginasi
+        // $laporanPengeluaranCabangFull = LapPengeluaranCabang::with('cabang', 'user')->get(); // Mengambil semua data laporan pengeluaran cabang
 
-        // Kirim data guru ke tampilan Inertia
-        return Inertia::render('Guru/Dashboard', [
-            'guruData' => $guruData
+        $weekOffset = (int) $request->input('weekOffset', 0);
+
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanCabang = LapPemasukanCabang::with('cabang')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanCabangPage');
+
+        $laporanPengeluaranCabang = LapPengeluaranCabang::with('user')
+            ->with('cabang')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranCabangPage');
+
+
+
+        return Inertia::render('Guru/Index', [
+
+            // 'laporanCabang' => $laporanCabang,
+            // 'laporanCabangFull' => $laporanCabangFull,
+            // 'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
+            // 'laporanPengeluaranCabangFull' => $laporanPengeluaranCabangFull,
+
+            'laporanCabang' => $laporanCabang,
+            'startOfWeek' => $startOfWeek->format('Y-m-d'),
+            'endOfWeek' => $endOfWeek->format('Y-m-d'),
+            'nextWeekOffset' => $weekOffset + 1,
+            'prevWeekOffset' => $weekOffset - 1,
+            'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
+
         ]);
-    }
-
-
-    public function showadmin()
-    {
-        $gurus = Guru::all();
-
-        return Inertia::render('Admin/Dashboard', [
-            'gurus' => $gurus
-        ]);
-    }
-
-    public function create()
-    {
-        return Inertia::render('Guru/Create');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'address' => 'required',
-            'phone' => 'required',
-            'email' => 'required|email|unique:gurus,email',
-        ]);
-
-        Guru::create([
-            'name' => $request->name,
-            'address' => $request->address,
-            'phone' => $request->phone,
-            'email' => $request->email,
-        ]);
-
-        return redirect()->route('guru.dashboard')->with('success', 'Guru berhasil ditambahkan');
-    }
-
-
-    public function edit($id)
-    {
-        // Ambil data guru berdasarkan ID
-        $guru = Guru::find($id);
-
-        // Kirim data guru ke tampilan Inertia
-        return Inertia::render('Guru/Edit', [
-            'guru' => $guru
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        // Validasi data yang dikirim
-        $request->validate([
-            'nama' => 'required',
-            'alamat' => 'required',
-            'no_hp' => 'required',
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-
-        // Ambil data guru berdasarkan ID
-        $guru = Guru::find($id);
-
-        // Update data guru ke database
-        $guru->update([
-            'nama' => $request->nama,
-            'alamat' => $request->alamat,
-            'no_hp' => $request->no_hp,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
-
-        // Redirect ke halaman daftar guru
-        return redirect()->route('guru.dashboard');
-    }
-
-    public function destroy($id)
-    {
-        // Hapus data guru dari database
-        Guru::destroy($id);
-
-        // Redirect ke halaman daftar guru
-        return redirect()->route('guru.dashboard');
     }
 }

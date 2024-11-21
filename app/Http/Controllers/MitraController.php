@@ -8,94 +8,43 @@ use App\Models\Mitra;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LapPemasukanMitra;
+use App\Models\LapPengeluaranMitra;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Response;
 
 class MitraController extends Controller
 {
-    public function index()
-    {
-     $mitraData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Mitra');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Mitra');
-        }])->latest()
-            ->paginate(5, ['*'], 'mitraPage');
+   
 
-        // Kirim data guru ke tampilan Inertia
-        return Inertia::render('Mitra/Dashboard', [
-            'mitraData' => $mitraData
+    public function index(Request $request): Response
+    {
+        // Ambil parameter `weekOffset` dari request, default ke 0 (minggu ini), dan pastikan tipe datanya integer
+        $weekOffset = (int) $request->input('weekOffset', 0);
+        // Hitung tanggal awal dan akhir dari minggu yang diinginkan
+        $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
+        $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanMitraPage');
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->orderBy('tanggal', 'desc')
+            ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
+        $laporanMitraFull = LapPemasukanMitra::all();
+        $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get();
+        return Inertia::render('Mitra/Index', [
+            'laporanMitra' => $laporanMitra,
+            'startOfWeek' => $startOfWeek->format('Y-m-d'),
+            'endOfWeek' => $endOfWeek->format('Y-m-d'),
+            'nextWeekOffset' => $weekOffset + 1,
+            'prevWeekOffset' => $weekOffset - 1,
+            'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
+            'laporanMitraFull' => $laporanMitraFull,
+            'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
         ]);
     }
 
 
-
-    public function showadmin()
-    {
-        $mitras = Mitra::all();
-
-        return Inertia::render('Admin/Dashboard', [
-            'mitras' => $mitras
-        ]);
-    }
-
-
-    public function create()
-    {
-
-        
-        return Inertia::render('Mitra/Create');
-    }
-
-    public function store(Request $request)
-    {
-
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:mitra',
-            'phone' => 'required',
-            'company' => 'required',
-        ]);
-
-        Mitra::create($request->all());
-
-        if (Auth::user()->hasRole('Admin')) {
-            return redirect()->route('admin.dashboard')->with('success', 'Mitra berhasil ditambahkan');
-        }
-        return redirect()->route('Mitra.Dashboard')->with('success', 'Mitra berhasil ditambahkan');
-    }
-
-    public function edit($id)
-    {
-        $mitra = Mitra::findOrFail($id);
-        return Inertia::render('Mitra/Edit', ['mitra' => $mitra]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $mitra = Mitra::findOrFail($id);
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:mitra,email,' . $id,
-            'phone' => 'required',
-            'company' => 'required',
-        ]);
-
-        $mitra->update($request->all());
-
-        if (Auth::user()->hasRole('Admin')) {
-            return redirect()->route('admin.dashboard')->with('success', 'Mitra berhasil diperbarui');
-        }
-         // Pastikan redirect ke route yang benar
-    return redirect()->route('Mitra.Dashboard')->with('success', 'Mitra berhasil diperbarui');
-}
-
-    public function destroy($id)
-    {
-        $mitra = Mitra::findOrFail($id);
-        $mitra->delete();
-
-        if (Auth::user()->hasRole('Admin')) {
-            return redirect()->route('admin.dashboard')->with('success', 'Mitra berhasil dihapus');
-        }
-        return redirect()->route('mitra.Dashboard')->with('success', 'Mitra berhasil dihapus');
-    }
 }

@@ -35,7 +35,7 @@ const DropdownUser = () => {
                     <span className="block text-sm font-medium text-black dark:text-white">
                         {user.name}
                     </span>
-                    {user.roles.map((role) => (
+                    {user?.roles?.map((role) => (
                         <span key={role.id} className="block text-xs text-gray-400 dark:text-gray-500">
                             {role.name}
                         </span>

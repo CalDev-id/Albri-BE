@@ -122,6 +122,16 @@ class AdminController extends Controller
 
         $request->user()->save();
 
+        if ($request->user()->hasRole('Private')) {
+            return Redirect::route('private.settings')->with('success', 'Profil berhasil diperbarui.');
+        } else if ($request->user()->hasRole('Admin')) {
+            return Redirect::route('admin.settings')->with('success', 'Profil berhasil diperbarui.');
+        } else if ($request->user()->hasRole('Guru')) {
+            return Redirect::route('guru.settings')->with('success', 'Profil berhasil diperbarui.');
+        } else if ($request->user()->hasRole('Mitra')) {
+            return Redirect::route('mitra.settings')->with('success', 'Profil berhasil diperbarui.');
+        }
+
         return Redirect::route('admin.settings');
     }
 
@@ -237,8 +247,14 @@ class AdminController extends Controller
 
         ]);
 
-        // Redirect kembali ke halaman laporan cabang dengan pesan sukses
-        return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
+
+
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
+            return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan mitra berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
+        }
     }
 
 
@@ -442,7 +458,7 @@ class AdminController extends Controller
 
 
     /* -----------------------------------------
-            Rekap Bulanan Mitra
+            Laporan Mitra
         -------------------------------------------- */
 
     public function mitralaporan(Request $request): Response
@@ -519,7 +535,12 @@ class AdminController extends Controller
             'totalpemasukan' => $totalpemasukan,
             'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
         ]);
-        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
+
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil ditambahkan.');
+        } else {
+            return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
+        }
     }
 
     public function editlaporanmitra($id): Response
@@ -570,8 +591,12 @@ class AdminController extends Controller
             'totalpemasukan' => $totalpemasukan,
             'updated_by' => Auth::user()->id, // Assuming you are using
         ]);
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil ditambahkan.');
+        } else {
 
-        return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil diupdate.');
+            return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil diupdate.');
+        }
     }
 
     public function destroylaporanmitra($id)
@@ -625,8 +650,13 @@ class AdminController extends Controller
             'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
 
         ]);
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil ditambahkan.');
+        } else {
+
 
         return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil ditambahkan.');
+        }
     }
 
     public function editpengeluaranmitra($id): Response
@@ -673,7 +703,12 @@ class AdminController extends Controller
             'totalpengeluaran' => $totalpengeluaran,
             'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
         ]);
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil ditambahkan.');
+        } else {
+
         return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pengeluaran mitra berhasil diupdate.');
+        }
     }
 
     public function destroypengeluaranmitra($id)
@@ -787,7 +822,12 @@ class AdminController extends Controller
 
         ]);
 
-        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+        }
     }
 
 
@@ -841,7 +881,12 @@ class AdminController extends Controller
             'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
         ]);
 
-        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+        }
     }
 
     public function destroylaporanprivate($id)
@@ -901,7 +946,13 @@ class AdminController extends Controller
             'created_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
 
         ]);
-        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil ditambahkan.');
+        }
     }
 
     public function editpengeluaranprivate($id): Response
@@ -953,7 +1004,12 @@ class AdminController extends Controller
             'totalpengeluaran' => $totalpengeluaran,
             'updated_by' => Auth::user()->id, // Assuming you are using Laravel's Auth
         ]);
-        return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pengeluaran private berhasil diupdate.');
+        }
     }
 
     public function destroypengeluaranprivate($id)
