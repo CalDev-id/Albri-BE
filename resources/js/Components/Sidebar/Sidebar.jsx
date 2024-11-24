@@ -303,7 +303,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Cabang",
-                route: "/cabang/rekap",
+                route: "/rekap/cabang",
             },
             {
                 icon: (
@@ -334,7 +334,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Mitra",
-                route: "/mitra/rekap",
+                route: "/rekap/mitra",
             },
             {
                 icon: (
@@ -365,7 +365,7 @@ const menuGroupsAdmin = [
                     </svg>
                 ),
                 label: "Rekap Private",
-                route: "/private/rekap",
+                route: "/rekap/private",
                 
             },
             {
@@ -657,20 +657,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 {/* <!-- SIDEBAR HEADER --> */}
                 <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
                     <Link
-                        className="flex justify-center items-center -my-10"
+                        className="flex justify-center items-center ml-10"
                         href="/"
                     >
                         <img
-                            className="w-[150px] h-[150px]"
-                            src="p"
+                            className="w-[50px] h-[50px]"
+                            src="/images/AlbriAssets/AlbriLogo.png"
                             alt="Logo"
                         />
-                        <h1 className="font-bold text-4xl text-white -ml-8">
+                        <h1 className="font-bold text-4xl text-white ml-3">
                             Albri
                         </h1>
                     </Link>
 
-                    <button
+                    {/* <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                         aria-controls="sidebar"
                         className="block lg:hidden"
@@ -688,7 +688,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                 fill=""
                             />
                         </svg>
-                    </button>
+                    </button> */}
                 </div>
                 {/* <!-- SIDEBAR HEADER --> */}
                 <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">

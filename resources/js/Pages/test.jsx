@@ -29,8 +29,7 @@ const Test = () => {
                             </div>
 
                             <p className="2xl:px-20">
-                                Lorem ipsum dolor sit amet, consectetur
-                                adipiscing elit suspendisse.
+                                Login to your account using email and password
                             </p>
 
                             <span className="mt-15 inline-block">

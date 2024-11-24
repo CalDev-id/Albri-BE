@@ -21,26 +21,30 @@ const Laporan = ({
     prevMonth,
     prevYear,
 }) => {
-    const calculateTotals = (laporanPrivateData, laporanPengeluaranPrivateData) => {
+    const calculateTotals = (
+        laporanPrivateData,
+        laporanPengeluaranPrivateData
+    ) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanPrivateData)) laporanPrivateData = [];
-        if (!Array.isArray(laporanPengeluaranPrivateData)) laporanPengeluaranPrivateData = [];
-    
+        if (!Array.isArray(laporanPengeluaranPrivateData))
+            laporanPengeluaranPrivateData = [];
+
         // Hitung total pemasukan
         const totalProfit = laporanPrivateData.reduce(
             (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranPrivateData.reduce(
             (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
+
         // Hitung total students (biaya)
         const totalStudents = laporanPrivateData.reduce(
             (sum, laporan) =>
@@ -51,18 +55,16 @@ const Laporan = ({
                     (laporan.biaya_45 || 0)),
             0
         );
-    
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
-    const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
-        laporanPrivate.data,
-        laporanPengeluaranPrivate.data
-    );
+    const { totalLaba, totalProfit, totalOutcome, totalStudents } =
+        calculateTotals(laporanPrivate.data, laporanPengeluaranPrivate.data);
     return (
         <DefaultLayout>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
                     total={`Rp ${totalLaba.toLocaleString()}`}
@@ -168,11 +170,27 @@ const Laporan = ({
                     </svg>
                 </CardDataStats>
             </div>
-            <RekapPemasukan laporanPrivate={laporanPrivate}  bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear}/>
+            <RekapPemasukan
+                laporanPrivate={laporanPrivate}
+                bulan={bulan}
+                tahun={tahun}
+                nextMonth={nextMonth}
+                nextYear={nextYear}
+                prevMonth={prevMonth}
+                prevYear={prevYear}
+            />
 
             {/* P E N G E L U A R A N */}
 
-            <RekapPengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate}  bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear}/>
+            <RekapPengeluaran
+                laporanPengeluaranPrivate={laporanPengeluaranPrivate}
+                bulan={bulan}
+                tahun={tahun}
+                nextMonth={nextMonth}
+                nextYear={nextYear}
+                prevMonth={prevMonth}
+                prevYear={prevYear}
+            />
         </DefaultLayout>
     );
 };

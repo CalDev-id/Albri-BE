@@ -28,26 +28,25 @@ export default function Login({ status, canResetPassword }) {
                 <div className="flex flex-wrap items-center">
                     <div className="hidden w-full xl:block xl:w-1/2">
                         <div className="px-26 py-17.5 text-center">
-                            <div className="flex items-center justify-center py-5 pr-18">
+                            <div className="flex items-center justify-center py-5">
                                 <Link
-                                    className="-my-10 flex items-center justify-center"
+                                    className="flex items-center justify-center"
                                     href="/"
                                 >
                                     <img
-                                        className="w-[150px] h-[150px]"
-                                        src="images/logobiru.png"
+                                        className="w-[50px] h-[50px]"
+                                        src="images/AlbriAssets/AlbriLogo.png"
                                         alt="Logo"
                                     />
 
-                                    <h1 className="-ml-8 text-4xl font-bold text-blue-700">
+                                    <h1 className="text-4xl font-bold text-blue-700">
                                         Albri
                                     </h1>
                                 </Link>
                             </div>
 
                             <p className="2xl:px-20">
-                                Lorem ipsum dolor sit amet, consectetur
-                                adipiscing elit suspendisse.
+                                Masuk ke akun Anda untuk melanjutkan
                             </p>
 
                             <span className="mt-15 inline-block">

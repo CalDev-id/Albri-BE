@@ -236,7 +236,7 @@ const TablePemasukan = () => {
                             // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
-                            Previous
+                            Sebelumnya
                         </button>
 
                         {/* Menampilkan nomor halaman */}
@@ -259,7 +259,7 @@ const TablePemasukan = () => {
                             // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
-                            Next
+                            Selanjutnya
                         </button>
                     </div>
                 </div>

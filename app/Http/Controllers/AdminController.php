@@ -52,11 +52,57 @@ class AdminController extends Controller
         $cabangs = Cabangalbri::all();
 
 
+
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        // Filter data berdasarkan bulan dan tahun
+        $laporanCabang = LapPemasukanCabang::with('cabang')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanCabangPage'); // Sesuaikan jumlah per halaman
+
+            $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanCabangPage');
+
+            $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanMitraPage');
+            $laporanPrivate = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
+            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10, ['*'], 'laporanPrivatePage');
+
         return Inertia::render('Admin/Dashboard', [
             'mitraData' => $mitraData,
             'userData' => $userData,
             'guruData' => $guruData,
             'cabangs' => $cabangs,
+
+            'laporanCabang' => $laporanCabang,
+            'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
+            'laporanMitra' => $laporanMitra,
+            'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
+
+            'laporanPrivate' => $laporanPrivate,
+            'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+
+
         ]);
     }
 
