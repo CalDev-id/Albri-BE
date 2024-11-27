@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CabangAlbri;
+use App\Models\User;
 
 class LapPemasukanCabang extends Model
 {
@@ -34,6 +35,13 @@ class LapPemasukanCabang extends Model
 public function cabang()
 {
     return $this->belongsTo(CabangAlbri::class, 'cabang_id');
+}
+
+public function user()
+{
+    return $this->belongsTo(User::class, 'created_by');
+
+
 }
 
 

@@ -37,7 +37,7 @@ class GuruController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
 
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
-        $laporanCabang = LapPemasukanCabang::with('cabang')
+        $laporanCabang = LapPemasukanCabang::with('cabang','user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanCabangPage');

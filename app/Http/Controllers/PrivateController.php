@@ -22,6 +22,7 @@ class PrivateController extends Controller
 
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->with('user')
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
 
