@@ -207,7 +207,7 @@ class AdminController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
 
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
-        $laporanCabang = LapPemasukanCabang::with('cabang')
+        $laporanCabang = LapPemasukanCabang::with('cabang','user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanCabangPage');
@@ -516,6 +516,7 @@ class AdminController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->with('user')
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanMitraPage');
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
@@ -775,6 +776,7 @@ class AdminController extends Controller
 
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->with('user')
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
 

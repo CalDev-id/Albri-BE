@@ -26,6 +26,7 @@ class MitraController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->with('user')
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanMitraPage');
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')

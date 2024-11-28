@@ -24,7 +24,8 @@ Route::get('/login', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->middleware('guest');
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth', 'web')->name('logout');
+
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth', 'web');
 
 
 
@@ -118,19 +119,19 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::get('/', [AdminController::class, 'cabanglaporan'])->name('admin.laporan.cabang');
         Route::get('/create', [AdminController::class, 'createcabanglaporan'])->name('admin.laporan.create');
         Route::post('/store', [AdminController::class, 'storelaporancabang'])->name('admin.laporan.store');
-        Route::get('/{id}/edit', [AdminController::class, 'editlaporancabang'])->name('admin.laporan.show');
-        Route::put('/{id}', [AdminController::class, 'updatelaporancabang'])->name('admin.laporan.update');
-        Route::delete('/{id}', [AdminController::class, 'destroylaporancabang'])->name('admin.laporan.destroy');
+        Route::get('/{id}/edit', [AdminController::class, 'editlaporancabang'])->name('admin.laporan.cabang.show');
+        Route::put('/{id}', [AdminController::class, 'updatelaporancabang'])->name('admin.laporan.cabang.update');
+        Route::delete('/{id}', [AdminController::class, 'destroylaporancabang'])->name('admin.laporan.cabang.destroy');
     });
             /* -----------------------------------------
                             Pengeluaran Cabang 
             -------------------------------------------- */
     Route::prefix('pengeluaran')->group(function () {
-        Route::get('/create', [AdminController::class, 'createcabanpengeluaranlaporan'])->name('admin.laporan.pengeluaran.create');
-        Route::post('/store', [AdminController::class, 'storelaporanpengeluaran'])->name('admin.laporan.pengeluaran.store');
-        Route::get('/{id}/edit', [AdminController::class, 'editpengeluarancabang'])->name('admin.laporan.pengeluaran.show');
-        Route::put('/{id}', [AdminController::class, 'updatepengeluarancabang'])->name('admin.laporan.pengeluaran.update');
-        Route::delete('/{id}', [AdminController::class, 'destroypengeluarancabang'])->name('admin.laporan.pengeluaran.destroy');
+        Route::get('/create', [AdminController::class, 'createcabanpengeluaranlaporan'])->name('admin.laporan.pengeluaran.cabang.create');
+        Route::post('/store', [AdminController::class, 'storelaporanpengeluaran'])->name('admin.laporan.pengeluaran.cabang.store');
+        Route::get('/{id}/edit', [AdminController::class, 'editpengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.show');
+        Route::put('/{id}', [AdminController::class, 'updatepengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.update');
+        Route::delete('/{id}', [AdminController::class, 'destroypengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.destroy');
     });
 });
             /* -----------------------------------------
@@ -138,21 +139,21 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
             -------------------------------------------- */
     Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])->name('admin.laporan.mitra');
-    Route::get('/admin/laporan/mitra/create', [AdminController::class, 'createmitralaporan'])->name('admin.laporan.create');
+    Route::get('/admin/laporan/mitra/create', [AdminController::class, 'createmitralaporan'])->name('admin.laporan.mitra.create');
     Route::post('/admin/laporan/mitra/store', [AdminController::class, 'storelaporanmitra'])->name('admin.laporan.mitra.store');
-    Route::get('/admin/laporan/mitra/{id}/edit', [AdminController::class, 'editlaporanmitra'])->name('admin.laporan.show');
-    Route::put('/admin/laporan/mitra/{id}', [AdminController::class, 'updatelaporanmitra'])->name('admin.laporan.update');
-    Route::delete('/admin/laporan/mitra/{id}', [AdminController::class, 'destroylaporanmitra'])->name('admin.laporan.destroy');
+    Route::get('/admin/laporan/mitra/{id}/edit', [AdminController::class, 'editlaporanmitra'])->name('admin.laporan.mitra.show');
+    Route::put('/admin/laporan/mitra/{id}', [AdminController::class, 'updatelaporanmitra'])->name('admin.laporan.mitra.update');
+    Route::delete('/admin/laporan/mitra/{id}', [AdminController::class, 'destroylaporanmitra'])->name('admin.laporan.mitra.destroy');
 });
             /* -----------------------------------------
                             Laporan Pengeluaran Mitra 
             -------------------------------------------- */
     Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
-    Route::get('/admin/laporan/pengeluaranmitra/create', [AdminController::class, 'createpengeluaranmitralaporan'])->name('admin.laporan.pengeluaran.create');
-    Route::post('/admin/laporan/pengeluaranmitra/store', [AdminController::class, 'storelaporanpengeluaranmitra'])->name('admin.laporan.pengeluaran.store');
-    Route::get('/admin/laporan/pengeluaranmitra/{id}/edit', [AdminController::class, 'editpengeluaranmitra'])->name('admin.laporan.pengeluaran.show');
-    Route::put('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'updatepengeluaranmitra'])->name('admin.laporan.pengeluaran.update');
-    Route::delete('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'destroypengeluaranmitra'])->name('admin.laporan.pengeluaran.destroy');
+    Route::get('/admin/laporan/pengeluaranmitra/create', [AdminController::class, 'createpengeluaranmitralaporan'])->name('admin.laporan.pengeluaran.mitra.create');
+    Route::post('/admin/laporan/pengeluaranmitra/store', [AdminController::class, 'storelaporanpengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.store');
+    Route::get('/admin/laporan/pengeluaranmitra/{id}/edit', [AdminController::class, 'editpengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.show');
+    Route::put('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'updatepengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.update');
+    Route::delete('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'destroypengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.destroy');
 });
             /* -----------------------------------------
                             Laporan Private 
@@ -161,21 +162,21 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
     // Laporan Private
     Route::prefix('private')->group(function () {
         Route::get('/', [AdminController::class, 'privatelaporan'])->name('admin.laporan.private');
-        Route::get('/create', [AdminController::class, 'createprivate'])->name('admin.laporan.create');
+        Route::get('/create', [AdminController::class, 'createprivate'])->name('admin.laporan.private.create');
         Route::post('/store', [AdminController::class, 'storelaporanprivate'])->name('admin.laporan.private.store');
-        Route::get('/{id}/edit', [AdminController::class, 'editlaporanprivate'])->name('admin.laporan.show');
-        Route::put('/{id}', [AdminController::class, 'updatelaporanprivate'])->name('admin.laporan.update');
-        Route::delete('/{id}', [AdminController::class, 'destroylaporanprivate'])->name('admin.laporan.destroy');
+        Route::get('/{id}/edit', [AdminController::class, 'editlaporanprivate'])->name('admin.laporan.private.show');
+        Route::put('/{id}', [AdminController::class, 'updatelaporanprivate'])->name('admin.laporan.private.update');
+        Route::delete('/{id}', [AdminController::class, 'destroylaporanprivate'])->name('admin.laporan.private.destroy');
     });
             /* -----------------------------------------
                             Pengeluaran Private 
             -------------------------------------------- */    
         Route::prefix('pengeluaranprivate')->group(function () {
-        Route::get('/create', [AdminController::class, 'createpengeluaranprivatelaporan'])->name('admin.laporan.pengeluaran.create');
-        Route::post('/store', [AdminController::class, 'storelaporanpengeluaranprivate'])->name('admin.laporan.pengeluaran.store');
-        Route::get('/{id}/edit', [AdminController::class, 'editpengeluaranprivate'])->name('admin.laporan.pengeluaran.edit');
-        Route::put('/{id}', [AdminController::class, 'updatepengeluaranprivate'])->name('admin.laporan.pengeluaran.update');
-        Route::delete('/{id}', [AdminController::class, 'destroypengeluaranprivate'])->name('admin.laporan.pengeluaran.destroy');
+        Route::get('/create', [AdminController::class, 'createpengeluaranprivatelaporan'])->name('admin.laporan.pengeluaran.private.create');
+        Route::post('/store', [AdminController::class, 'storelaporanpengeluaranprivate'])->name('admin.laporan.pengeluaran.private.store');
+        Route::get('/{id}/edit', [AdminController::class, 'editpengeluaranprivate'])->name('admin.laporan.pengeluaran.private.edit');
+        Route::put('/{id}', [AdminController::class, 'updatepengeluaranprivate'])->name('admin.laporan.pengeluaran.private.update');
+        Route::delete('/{id}', [AdminController::class, 'destroypengeluaranprivate'])->name('admin.laporan.pengeluaran.private.destroy');
     });
 });
             /* -----------------------------------------

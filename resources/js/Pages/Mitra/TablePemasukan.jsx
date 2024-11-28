@@ -66,6 +66,9 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Hari
                                 </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
+                                    Nama
+                                </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
@@ -117,6 +120,9 @@ const TablePemasukan = () => {
                                     {/* Table rows with data */}
                                     <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
                                         {laporan.hari}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                                        {laporan.user ? laporan.user.name : "N/A"}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.tanggal}
@@ -187,7 +193,7 @@ const TablePemasukan = () => {
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                                 <td
-                                    colSpan="2"
+                                    colSpan="3"
                                     className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
                                 >
                                     Total
