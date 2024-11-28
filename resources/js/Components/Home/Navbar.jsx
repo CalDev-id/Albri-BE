@@ -64,7 +64,7 @@ const Navbar = ({ method = "get", active }) => {
                                         method={method}
                                         as="button"
                                     >
-                                        About Us
+                                        Home
                                     </Link>
                                 </li>
                                 <li tabIndex={0}>
@@ -78,7 +78,7 @@ const Navbar = ({ method = "get", active }) => {
                                         method={method}
                                         as="button"
                                     >
-                                        Programs
+                                        Visi-Misi
                                     </Link>
                                 </li>
                                 <li>
@@ -92,7 +92,21 @@ const Navbar = ({ method = "get", active }) => {
                                         }
                                         as="button"
                                     >
-                                        National Seminar
+                                        Legalitas
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/"
+                                        method={method}
+                                        className={
+                                            active === "national"
+                                                ? "text-[#EB9928] active:bg-[#FFCE2E]"
+                                                : "active:bg-[#FFCE2E]"
+                                        }
+                                        as="button"
+                                    >
+                                        Gallery
                                     </Link>
                                 </li>
                             </ul>
@@ -116,12 +130,12 @@ const Navbar = ({ method = "get", active }) => {
                                         method={method}
                                         as="button"
                                     >
-                                        Tentang Kami
+                                        Home
                                     </Link>
                                 </li>
                                 <li tabIndex={0}>
                                     <Link
-                                        href="/"
+                                        href="#visi"
                                         className={
                                             active === "dbcc"
                                                 ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
@@ -130,12 +144,12 @@ const Navbar = ({ method = "get", active }) => {
                                         method={method}
                                         as="button"
                                     >
-                                        Program
+                                        Visi-Misi
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
-                                        href="/"
+                                        href="#legal"
                                         method={method}
                                         className={
                                             active === "national"
@@ -144,12 +158,12 @@ const Navbar = ({ method = "get", active }) => {
                                         }
                                         as="button"
                                     >
-                                        Harga
+                                        Legalitas
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
-                                        href="/"
+                                        href="#gallery"
                                         method={method}
                                         className={
                                             active === "guru"
@@ -158,10 +172,10 @@ const Navbar = ({ method = "get", active }) => {
                                         }
                                         as="button"
                                     >
-                                        Guru
+                                        Gallery
                                     </Link>
                                 </li>
-                                <li>
+                                {/* <li>
                                     <Link
                                         href="/"
                                         method={method}
@@ -174,7 +188,7 @@ const Navbar = ({ method = "get", active }) => {
                                     >
                                         Informasi
                                     </Link>
-                                </li>
+                                </li> */}
                             </ul>
                         </div>
                     </div>

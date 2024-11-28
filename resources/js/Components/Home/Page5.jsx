@@ -1,6 +1,6 @@
 const Page5 = () => {
     return (
-        <div>
+        <div id="gallery">
             <div>
                 <div
                     className="hero min-h-screen bg-cover bg-center"
@@ -22,132 +22,71 @@ const Page5 = () => {
                                 {/* Card 1 */}
                                 <div className="bg-white rounded-lg shadow-lg p-6">
                                     <img
-                                        src="images/AlbriAssets/kegiatan.jpg"
+                                        src="images/AlbriAssets/gallery1.png"
                                         alt="Learn to Read"
                                         className="w-full h-60 object-cover rounded-md mb-4"
                                     />
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                        Learn To Read And Write For Toddlers
+                                        Sertifikat Anak Bintang Indonesia
                                     </h3>
                                     <p className="text-gray-600 mb-4">
-                                        At Incredible Kids GFDC, we believe
-                                        early reading skills are important for a
-                                        strong future.
+                                        Sertifikat penghargaan ini diberikan
+                                        kepada siswa yang telah menunjukkan
+                                        pencapaian luar biasa dalam membaca dan
+                                        belajar.
                                     </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">
-                                            190 Students
-                                        </span>
-                                        <span className="flex items-center text-yellow-500">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={2}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M12 17.25l6.16 3.243-1.18-6.885 5.015-4.882-6.927-1.006L12 2.25 9.927 7.72l-6.927 1.006 5.015 4.882-1.18 6.885L12 17.25z"
-                                                />
-                                            </svg>
-                                            4.9
-                                        </span>
-                                    </div>
                                 </div>
 
                                 {/* Card 2 */}
                                 <div className="bg-white rounded-lg shadow-lg p-6">
                                     <img
-                                        src="images/AlbriAssets/kegiatan.jpg"
+                                        src="images/AlbriAssets/galery2.png"
                                         alt="Geography Class"
                                         className="w-full h-60 object-cover rounded-md mb-4"
                                     />
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                        Knowledge of Earth and World Geography
+                                        Sertifikat Anak Bintang Indonesia
                                     </h3>
                                     <p className="text-gray-600 mb-4">
-                                        Engage students in learning geography
-                                        and its importance in today’s world.
+                                        Penghargaan ini diberikan kepada siswa
+                                        yang berprestasi
                                     </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">
-                                            190 Students
-                                        </span>
-                                        <span className="flex items-center text-yellow-500">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={2}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M12 17.25l6.16 3.243-1.18-6.885 5.015-4.882-6.927-1.006L12 2.25 9.927 7.72l-6.927 1.006 5.015 4.882-1.18 6.885L12 17.25z"
-                                                />
-                                            </svg>
-                                            4.9
-                                        </span>
-                                    </div>
                                 </div>
 
                                 {/* Card 3 */}
                                 <div className="bg-white rounded-lg shadow-lg p-6">
                                     <img
-                                        src="images/AlbriAssets/kegiatan.jpg"
+                                        src="images/AlbriAssets/gallery3.png"
                                         alt="Creativity Class"
                                         className="w-full h-60 object-cover rounded-md mb-4"
                                     />
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                        The Level of Creativity and Student
-                                        Activity
+                                        Sertifikat Anak Bintang Indonesia
                                     </h3>
                                     <p className="text-gray-600 mb-4">
-                                        Foster creativity and encourage
-                                        activity-based learning for young minds.
+                                        Sertifikat ini menghormati kreativitas
+                                        siswa dalam mengekspresikan ide dan
+                                        inovasi mereka.
                                     </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">
-                                            190 Students
-                                        </span>
-                                        <span className="flex items-center text-yellow-500">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={2}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M12 17.25l6.16 3.243-1.18-6.885 5.015-4.882-6.927-1.006L12 2.25 9.927 7.72l-6.927 1.006 5.015 4.882-1.18 6.885L12 17.25z"
-                                                />
-                                            </svg>
-                                            4.9
-                                        </span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                {/* Legalitas */}
+                <h1 id="legal"  className="flex text-center items-center justify-center text-4xl font-semibold pt-10">
+                    Legalitas
+                </h1>
                 <div className="flex w-full flex-col lg:flex-row md:px-50 md:py-20">
                     <div className="rounded-box grid flex-grow place-items-center">
                         <img src="images/AlbriAssets/lisensi1.png" alt="" />
                     </div>
-                    
+
                     <div className="rounded-box grid flex-grow place-items-center">
-                    <img src="images/AlbriAssets/lisensi1.png" alt="" />
+                        <img src="images/AlbriAssets/lisensi1.png" alt="" />
                     </div>
                 </div>
+
             </div>
         </div>
     );

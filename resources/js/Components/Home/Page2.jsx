@@ -150,7 +150,7 @@ const Page2 = () => {
                 />
             </div>
 
-            <div class="flex w-full flex-col lg:flex-row gap-6 pb-20">
+            <div id="visi"  class="flex w-full flex-col lg:flex-row gap-6 pb-20">
                 <div class="card bg-gradient-to-r from-blue-500 to-blue-300 text-white shadow-xl rounded-box flex-grow p-6">
                     <h3 class="text-xl font-bold mb-2">Visi</h3>
                     <p class="text-lg">

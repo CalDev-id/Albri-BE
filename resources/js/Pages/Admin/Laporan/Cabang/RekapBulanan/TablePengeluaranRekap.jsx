@@ -125,14 +125,14 @@ const TablePengeluaranRekap = ({
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A"}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.thr}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.thr.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
 
                         </tr>
                     ))}
@@ -141,14 +141,14 @@ const TablePengeluaranRekap = ({
                 <tfoot>
                     <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                         <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('sewa')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('thr')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain')}</td>
-                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran')}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('sewa').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('thr').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain').toLocaleString()}</td>
+                        <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran').toLocaleString()}</td>
                         <td className="py-4 px-4"></td>
                     </tr>
                 </tfoot>

@@ -211,18 +211,18 @@ const TableOne = ({ laporanCabang, laporanPengeluaranCabang, laporanMitra, lapor
 
                         <div className="flex items-center justify-center p-2.5 xl:p-5">
                             <p className="text-meta-3">
-                                {"Rp. " + data.pemasukan}
+                                {"Rp. " + data.pemasukan.toLocaleString()}
                             </p>
                         </div>
 
                         <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
                             <p className="text-red dark:text-white">
-                                {"Rp. " + data.pengeluaran}
+                                {"Rp. " + data.pengeluaran.toLocaleString()}
                             </p>
                         </div>
 
                         <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-                            <p className="text-meta-5">{"Rp. " + data.laba}</p>
+                            <p className="text-meta-5">{"Rp. " + data.laba.toLocaleString()}</p>
                         </div>
                     </div>
                 ))}

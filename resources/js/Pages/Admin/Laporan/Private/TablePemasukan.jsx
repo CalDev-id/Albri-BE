@@ -217,25 +217,25 @@ const TablePemasukan = () => {
                                         {laporan.biaya_45}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya}
+                                        {laporan.totalbiaya.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar}
+                                        {laporan.daftar.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul}
+                                        {laporan.modul.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos}
+                                        {laporan.kaos.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas}
+                                        {laporan.kas.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain}
+                                        {laporan.lainlain.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan}
+                                        {laporan.totalpemasukan.toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
                                         {/* Action buttons */}
@@ -288,25 +288,25 @@ const TablePemasukan = () => {
                                     {getTotal("biaya_45")}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalbiaya")}
+                                    {getTotal("totalbiaya").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("daftar")}
+                                    {getTotal("daftar").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("modul")}
+                                    {getTotal("modul").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kaos")}
+                                    {getTotal("kaos").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kas")}
+                                    {getTotal("kas").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("lainlain")}
+                                    {getTotal("lainlain").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalpemasukan")}
+                                    {getTotal("totalpemasukan").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>

@@ -148,7 +148,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total={`Rp ${totalLaba+totalLabaM+totalLabaP}`}
+                    total={`Rp ${(totalLaba+totalLabaM+totalLabaP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pemasukan"
-                    total={`Rp ${totalProfit+totalProfitM+totalProfitP}`}
+                    total={`Rp ${(totalProfit+totalProfitM+totalProfitP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -200,7 +200,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pengeluaran"
-                    total={`Rp ${totalOutcome+totalOutcomeM+totalOutcomeP}`}
+                    total={`Rp ${(totalOutcome+totalOutcomeM+totalOutcomeP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -224,7 +224,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Students"
-                    total={totalStudents+totalStudentsM+totalStudentsP}
+                    total={(totalStudents+totalStudentsM+totalStudentsP).toLocaleString()}
                     rate=""
                     levelUp
                 >
