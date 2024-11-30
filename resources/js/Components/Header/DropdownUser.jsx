@@ -13,25 +13,13 @@ const DropdownUser = () => {
     const closeDropdown = () => {
         setDropdownOpen(false);
     };
-
-
-
-  
-
-  
-  
-  
-  
-  
-
-
     return (
         <ClickOutside onClick={closeDropdown} className="relative">
             <button
                 onClick={toggleDropdown}
                 className="flex items-center gap-4"
             >
-                <span className="hidden text-right lg:block">
+                <span className="text-right lg:block">
                     <span className="block text-sm font-medium text-black dark:text-white">
                         {user.name}
                     </span>
@@ -42,7 +30,7 @@ const DropdownUser = () => {
                     ))}
                 </span>
                 <svg
-                    className="hidden fill-current sm:block"
+                    className=" fill-current sm:block"
                     width="12"
                     height="8"
                     viewBox="0 0 12 8"
