@@ -7,6 +7,8 @@ const EditUsers = () => {
     const { data, setData, put, errors } = useForm({
         name: user.name,
         email: user.email,
+        password: '',
+
         roles: userRole, // Inisialisasi dengan userRole
     });
 
@@ -55,6 +57,22 @@ const EditUsers = () => {
                         {errors.email && <div className="text-red-500">{errors.email}</div>}
                     </div>
 
+                    {/* Input untuk Password */}
+                      <div className="w-full xl:w-1/2 mb-4.5">
+                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            value={data.password}
+                            onChange={(e) => setData("password", e.target.value)}
+                            placeholder="Enter Password"
+                            className="w-full rounded border-[1.5px] px-5 py-3 text-black dark:border-form-strokedark dark:bg-form-input dark:text-white focus:border-primary"
+                        />
+                        {errors.password && <div className="text-red-500">{errors.password}</div>}
+                    </div>
+
+                       
                     {/* Input untuk Role */}
                     <div className="w-full xl:w-1/2 mb-4.5">
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">

@@ -21,9 +21,14 @@ const Hero = () => {
                             elit. Dolorum fugiat unde minus explicabo? Dolorum
                             neque officiis assumenda maxime sunt repudiandae!
                         </p>
+                        <a href="http://wa.me/6285228270200">
                         <button className="btn bg-[#16023f] text-white border-none font-Geologica font-semibold rounded-full px-10 mt-6 w-fit">
                             Gabung Sekarang
                         </button>
+
+                        </a> 
+                
+               
                     </div>
                     <div className="md:min-w-1/2 w-full  justify-center md:justify-end md:flex hidden">
                         <img
