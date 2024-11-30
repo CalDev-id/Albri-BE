@@ -158,7 +158,7 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|same:confirm-password', // Password optional
+            'password' => 'nullable|min:8', // Password optional
             'roles' => 'required|array' // Validasi roles sebagai array
         ]);
     

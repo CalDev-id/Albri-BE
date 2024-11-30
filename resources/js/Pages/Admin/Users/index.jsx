@@ -92,7 +92,7 @@ const AdminUsers = () => {
                                                 as="button"
                                                 data={{ id: user.id }}
                                                 onClick={(e) => {
-                                                    if (!confirm("Are you sure you want to delete this user?")) {
+                                                    if (!confirm("Dengan Perhatian !  Jika anda menghapus data ini, maka data yang berhubungan dengan data ini juga akan terhapus. Apakah anda yakin ?")) {
                                                         e.preventDefault();
                                                     }
                                                 }}
