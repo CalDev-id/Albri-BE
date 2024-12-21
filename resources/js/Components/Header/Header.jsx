@@ -108,7 +108,9 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center gap-3 2xsm:gap-7">
           <ul className="flex items-center gap-2 2xsm:gap-4">
             {/* <!-- Dark Mode Toggler --> */}
+            <div className="md:flex hidden">
             <DarkModeSwitcher />
+            </div>
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
@@ -118,11 +120,12 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             {/* <!-- Chat Notification Area --> */}
             {/* <DropdownMessage /> */}
             {/* <!-- Chat Notification Area --> */}
-          </ul>
-
-          {/* <!-- User Area --> */}
+                      {/* <!-- User Area --> */}
           <DropdownUser />
           {/* <!-- User Area --> */}
+          </ul>
+
+
         </div>
       </div>
     </header>
