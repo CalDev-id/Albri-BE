@@ -6,6 +6,8 @@ import * as XLSX from "xlsx";
 import "flowbite/dist/flowbite.min.js";
 import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
+import { Link } from "@inertiajs/react";
+
 
 const Laporan = () => {
     // const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
@@ -177,7 +179,21 @@ const Laporan = () => {
 
             <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang}  startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
 
+            {/* <Link href="/admin/laporan/cabang/create">
+                            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                                Tambah Laporan
+                            </button>
+                        </Link>
+
+                        <Link href="/admin/laporan/pengeluaran/create">
+                    <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                        Tambah Pengeluaran
+                    </button>
+                </Link> */}
+
         </DefaultLayout>
+
+
     );
 };
 

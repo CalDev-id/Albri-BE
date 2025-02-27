@@ -102,7 +102,7 @@ const TablePengeluaran = () => {
                     </button>
                 </Link> */}
                 <button
-                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranMitra, `${startOfWeek} sampai ${endOfWeek}`)}
+                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranMitra, `${bulan} sampai ${tahun}`)}
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
                         >
                             Download Excel

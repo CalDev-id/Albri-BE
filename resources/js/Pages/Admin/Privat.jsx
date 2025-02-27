@@ -11,11 +11,11 @@ const Privat = () => {
             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
   <div className="flex justify-between px-7.5 mb-6">
     <h4 className="text-xl font-semibold text-black dark:text-white">
-      Users
+      Private
     </h4>
     <Link href="/admin/users/create">
       <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-        Tambah User
+        Tambah Private
       </button>
     </Link>
   </div>

@@ -18,7 +18,7 @@ const AdminCabang = () => {
     </h4>
     <Link href="/admin/cabang/create">
       <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-        Tambah User
+        Tambah Cabang
       </button>
     </Link>
   </div>
