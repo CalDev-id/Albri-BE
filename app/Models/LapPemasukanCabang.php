@@ -43,6 +43,12 @@ public function user()
 
 
 }
+public function pakets()
+{
+    return $this->belongsToMany(Paket::class, 'laporan_paket', 'laporan_id', 'paket_id')
+                ->withPivot('jumlah')
+                ->withTimestamps();
+}
 
-
+    
 }

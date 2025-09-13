@@ -17,9 +17,10 @@ const Hero = () => {
                             Yayasan Bimbingan Anak Prestasi Indonesia
                         </h1>
                         <p className="text-white mt-4 font-Geologica">
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Dolorum fugiat unde minus explicabo? Dolorum
-                            neque officiis assumenda maxime sunt repudiandae!
+                            Rumah Belajar Albri hadir untuk memberikan solusi
+                            pendidikan yang terjangkau dan berkualitas bagi anak-anak. Dengan pendekatan belajar yang
+                            menyenangkan dan interaktif, kami berkomitmen untuk
+                            membantu setiap anak mencapai potensi terbaiknya.
                         </p>
                         <a href="http://wa.me/6285228270200">
                         <button className="btn bg-[#16023f] text-white border-none font-Geologica font-semibold rounded-full px-10 mt-6 w-fit">

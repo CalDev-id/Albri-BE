@@ -38,7 +38,7 @@ const TablePengeluaran = () => {
             "Lain Lain": pengeluaran.lainlain || 0,
             Total: pengeluaran.totalpengeluaran || 0,
         }));
-    
+
         // Hitung total untuk setiap kolom numerik
         const totals = {
             Hari: "Total", // Label di kolom pertama
@@ -54,22 +54,22 @@ const TablePengeluaran = () => {
             "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
             Total: data.reduce((sum, row) => sum + row.Total, 0),
         };
-    
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
+
         // Buat worksheet dan workbook
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
-    
+
         // Tentukan nama file
         const fileName = `Laporan_Pengeluaran_cabang_${judul}.xlsx`;
-    
+
         // Simpan file
         XLSX.writeFile(workbook, fileName);
     };
-    
+
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
@@ -78,19 +78,19 @@ const TablePengeluaran = () => {
                     Laporan Pengeluaran Cabang
                 </h4>
                 <div>
-                <Link href="/admin/laporan/pengeluaran/create">
-                    <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                        Tambah Pengeluaran
-                    </button>
-                </Link>
-                <button
-                            // onClick={downloadExcel}
-                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranCabang, `${startOfWeek} sampai ${endOfWeek}`)}
-                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                        >
-                            Download Excel
+                    <Link href="/admin/laporan/pengeluaran/create">
+                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                            Tambah Pengeluaran
                         </button>
-                        </div>
+                    </Link>
+                    <button
+                        // onClick={downloadExcel}
+                        onClick={() => downloadExcelPengeluaran(laporanPengeluaranCabang, `${startOfWeek} sampai ${endOfWeek}`)}
+                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                    >
+                        Download Excel
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -101,7 +101,7 @@ const TablePengeluaran = () => {
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Cabang</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Nama Guru</th>
+                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Pembuat</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Gaji</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">ATK</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Sewa</th>
@@ -121,7 +121,17 @@ const TablePengeluaran = () => {
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {pengeluaran.gurus.length > 0
+                                        ? pengeluaran.gurus.map((guru) => (
+                                            <div key={guru.id}>
+                                                {guru.guru_nama} - Rp {guru.gaji.toLocaleString()}
+                                            </div>
+                                        ))
+                                        : "N/A"}
+
+                                </td>
+
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa.toLocaleString()}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
@@ -173,16 +183,16 @@ const TablePengeluaran = () => {
 
             {/* Pagination */}
             <div className="flex justify-center gap-3 mt-4">
-                        <button
-                            onClick={() => goToWeek(prevWeekOffset)}
-                            // disabled={current_page === 1}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Sebelumnya
-                        </button>
+                <button
+                    onClick={() => goToWeek(prevWeekOffset)}
+                    // disabled={current_page === 1}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Sebelumnya
+                </button>
 
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
+                {/* Menampilkan nomor halaman */}
+                {/* {[...Array(last_page)].map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => handlePageChange(index + 1)}
@@ -196,14 +206,14 @@ const TablePengeluaran = () => {
                             </button>
                         ))} */}
 
-                        <button
-                            onClick={() => goToWeek(nextWeekOffset)}
-                            // disabled={current_page === last_page}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Selanjutnya
-                        </button>
-                    </div>
+                <button
+                    onClick={() => goToWeek(nextWeekOffset)}
+                    // disabled={current_page === last_page}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Selanjutnya
+                </button>
+            </div>
         </div>
     );
 };

@@ -11,57 +11,58 @@ import TablePengeluaran from "./TablePengeluaranRekap";
 import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
-const Laporan = ({
-    laporanCabang,
-    laporanPengeluaranCabang,
-    bulan,
-    tahun,
-    nextMonth,
-    nextYear,
-    prevMonth,
-    prevYear,
-}) => {
+const Laporan = () => {
+    const {
+        laporanCabang,
+        laporanPengeluaranCabang,
+        pakets,
+        bulan,
+        tahun,
+        nextMonth,
+        nextYear,
+        prevMonth,
+        prevYear,
+    } = usePage().props;
     const calculateTotals = (laporanCabangData, laporanPengeluaranCabangData) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
         if (!Array.isArray(laporanPengeluaranCabangData)) laporanPengeluaranCabangData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanCabangData.reduce(
             (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranCabangData.reduce(
             (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
-        // Hitung total students (biaya)
-        const totalStudents = laporanCabangData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_12000 || 0)),
-            0
-        );
-    
+
+        // Hitung total students (paket dinamis)
+        const totalStudents = laporanCabangData.reduce((sum, laporan) => {
+            if (!laporan.pakets || !Array.isArray(laporan.pakets)) return sum;
+
+            return sum + laporan.pakets.reduce((paketSum, paket) => {
+                return paketSum + (paket.pivot?.jumlah || 0);
+            }, 0);
+        }, 0);
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
-        laporanCabang.data,
-        laporanPengeluaranCabang.data
+        laporanCabang?.data || [],
+        laporanPengeluaranCabang?.data || []
     );
     return (
         <DefaultLayout>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
                     total={`Rp ${totalLaba.toLocaleString()}`}
@@ -168,11 +169,11 @@ const Laporan = ({
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanCabang={laporanCabang} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear}/>
+            <TablePemasukan laporanCabang={laporanCabang} pakets={pakets || []} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear} />
 
             {/* P E N G E L U A R A N */}
 
-            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang}  bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear} />
+            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear} />
         </DefaultLayout>
     );
 };

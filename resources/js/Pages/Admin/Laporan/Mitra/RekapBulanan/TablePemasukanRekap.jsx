@@ -17,6 +17,7 @@ const TablePemasukanRekap = ({
     nextYear,
     prevMonth,
     prevYear,
+    paketMitra,
 }) => {
 
     const goToMonth = (month, year) => {
@@ -33,196 +34,202 @@ const TablePemasukanRekap = ({
     };
 
     const downloadExcel = (laporanMitra, judul) => {
-        const data = laporanMitra.data.map((laporan) => ({
-            Hari: laporan.hari,
-            Tanggal: laporan.tanggal,
-            "7000": laporan.biaya_5000 || 0,
-            "8.000": laporan.biaya_8000 || 0,
-            "10.000": laporan.biaya_10000 || 0,
-            "15.000": laporan.biaya_15000 || 0,
-            "Total Biaya": laporan.totalbiaya || 0,
-            Daftar: laporan.daftar || 0,
-            Modul: laporan.modul || 0,
-            Kaos: laporan.kaos || 0,
-            Kas: laporan.kas || 0,
-            "Lain Lain": laporan.lainlain || 0,
-            "Total Pemasukan": laporan.totalpemasukan || 0,
-        }));
-    
-        // Hitung total untuk setiap kolom numerik
+        // Buat object data dengan struktur dinamis berdasarkan paket
+        const data = laporanMitra.data.map((laporan) => {
+            const row = {
+                Hari: laporan.hari,
+                Tanggal: laporan.tanggal,
+            };
+
+            // Tambahkan kolom paket secara dinamis
+            if (paketMitra && paketMitra.length > 0) {
+                paketMitra.forEach((paket) => {
+                    const headerName = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
+                    const fieldName = `biaya_${paket.harga}`;
+                    row[headerName] = laporan[fieldName] || 0;
+                });
+            }
+
+            // Tambahkan kolom lainnya
+            row["Total Biaya"] = laporan.totalbiaya || 0;
+            row["Daftar"] = laporan.daftar || 0;
+            row["Modul"] = laporan.modul || 0;
+            row["Kaos"] = laporan.kaos || 0;
+            row["Kas"] = laporan.kas || 0;
+            row["Lain Lain"] = laporan.lainlain || 0;
+            row["Total Pemasukan"] = laporan.totalpemasukan || 0;
+
+            return row;
+        });
+
+        // Hitung total untuk setiap kolom
         const totals = {
             Hari: "Total",
             Tanggal: "",
-            "7000": data.reduce((sum, row) => sum + row["7000"], 0),
-            "8.000": data.reduce((sum, row) => sum + row["8.000"], 0),
-            "10.000": data.reduce((sum, row) => sum + row["10.000"], 0),
-            "15.000": data.reduce((sum, row) => sum + row["15.000"], 0),
-            "Total Biaya": data.reduce((sum, row) => sum + row["Total Biaya"], 0),
-            Daftar: data.reduce((sum, row) => sum + row.Daftar, 0),
-            Modul: data.reduce((sum, row) => sum + row.Modul, 0),
-            Kaos: data.reduce((sum, row) => sum + row.Kaos, 0),
-            Kas: data.reduce((sum, row) => sum + row.Kas, 0),
-            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            "Total Pemasukan": data.reduce((sum, row) => sum + row["Total Pemasukan"], 0),
         };
-    
+
+        // Total untuk paket
+        if (paketMitra && paketMitra.length > 0) {
+            paketMitra.forEach((paket) => {
+                const headerName = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
+                totals[headerName] = data.reduce((sum, row) => sum + row[headerName], 0);
+            });
+        }
+
+        // Total untuk kolom lainnya
+        totals["Total Biaya"] = data.reduce((sum, row) => sum + row["Total Biaya"], 0);
+        totals["Daftar"] = data.reduce((sum, row) => sum + row.Daftar, 0);
+        totals["Modul"] = data.reduce((sum, row) => sum + row.Modul, 0);
+        totals["Kaos"] = data.reduce((sum, row) => sum + row.Kaos, 0);
+        totals["Kas"] = data.reduce((sum, row) => sum + row.Kas, 0);
+        totals["Lain Lain"] = data.reduce((sum, row) => sum + row["Lain Lain"], 0);
+        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + row["Total Pemasukan"], 0);
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
-        // Urutan kolom yang diinginkan
-        const headers = [
-            "Hari",
-            "Tanggal",
-            "7000",
-            "8.000",
-            "10.000",
-            "15.000",
-            "Total Biaya",
-            "Daftar",
-            "Modul",
-            "Kaos",
-            "Kas",
-            "Lain Lain",
-            "Total Pemasukan",
-        ];
-    
+
+        // Buat header dinamis berdasarkan paket
+        const headers = ["Hari", "Tanggal"];
+
+        if (paketMitra && paketMitra.length > 0) {
+            paketMitra.forEach((paket) => {
+                headers.push(`${paket.nama_paket} (${paket.harga.toLocaleString()})`);
+            });
+        }
+
+        headers.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Total Pemasukan");
+
         // Membuat worksheet dengan header khusus
         const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
-    
+
         // Menambahkan header secara eksplisit (jika perlu)
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
-    
+
         // Membuat workbook
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap");
-    
+
         // Menentukan nama file dan mendownload
         const fileName = `Rekap_Pemasukan_mitra_${judul}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
 
 
-    return(
+    return (
         <div>
-        <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-            <div className="flex justify-between px-7.5 mb-6">
-                <h4 className="text-xl font-semibold text-black dark:text-white">
-                    Rekap Pemasukan Mitra - {bulan}/{tahun}
-                </h4>
+            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div className="flex justify-between px-7.5 mb-6">
+                    <h4 className="text-xl font-semibold text-black dark:text-white">
+                        Rekap Pemasukan Mitra - {bulan}/{tahun}
+                    </h4>
 
-                <div>
-                    {/* <Link href="/admin/laporan/mitra/create">
+                    <div>
+                        {/* <Link href="/admin/laporan/mitra/create">
                         <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                             Tambah Laporan
                         </button>
                     </Link> */}
-                    <button
-                        // onClick={downloadExcel}
-                        onClick={() => downloadExcel(laporanMitra, `${bulan} / ${tahun}`)}
-                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                    >
-                        Download Excel
-                    </button>
+                        <button
+                            // onClick={downloadExcel}
+                            onClick={() => downloadExcel(laporanMitra, `${bulan} / ${tahun}`)}
+                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                        >
+                            Download Excel
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full table-auto">
-                    <thead>
-                        <tr className="bg-gray-2 dark:bg-meta-4">
-                            {/* Header cells */}
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
-                                Hari
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Tanggal
-                            </th>
+                <div className="overflow-x-auto">
+                    <table className="w-full table-auto">
+                        <thead>
+                            <tr className="bg-gray-2 dark:bg-meta-4">
+                                {/* Header cells */}
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
+                                    Hari
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Tanggal
+                                </th>
 
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                7000
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                8000
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                10.000
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                15.000
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Total Biaya
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Daftar
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Modul
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Kaos
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Kas
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Lain Lain
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                Total
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {laporanMitra.data.map((laporan, key) => (
-                            <tr
-                                key={key}
-                                className="border-b border-stroke dark:border-strokedark"
-                            >
-                                {/* Table rows with data */}
-                                <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
-                                    {laporan.hari}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.tanggal}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.biaya_5000}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.biaya_8000}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.biaya_10000}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.biaya_15000}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.totalbiaya.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.daftar.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.modul.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.kaos.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.kas.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.lainlain.toLocaleString()}
-                                </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {laporan.totalpemasukan.toLocaleString()}
-                                </td>
+                                {/* Dynamic paket headers */}
+                                {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => (
+                                    <th key={index} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                        {paket.nama_paket} ({paket.harga.toLocaleString()})
+                                    </th>
+                                ))}
+
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Total Biaya
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Daftar
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Modul
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Kaos
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Kas
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Lain Lain
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Total
+                                </th>
                             </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
+                        </thead>
+                        <tbody>
+                            {laporanMitra.data.map((laporan, key) => (
+                                <tr
+                                    key={key}
+                                    className="border-b border-stroke dark:border-strokedark"
+                                >
+                                    {/* Table rows with data */}
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                                        {laporan.hari}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.tanggal}
+                                    </td>
+
+                                    {/* Dynamic paket data */}
+                                    {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => {
+                                        const fieldName = `biaya_${paket.harga}`;
+                                        return (
+                                            <td key={index} className="py-4 px-4 text-sm text-black dark:text-white">
+                                                {laporan[fieldName] || 0}
+                                            </td>
+                                        );
+                                    })}
+
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.totalbiaya ? laporan.totalbiaya.toLocaleString() : 0}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.daftar.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.modul.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.kaos.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.kas.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.lainlain.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.totalpemasukan.toLocaleString()}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                                 <td
                                     colSpan="2"
@@ -230,18 +237,17 @@ const TablePemasukanRekap = ({
                                 >
                                     Total
                                 </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_5000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_8000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_10000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_15000")}
-                                </td>
+
+                                {/* Dynamic paket totals */}
+                                {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => {
+                                    const fieldName = `biaya_${paket.harga}`;
+                                    return (
+                                        <td key={index} className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                            {getTotal(fieldName)}
+                                        </td>
+                                    );
+                                })}
+
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
                                     {getTotal("totalbiaya").toLocaleString()}
                                 </td>
@@ -266,9 +272,9 @@ const TablePemasukanRekap = ({
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
                         </tfoot>
-                </table>
-                {/* Pagination Controls */}
-                <div className="flex justify-center gap-3 mt-4">
+                    </table>
+                    {/* Pagination Controls */}
+                    <div className="flex justify-center gap-3 mt-4">
                         <button
                             onClick={() => goToMonth(prevMonth, prevYear)}
                             // disabled={current_page === 1}
@@ -284,9 +290,9 @@ const TablePemasukanRekap = ({
                             Selanjutnya
                         </button>
                     </div>
+                </div>
             </div>
         </div>
-    </div>
     )
 };
 

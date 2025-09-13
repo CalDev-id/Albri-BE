@@ -1,32 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 
 const EditCabang = () => {
     const { cabangs, laporanCabang, users } = usePage().props
-    const{ data, setData, put, errors }=useForm({
-        hari:laporanCabang.hari,
+    const { data, setData, put, errors } = useForm({
+        hari: laporanCabang.hari,
         tanggal: laporanCabang.tanggal,
         cabang_id: laporanCabang.cabang_id,
-        guru_id : laporanCabang.guru_id,
-        gaji : laporanCabang.gaji,
+        gurus: laporanCabang.gurus && laporanCabang.gurus.length > 0
+            ? laporanCabang.gurus.map(guru => ({
+                guru_id: guru.guru_nama || "",
+                gaji: guru.gaji || ""
+            }))
+            : [{ guru_id: "", gaji: "" }],
         atk: laporanCabang.atk,
         sewa: laporanCabang.sewa,
         intensif: laporanCabang.intensif,
         lisensi: laporanCabang.lisensi,
-        thr: laporanCabang.thr,     
+        thr: laporanCabang.thr,
         lainlain: laporanCabang.lainlain,
     });
 
+    // Tambah input guru baru
+    const addGuru = () => {
+        setData("gurus", [...data.gurus, { guru_id: "", gaji: "" }]);
+    };
+
+    // Hapus input guru
+    const removeGuru = (index) => {
+        if (data.gurus.length > 1) { // Pastikan minimal ada 1 guru
+            const updated = data.gurus.filter((_, i) => i !== index);
+            setData("gurus", updated);
+        }
+    };
+
+    // Ubah value guru
+    const updateGuru = (index, field, value) => {
+        const updated = [...data.gurus];
+        updated[index][field] = value;
+        setData("gurus", updated);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/admin/laporan/pengeluaran/${laporanCabang.id}`);
+        console.log('Submitting data:', data);
+        put(`/admin/laporan/pengeluaran/${laporanCabang.id}`, {
+            onSuccess: () => {
+                console.log('Update successful');
+            },
+            onError: (errors) => {
+                console.log('Update errors:', errors);
+            }
+        });
     };
 
     return (
         <DefaultLayout>
             <div className="flex flex-col gap-9">
-                {/* <!-- Contact Form --> */}
+                {/* <!-- Contact Form --> s*/}
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                         <h3 className="font-medium text-black dark:text-white">
@@ -48,13 +80,13 @@ const EditCabang = () => {
                                         <option disabled selected>
                                             Pilih Hari
                                         </option>
-                                        <option value="Senin">Senin</option>
-                                        <option value="Selasa">Selasa</option>
-                                        <option value="Rabu">Rabu</option>
-                                        <option value="Kamis">Kamis</option>
-                                        <option value="Jumat">Jumat</option>
-                                        <option value="Sabtu">Sabtu</option>
-                                        <option value="Minggu">Minggu</option>
+                                        <option value="senin">Senin</option>
+                                        <option value="selasa">Selasa</option>
+                                        <option value="rabu">Rabu</option>
+                                        <option value="kamis">Kamis</option>
+                                        <option value="jumat">Jumat</option>
+                                        <option value="sabtu">Sabtu</option>
+                                        <option value="minggu">Minggu</option>
                                     </select>
                                 </div>
                                 <div className="w-full">
@@ -71,61 +103,72 @@ const EditCabang = () => {
                                 </div>
                             </div>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                                <div className="w-full">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                    Cabang
-                                </label>
-                                <select className="select select-bordered w-full"
-                                    value={data.cabang_id}
-                                    onChange={(e) => setData("cabang_id", e.target.value)}
-                                >
-                                    <option disabled selected>
-                                        Pilih Cabang
-                                    </option>
-                                    {cabangs.map((cabang) => (
-                                        <option key={cabang.id} value={cabang.id}>
-                                            {cabang.nama}
+                                <div className="w-full">
+                                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                        Cabang
+                                    </label>
+                                    <select className="select select-bordered w-full"
+                                        value={data.cabang_id}
+                                        onChange={(e) => setData("cabang_id", e.target.value)}
+                                    >
+                                        <option disabled selected>
+                                            Pilih Cabang
                                         </option>
-                                    ))}
-                                </select>
-                            </div>
-
-
-                            <div className="w-full">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                    guru
-                                </label>
-                                <select className="select select-bordered w-full"
-                                    value={data.guru_id}
-                                    onChange={(e) => setData("guru_id", e.target.value)}
-                                >
-                                    <option disabled selected>
-                                        Pilih guru
-                                    </option>
-                                    {users.map((user) => (
-                                        <option key={user.id} value={user.id}>
-                                            {user.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            </div>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            Gaji
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.gaji}
-                                            onChange={(e) => setData("gaji", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
+                                        {cabangs.map((cabang) => (
+                                            <option key={cabang.id} value={cabang.id}>
+                                                {cabang.nama}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
-                                <div className="w-full xl:w-1/2">
+                            </div>
+                            {/* Section Guru */}
+                            <div className="mb-4.5">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    Data Guru
+                                </label>
+                                {data.gurus.map((guru, index) => (
+                                    <div key={index} className="mb-3 flex flex-col gap-4 xl:flex-row xl:items-end">
+                                        <div className="w-full xl:w-1/2">
+                                            <input
+                                                type="text"
+                                                value={guru.guru_id}
+                                                onChange={(e) => updateGuru(index, "guru_id", e.target.value)}
+                                                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                                placeholder="Nama Guru"
+                                            />
+                                        </div>
+                                        <div className="w-full xl:w-1/2">
+                                            <input
+                                                type="number"
+                                                value={guru.gaji}
+                                                onChange={(e) => updateGuru(index, "gaji", e.target.value)}
+                                                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                                placeholder="Gaji"
+                                            />
+                                        </div>
+                                        {data.gurus.length > 1 && (
+                                            <div className="xl:w-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeGuru(index)}
+                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
+                                                    title="Hapus Guru"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                <button type="button" onClick={addGuru} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
+                                    + Tambah Guru
+                                </button>
+                            </div>
+
+                            {/* Section ATK dan lainnya */}
+                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                                <div className="w-full">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             ATK
@@ -142,7 +185,7 @@ const EditCabang = () => {
                             </div>
 
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
+                                <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             sewa
@@ -156,7 +199,7 @@ const EditCabang = () => {
                                         />
                                     </div>
                                 </div>
-                            <div className="w-full xl:w-1/2">
+                                <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             Intensif
@@ -175,7 +218,7 @@ const EditCabang = () => {
                             </div>
 
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
+                                <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             Lisensi
@@ -207,7 +250,7 @@ const EditCabang = () => {
                                 </div>
                             </div>
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
+                                <div className="w-full xl:w-1/2">
                                     <div className="mb-4.5">
                                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                             Lain Lain
@@ -223,7 +266,7 @@ const EditCabang = () => {
                                 </div>
                             </div>
 
-                            <button  type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                            <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                                 Submit
                             </button>
                         </div>

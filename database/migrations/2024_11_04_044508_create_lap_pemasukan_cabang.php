@@ -17,9 +17,6 @@ return new class extends Migration
             $table->string('hari');
             $table->date('tanggal');
             $table->foreignId('cabang_id')->constrained('cabangalbris');
-            $table->integer('biaya_5000');
-            $table->integer('biaya_10000');
-            $table->integer('biaya_12000');
             $table->integer('totalbiaya');
             $table->integer('daftar');
             $table->integer('modul');

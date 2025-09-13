@@ -15,17 +15,20 @@ class LapPengeluaranMitra extends Model
         'created_by',
         'hari',
         'tanggal',
-        'guru_id',
-        'gaji',
         'atk',
         'intensif',
         'lisensi',
         'lainlain',
         'totalpengeluaran',
-
     ];
-    public function user(){
 
-        return $this->belongsTo(User::class, 'guru_id');
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function mitras()
+    {
+        return $this->hasMany(LaporanPengeluaranMitraDet::class, 'lap_pengeluaran_mitra_id');
     }
 }

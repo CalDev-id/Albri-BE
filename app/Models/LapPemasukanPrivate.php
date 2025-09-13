@@ -17,6 +17,7 @@ class LapPemasukanPrivate extends Model
         'created_by',
         'hari',
         'tanggal',
+        'pakets', // JSON field for dynamic paket data
         'biaya_30',
         'biaya_35',
         'biaya_40',
@@ -30,10 +31,14 @@ class LapPemasukanPrivate extends Model
         'totalpemasukan',
     ];
 
+    protected $casts = [
+        'pakets' => 'array', // Automatically cast JSON to array
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
-    
-    
+
+
     }
 }

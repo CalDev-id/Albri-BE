@@ -26,24 +26,45 @@ const TablePengeluaran = () => {
         return laporanPengeluaranMitra.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
     };
 
+    // Function to get total gaji from mitras for a single report
+    const getTotalGajiMitra = (pengeluaran) => {
+        if (!pengeluaran.mitras || pengeluaran.mitras.length === 0) return 0;
+        return pengeluaran.mitras.reduce((sum, mitra) => sum + (mitra.gaji || 0), 0);
+    };
+
+    // Function to get names of all mitras for a single report
+    const getMitraNames = (pengeluaran) => {
+        if (!pengeluaran.mitras || pengeluaran.mitras.length === 0) return "N/A";
+        return pengeluaran.mitras.map(mitra => mitra.mitra_nama).join(", ");
+    };
+
+    // Function to calculate total of all gaji from all reports
+    const calculateTotalGajiAllMitra = () => {
+        return laporanPengeluaranMitra.data.reduce((sum, pengeluaran) => {
+            return sum + getTotalGajiMitra(pengeluaran);
+        }, 0);
+    };
+
     const downloadExcelPengeluaran = (laporanPengeluaranMitra, judul) => {
         const data = laporanPengeluaranMitra.data.map((pengeluaran) => ({
             Hari: pengeluaran.hari,
             Tanggal: pengeluaran.tanggal,
-            "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
-            Gaji: pengeluaran.gaji || 0,
+            Pembuat: pengeluaran.user ? pengeluaran.user.name : "N/A",
+            "Nama Mitra": getMitraNames(pengeluaran),
+            Gaji: getTotalGajiMitra(pengeluaran),
             ATK: pengeluaran.atk || 0,
             Intensif: pengeluaran.intensif || 0,
             Lisensi: pengeluaran.lisensi || 0,
             "Lain Lain": pengeluaran.lainlain || 0,
             Total: pengeluaran.totalpengeluaran || 0,
         }));
-    
+
         // Hitung total untuk setiap kolom numerik
         const totals = {
             Hari: "Total",
             Tanggal: "",
-            "Nama Guru": "",
+            Pembuat: "",
+            "Nama Mitra": "",
             Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
             ATK: data.reduce((sum, row) => sum + row.ATK, 0),
             Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
@@ -51,15 +72,16 @@ const TablePengeluaran = () => {
             "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
             Total: data.reduce((sum, row) => sum + row.Total, 0),
         };
-    
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
+
         // Urutan kolom yang diinginkan
         const headers = [
             "Hari",
             "Tanggal",
-            "Nama Guru",
+            "Pembuat",
+            "Nama Mitra",
             "Gaji",
             "ATK",
             "Intensif",
@@ -67,24 +89,24 @@ const TablePengeluaran = () => {
             "Lain Lain",
             "Total",
         ];
-    
+
         // Membuat worksheet dengan header khusus
         const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
-    
+
         // Menambahkan header secara eksplisit (jika perlu)
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
-    
+
         // Membuat workbook
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
-    
+
         // Tentukan nama file
         const fileName = `Laporan_Pengeluaran_Mitra_${judul}.xlsx`;
-    
+
         // Simpan file
         XLSX.writeFile(workbook, fileName);
     };
-    
+
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
@@ -93,18 +115,18 @@ const TablePengeluaran = () => {
                     Laporan Pengeluaran Mitra
                 </h4>
                 <div>
-                <Link href="/admin/laporan/pengeluaranmitra/create">
-                    <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                        Tambah Pengeluaran
-                    </button>
-                </Link>
-                <button
-                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranMitra, `${startOfWeek} sampai ${endOfWeek}`)}
-                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                        >
-                            Download Excel
+                    <Link href="/admin/laporan/pengeluaranmitra/create">
+                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                            Tambah Pengeluaran
                         </button>
-                        </div>
+                    </Link>
+                    <button
+                        onClick={() => downloadExcelPengeluaran(laporanPengeluaranMitra, `${startOfWeek} sampai ${endOfWeek}`)}
+                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                    >
+                        Download Excel
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -114,7 +136,7 @@ const TablePengeluaran = () => {
                             {/* Table Headers */}
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Nama Guru</th>
+                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Pembuat</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Gaji</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">ATK</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Intensif</th>
@@ -131,12 +153,20 @@ const TablePengeluaran = () => {
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {pengeluaran.mitras && pengeluaran.mitras.length > 0
+                                        ? pengeluaran.mitras.map((mitra) => (
+                                            <div key={mitra.id}>
+                                                {mitra.mitra_nama} - Rp {mitra.gaji.toLocaleString()}
+                                            </div>
+                                        ))
+                                        : "N/A"}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{(pengeluaran.atk || 0).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{(pengeluaran.intensif || 0).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{(pengeluaran.lisensi || 0).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{(pengeluaran.lainlain || 0).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{(pengeluaran.totalpengeluaran || 0).toLocaleString()}</td>
                                 <td className="py-4 px-4 text-center">
                                     {/* Actions */}
                                     <div className="flex justify-center gap-3">
@@ -164,8 +194,8 @@ const TablePengeluaran = () => {
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                            <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
+                            <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotalGajiAllMitra().toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi').toLocaleString()}</td>
@@ -179,16 +209,16 @@ const TablePengeluaran = () => {
 
             {/* Pagination */}
             <div className="flex justify-center gap-3 mt-4">
-                        <button
-                            onClick={() => goToWeek(prevWeekOffset)}
-                            // disabled={current_page === 1}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Sebelumnya
-                        </button>
+                <button
+                    onClick={() => goToWeek(prevWeekOffset)}
+                    // disabled={current_page === 1}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Sebelumnya
+                </button>
 
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
+                {/* Menampilkan nomor halaman */}
+                {/* {[...Array(last_page)].map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => handlePageChange(index + 1)}
@@ -202,14 +232,14 @@ const TablePengeluaran = () => {
                             </button>
                         ))} */}
 
-                        <button
-                            onClick={() => goToWeek(nextWeekOffset)}
-                            // disabled={current_page === last_page}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Selanjutnya
-                        </button>
-                    </div>
+                <button
+                    onClick={() => goToWeek(nextWeekOffset)}
+                    // disabled={current_page === last_page}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Selanjutnya
+                </button>
+            </div>
         </div>
     );
 };

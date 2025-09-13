@@ -5,19 +5,8 @@ import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
 import * as XLSX from "xlsx";
 
-const TablePengeluaran = () => {
-    const {
-        laporanPengeluaranPrivate,
-        startOfWeek,
-        endOfWeek,
-        nextWeekOffset,
-        prevWeekOffset,
-    } = usePage().props;
+const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset, goToWeek }) => {
 
-    const goToWeek = (weekOffset) => {
-        Inertia.get(route("admin.laporan.private"), { weekOffset });
-    };
-    
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
@@ -36,7 +25,7 @@ const TablePengeluaran = () => {
             "Lain Lain": pengeluaran.lainlain || 0,
             Total: pengeluaran.totalpengeluaran || 0,
         }));
-    
+
         // Hitung total untuk setiap kolom numerik
         const totals = {
             Hari: "Total",
@@ -49,10 +38,10 @@ const TablePengeluaran = () => {
             "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
             Total: data.reduce((sum, row) => sum + row.Total, 0),
         };
-    
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
+
         // Urutan kolom yang diinginkan
         const headers = [
             "Hari",
@@ -65,20 +54,20 @@ const TablePengeluaran = () => {
             "Lain Lain",
             "Total",
         ];
-    
+
         // Membuat worksheet dengan header khusus
         const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
-    
+
         // Menambahkan header secara eksplisit (jika perlu)
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
-    
+
         // Membuat workbook
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
-    
+
         // Tentukan nama file
         const fileName = `Laporan_Pengeluaran_Private_${judul}.xlsx`;
-    
+
         // Simpan file
         XLSX.writeFile(workbook, fileName);
     };
@@ -90,18 +79,18 @@ const TablePengeluaran = () => {
                     Laporan Pengeluaran Private
                 </h4>
                 <div>
-                <Link href="/admin/laporan/pengeluaranprivate/create">
-                    <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                        Tambah Pengeluaran
-                    </button>
-                </Link>
-                <button
-                            onClick={() => downloadExcelPengeluaran(laporanPengeluaranPrivate, `${startOfWeek} sampai ${endOfWeek}`)}
-                            className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
-                        >
-                            Download Excel
+                    <Link href="/admin/laporan/pengeluaranprivate/create">
+                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                            Tambah Pengeluaran
                         </button>
-                        </div>
+                    </Link>
+                    <button
+                        onClick={() => downloadExcelPengeluaran(laporanPengeluaranPrivate, `${startOfWeek} sampai ${endOfWeek}`)}
+                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                    >
+                        Download Excel
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -176,16 +165,16 @@ const TablePengeluaran = () => {
 
             {/* Pagination */}
             <div className="flex justify-center gap-3 mt-4">
-                        <button
-                            onClick={() => goToWeek(prevWeekOffset)}
-                            // disabled={current_page === 1}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Sebelumnya
-                        </button>
+                <button
+                    onClick={() => goToWeek(prevWeekOffset)}
+                    // disabled={current_page === 1}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Sebelumnya
+                </button>
 
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
+                {/* Menampilkan nomor halaman */}
+                {/* {[...Array(last_page)].map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => handlePageChange(index + 1)}
@@ -199,14 +188,14 @@ const TablePengeluaran = () => {
                             </button>
                         ))} */}
 
-                        <button
-                            onClick={() => goToWeek(nextWeekOffset)}
-                            // disabled={current_page === last_page}
-                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Selanjutnya
-                        </button>
-                    </div>
+                <button
+                    onClick={() => goToWeek(nextWeekOffset)}
+                    // disabled={current_page === last_page}
+                    className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                    Selanjutnya
+                </button>
+            </div>
         </div>
     );
 };

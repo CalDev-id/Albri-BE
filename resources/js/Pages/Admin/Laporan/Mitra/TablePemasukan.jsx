@@ -16,6 +16,7 @@ const TablePemasukan = () => {
         endOfWeek,
         nextWeekOffset,
         prevWeekOffset,
+        paketMitra,
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
@@ -30,75 +31,84 @@ const TablePemasukan = () => {
         );
     };
 
+    // Calculate total for specific paket
+    const getPaketTotal = (paketId) => {
+        return laporanMitra.data.reduce((sum, laporan) => {
+            const paketData = laporan.pakets?.find(p => p.id === paketId);
+            return sum + (paketData?.pivot?.jumlah || 0);
+        }, 0);
+    };
+
     const downloadExcel = (laporanMitra, judul) => {
-        const data = laporanMitra.data.map((laporan) => ({
-            Hari: laporan.hari,
-            Tanggal: laporan.tanggal,
-            "7000": laporan.biaya_5000 || 0,
-            "8.000": laporan.biaya_8000 || 0,
-            "10.000": laporan.biaya_10000 || 0,
-            "15.000": laporan.biaya_15000 || 0,
-            "Total Biaya": laporan.totalbiaya || 0,
-            Daftar: laporan.daftar || 0,
-            Modul: laporan.modul || 0,
-            Kaos: laporan.kaos || 0,
-            Kas: laporan.kas || 0,
-            "Lain Lain": laporan.lainlain || 0,
-            "Total Pemasukan": laporan.totalpemasukan || 0,
-        }));
-    
+        const data = laporanMitra.data.map((laporan) => {
+            const excelRow = {
+                Hari: laporan.hari,
+                Tanggal: laporan.tanggal,
+            };
+
+            // Dynamic paket columns
+            paketMitra?.forEach((paket) => {
+                const paketData = laporan.pakets?.find(p => p.id === paket.id);
+                excelRow[`${paket.nama_paket} (${paket.harga.toLocaleString()})`] = paketData?.pivot?.jumlah || 0;
+            });
+
+            // Static columns
+            excelRow["Total Biaya"] = laporan.totalbiaya || 0;
+            excelRow["Daftar"] = laporan.daftar || 0;
+            excelRow["Modul"] = laporan.modul || 0;
+            excelRow["Kaos"] = laporan.kaos || 0;
+            excelRow["Kas"] = laporan.kas || 0;
+            excelRow["Lain Lain"] = laporan.lainlain || 0;
+            excelRow["Total Pemasukan"] = laporan.totalpemasukan || 0;
+
+            return excelRow;
+        });
+
         // Hitung total untuk setiap kolom numerik
         const totals = {
             Hari: "Total",
             Tanggal: "",
-            "7000": data.reduce((sum, row) => sum + row["7000"], 0),
-            "8.000": data.reduce((sum, row) => sum + row["8.000"], 0),
-            "10.000": data.reduce((sum, row) => sum + row["10.000"], 0),
-            "15.000": data.reduce((sum, row) => sum + row["15.000"], 0),
-            "Total Biaya": data.reduce((sum, row) => sum + row["Total Biaya"], 0),
-            Daftar: data.reduce((sum, row) => sum + row.Daftar, 0),
-            Modul: data.reduce((sum, row) => sum + row.Modul, 0),
-            Kaos: data.reduce((sum, row) => sum + row.Kaos, 0),
-            Kas: data.reduce((sum, row) => sum + row.Kas, 0),
-            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            "Total Pemasukan": data.reduce((sum, row) => sum + row["Total Pemasukan"], 0),
         };
-    
+
+        // Add dynamic paket totals
+        paketMitra?.forEach((paket) => {
+            const headerKey = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
+            totals[headerKey] = data.reduce((sum, row) => sum + (row[headerKey] || 0), 0);
+        });
+
+        // Add static column totals
+        totals["Total Biaya"] = data.reduce((sum, row) => sum + (row["Total Biaya"] || 0), 0);
+        totals["Daftar"] = data.reduce((sum, row) => sum + (row["Daftar"] || 0), 0);
+        totals["Modul"] = data.reduce((sum, row) => sum + (row["Modul"] || 0), 0);
+        totals["Kaos"] = data.reduce((sum, row) => sum + (row["Kaos"] || 0), 0);
+        totals["Kas"] = data.reduce((sum, row) => sum + (row["Kas"] || 0), 0);
+        totals["Lain Lain"] = data.reduce((sum, row) => sum + (row["Lain Lain"] || 0), 0);
+        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + (row["Total Pemasukan"] || 0), 0);
+
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
-    
-        // Urutan kolom yang diinginkan
-        const headers = [
-            "Hari",
-            "Tanggal",
-            "7000",
-            "8.000",
-            "10.000",
-            "15.000",
-            "Total Biaya",
-            "Daftar",
-            "Modul",
-            "Kaos",
-            "Kas",
-            "Lain Lain",
-            "Total Pemasukan",
-        ];
-    
+
+        // Generate dynamic headers
+        const staticHeaders = ["Hari", "Tanggal"];
+        const paketHeaders = paketMitra?.map(paket => `${paket.nama_paket} (${paket.harga.toLocaleString()})`) || [];
+        const otherHeaders = ["Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Total Pemasukan"];
+        const headers = [...staticHeaders, ...paketHeaders, ...otherHeaders];
+
         // Membuat worksheet dengan header khusus
         const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
-    
+
         // Menambahkan header secara eksplisit (jika perlu)
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
-    
+
         // Membuat workbook
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
-    
+
         // Menentukan nama file dan mendownload
         const fileName = `Laporan_Pemasukan_mitra_${judul}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
-    
+
 
     return (
         <div>
@@ -120,6 +130,12 @@ const TablePemasukan = () => {
                         >
                             Download Excel
                         </button>
+
+                        <Link href="/admin/laporan/mitra/setting-harga">
+                            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 ml-2 ">
+                                Setting Harga
+                            </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -138,18 +154,13 @@ const TablePemasukan = () => {
                                     Tanggal
                                 </th>
 
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    7000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    8000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    10.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    15.000
-                                </th>
+                                {/* Dynamic Paket Headers */}
+                                {paketMitra && paketMitra.map((paket) => (
+                                    <th key={paket.id} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                        {paket.nama_paket} ({paket.harga.toLocaleString()})
+                                    </th>
+                                ))}
+
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total Biaya
                                 </th>
@@ -192,18 +203,17 @@ const TablePemasukan = () => {
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.tanggal}
                                     </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_5000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_8000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_10000}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_15000}
-                                    </td>
+
+                                    {/* Dynamic Paket Data */}
+                                    {paketMitra && paketMitra.map((paket) => {
+                                        const paketData = laporan.pakets?.find(p => p.id === paket.id);
+                                        return (
+                                            <td key={paket.id} className="py-4 px-4 text-sm text-black dark:text-white">
+                                                {paketData?.pivot?.jumlah || 0}
+                                            </td>
+                                        );
+                                    })}
+
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.totalbiaya.toLocaleString()}
                                     </td>
@@ -263,18 +273,14 @@ const TablePemasukan = () => {
                                 >
                                     Total
                                 </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_5000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_8000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_10000")}
-                                </td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_15000")}
-                                </td>
+
+                                {/* Dynamic Paket Totals */}
+                                {paketMitra && paketMitra.map((paket) => (
+                                    <td key={paket.id} className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                        {getPaketTotal(paket.id)}
+                                    </td>
+                                ))}
+
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
                                     {getTotal("totalbiaya").toLocaleString()}
                                 </td>

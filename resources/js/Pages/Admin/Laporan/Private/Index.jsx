@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { usePage } from "@inertiajs/react";
+import { Inertia } from "@inertiajs/inertia";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import * as XLSX from "xlsx";
 import TablePengeluaran from "./TablePengeluaran";
@@ -16,43 +17,48 @@ const Laporan = () => {
 
     const {
         laporanPrivate, laporanPengeluaranPrivate,
-        startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+        startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset, paketPrivate
     } = usePage().props;
+
+    const goToWeek = (weekOffset) => {
+        Inertia.get(route('admin.laporan.private'), { weekOffset });
+    };
 
     const calculateTotals = (laporanPrivateData, laporanPengeluaranPrivateData) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanPrivateData)) laporanPrivateData = [];
         if (!Array.isArray(laporanPengeluaranPrivateData)) laporanPengeluaranPrivateData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanPrivateData.reduce(
             (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranPrivateData.reduce(
             (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
-        // Hitung total students (biaya)
-        const totalStudents = laporanPrivateData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_30 || 0) +
-                    (laporan.biaya_35 || 0) +
-                    (laporan.biaya_40 || 0) +
-                    (laporan.biaya_45 || 0)),
-            0
-        );
-    
+
+        // Hitung total students (biaya) secara dinamis
+        const totalStudents = laporanPrivateData.reduce((sum, laporan) => {
+            let totalBiaya = 0;
+            if (paketPrivate && paketPrivate.length > 0) {
+                paketPrivate.forEach((paket) => {
+                    const fieldName = `biaya_${paket.harga}`;
+                    totalBiaya += laporan[fieldName] || 0;
+                });
+            }
+            return sum + totalBiaya;
+        }, 0);
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanPrivate.data,
@@ -166,16 +172,16 @@ const Laporan = () => {
                     </svg>
                 </CardDataStats>
             </div>
-        
-        <TablePemasukan laporanPrivate={laporanPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
-          
+
+            <TablePemasukan laporanPrivate={laporanPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} goToWeek={goToWeek} paketPrivate={paketPrivate} />
 
 
 
-          {/* P E N G E L U A R A N */}
 
-          <TablePengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate}                 startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
-           
+            {/* P E N G E L U A R A N */}
+
+            <TablePengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} goToWeek={goToWeek} />
+
         </DefaultLayout>
     );
 };

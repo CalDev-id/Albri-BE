@@ -15,6 +15,7 @@ class LapPengeluaranPrivate extends Model
         'created_by',
         'hari',
         'tanggal',
+        'gurus', // JSON field for multiple gurus
         'guru_id',
         'gaji',
         'atk',
@@ -24,10 +25,14 @@ class LapPengeluaranPrivate extends Model
         'thr',
         'lainlain',
         'totalpengeluaran',
-
     ];
 
-    public function user(){
+    protected $casts = [
+        'gurus' => 'array', // Automatically cast JSON to array
+    ];
+
+    public function user()
+    {
 
         return $this->belongsTo(User::class, 'guru_id');
     }

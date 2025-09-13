@@ -20,27 +20,28 @@ const Laporan = ({
     nextYear,
     prevMonth,
     prevYear,
+    paketMitra,
 }) => {
     const calculateTotals = (laporanMitraData, laporanPengeluaranMitraData) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
         if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanMitraData.reduce(
             (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranMitraData.reduce(
             (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
+
         // Hitung total students (biaya)
         const totalStudents = laporanMitraData.reduce(
             (sum, laporan) =>
@@ -51,10 +52,10 @@ const Laporan = ({
                     (laporan.biaya_15000 || 0)),
             0
         );
-    
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanMitra.data,
@@ -169,7 +170,7 @@ const Laporan = ({
                 </CardDataStats>
             </div>
 
-            <TablePemasukanRekap laporanMitra={laporanMitra} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear}/>
+            <TablePemasukanRekap laporanMitra={laporanMitra} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear} paketMitra={paketMitra} />
 
             {/* P E N G E L U A R A N */}
 

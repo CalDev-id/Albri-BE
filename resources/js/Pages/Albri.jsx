@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "@/Components/Home/Navbar";
 import Hero from "@/Components/Home/Hero";
+import Page from "@/Components/Home/Page";
 import Page2 from "@/Components/Home/Page2";
 import Page3 from "@/Components/Home/Page3";
 import Page4 from "@/Components/Home/Page4";
@@ -19,6 +20,7 @@ const Albri = () => {
             <div className="relative z-0">
                 <Hero />
             </div>
+            <Page />
             <Page2 />
             <Page3 />
             <Page4 />

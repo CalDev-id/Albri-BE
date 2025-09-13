@@ -1,47 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-// import { FaEdit, FaTrash } from "react-icons/fa";
 import { Link } from "@inertiajs/react";
 
-import DatePickerOne from "@/components/DatePickerOne";
-import SelectGroupTwo from "@/components/SelectGroupTwo";
-import { useEffect } from "react";
-
-import "flowbite/dist/flowbite.min.js";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
-
 const Laporan = () => {
+    const { paketPrivates } = usePage().props; // Dynamic pakets from backend
 
-    const{ data, setData, post, errors }=useForm({
+    const { data, setData, post, errors } = useForm({
         hari: "Senin",
         tanggal: "",
-        biaya_30: "",
-        biaya_35: "",
-        biaya_40: "",
-        biaya_45: "",
-        daftar: "",
-        modul: "",
-        kaos: "",
-        kas: "",
-        lainlain: "",
+        pakets: {}, // { paket_id: jumlah } - dynamic paket quantities
+        daftar: 0,
+        modul: 0,
+        kaos: 0,
+        kas: 0,
+        lainlain: 0,
     });
+
+    const [totalBiaya, setTotalBiaya] = useState(0);
+    const [totalPemasukan, setTotalPemasukan] = useState(0);
+
+    // Calculate totals whenever form data changes
+    useEffect(() => {
+        let biayaTotal = 0;
+
+        // Calculate total from dynamic pakets
+        if (paketPrivates && paketPrivates.length > 0) {
+            paketPrivates.forEach(paket => {
+                const jumlah = parseInt(data.pakets[paket.id]) || 0;
+                biayaTotal += jumlah * paket.harga;
+            });
+        }
+
+        const pemasukanTotal = biayaTotal +
+            (parseInt(data.daftar) || 0) +
+            (parseInt(data.modul) || 0) +
+            (parseInt(data.kaos) || 0) +
+            (parseInt(data.kas) || 0) +
+            (parseInt(data.lainlain) || 0);
+
+        setTotalBiaya(biayaTotal);
+        setTotalPemasukan(pemasukanTotal);
+    }, [data, paketPrivates]);
 
     const handlesubmit = (e) => {
         e.preventDefault();
         post("/admin/laporan/private/store");
     };
 
-    // useEffect(() => {
-    //     // Pastikan inisialisasi dijalankan setelah komponen dimuat
-    //     if (typeof window !== "undefined" && window.Datepicker) {
-    //         new window.Datepicker(document.getElementById("datepicker-format"));
-    //     }
-    // }, []);
+    const handleNumberChange = (field, value) => {
+        const numValue = parseInt(value) || 0;
+        setData(field, numValue);
+    };
+
+    const handleChangePaket = (id, value) => {
+        setData("pakets", { ...data.pakets, [id]: value });
+    };
+
     return (
         <DefaultLayout>
-          <div className="flex flex-col gap-9">
+            <div className="flex flex-col gap-9">
                 {/* <!-- Contact Form --> */}
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
@@ -57,13 +75,10 @@ const Laporan = () => {
                                         Hari
                                     </label>
                                     <select
-                                        className="select select-bordered w-full"
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         value={data.hari}
                                         onChange={(e) => setData("hari", e.target.value)}
                                     >
-                                        <option disabled selected>
-                                            Pilih Hari
-                                        </option>
                                         <option value="Senin">Senin</option>
                                         <option value="Selasa">Selasa</option>
                                         <option value="Rabu">Rabu</option>
@@ -72,174 +87,165 @@ const Laporan = () => {
                                         <option value="Sabtu">Sabtu</option>
                                         <option value="Minggu">Minggu</option>
                                     </select>
+                                    {errors.hari && <div className="text-red-500 text-sm mt-1">{errors.hari}</div>}
                                 </div>
                                 <div className="w-full">
                                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                         Tanggal
                                     </label>
                                     <input
-                    type="date"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    value={data.tanggal}
-                    onChange={(e) => setData("tanggal", e.target.value)}
-                    placeholder="Select date"
-                />
-                                </div>
-                            </div>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                       
-                                <div className="w-full  xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            30.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_30}
-                                            onChange={(e) => setData("biaya_30", e.target.value)}
-                                            placeholder="jumlah biaya"
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                    
-                                </div>
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            35.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_35}
-                                            onChange={(e) => setData("biaya_35", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-                                
-                            </div>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            40.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_40}
-                                            onChange={(e) => setData("biaya_40", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                            45.000
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={data.biaya_45}
-                                            onChange={(e) => setData("biaya_45", e.target.value)}
-                                            placeholder=""
-                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                        />
-                                    </div>
+                                        type="date"
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                        value={data.tanggal}
+                                        onChange={(e) => setData("tanggal", e.target.value)}
+                                        placeholder="Select date"
+                                    />
+                                    {errors.tanggal && <div className="text-red-500 text-sm mt-1">{errors.tanggal}</div>}
                                 </div>
                             </div>
 
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                            {/* Dynamic Paket Pricing Section */}
+                            <div className="mb-4.5">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    Paket Harga (Jumlah Siswa)
+                                </label>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    {paketPrivates && paketPrivates.map((paket) => (
+                                        <div key={paket.id}>
+                                            <label className="mb-2 block text-sm text-black dark:text-white">
+                                                {paket.nama_paket} - Rp {paket.harga.toLocaleString()}
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={data.pakets[paket.id] || ""}
+                                                onChange={(e) => handleChangePaket(paket.id, e.target.value)}
+                                                placeholder="Jumlah siswa"
+                                                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                            />
+                                            {errors[`pakets.${paket.id}`] && (
+                                                <div className="text-red-500 text-sm mt-1">
+                                                    {errors[`pakets.${paket.id}`]}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                {/* Total Biaya Display */}
+                                <div className="mt-3 rounded border border-stroke bg-gray-2 px-4 py-3 dark:border-strokedark dark:bg-meta-4">
+                                    <p className="text-sm font-medium text-black dark:text-white">
+                                        Total Biaya Paket: Rp {totalBiaya.toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Biaya Lainnya Section */}
+                            <div className="mb-4.5">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    Biaya Lainnya
+                                </label>
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-black dark:text-white">
                                             Pendaftaran
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
+                                            min="0"
                                             value={data.daftar}
-                                            onChange={(e) => setData("daftar", e.target.value)}
-                                            placeholder=""
+                                            onChange={(e) => handleNumberChange("daftar", e.target.value)}
+                                            placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
+                                        {errors.daftar && <div className="text-red-500 text-sm mt-1">{errors.daftar}</div>}
                                     </div>
-                                </div>
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-black dark:text-white">
                                             Modul
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
+                                            min="0"
                                             value={data.modul}
-                                            onChange={(e) => setData("modul", e.target.value)}
-                                            placeholder=""
+                                            onChange={(e) => handleNumberChange("modul", e.target.value)}
+                                            placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
+                                        {errors.modul && <div className="text-red-500 text-sm mt-1">{errors.modul}</div>}
                                     </div>
-                                </div>
-
-
-                            </div>
-
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-black dark:text-white">
                                             Kaos
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
+                                            min="0"
                                             value={data.kaos}
-                                            onChange={(e) => setData("kaos", e.target.value)}
-                                            placeholder=""
+                                            onChange={(e) => handleNumberChange("kaos", e.target.value)}
+                                            placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
+                                        {errors.kaos && <div className="text-red-500 text-sm mt-1">{errors.kaos}</div>}
                                     </div>
-                                </div>
-
-                                <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-black dark:text-white">
                                             Kas
                                         </label>
                                         <input
                                             type="number"
-
+                                            min="0"
                                             value={data.kas}
-                                            onChange={(e) => setData("kas", e.target.value)}
-                                            placeholder=""
+                                            onChange={(e) => handleNumberChange("kas", e.target.value)}
+                                            placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
+                                        {errors.kas && <div className="text-red-500 text-sm mt-1">{errors.kas}</div>}
                                     </div>
-                                </div>
-                            </div>
-                            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                            <div className="w-full xl:w-1/2">
-                                    <div className="mb-4.5">
-                                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-black dark:text-white">
                                             Lain Lain
                                         </label>
                                         <input
                                             type="number"
+                                            min="0"
                                             value={data.lainlain}
-                                            onChange={(e) => setData("lainlain", e.target.value)}
-                                            placeholder=""
+                                            onChange={(e) => handleNumberChange("lainlain", e.target.value)}
+                                            placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
+                                        {errors.lainlain && <div className="text-red-500 text-sm mt-1">{errors.lainlain}</div>}
                                     </div>
                                 </div>
                             </div>
 
-                            <button  type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
-                                Submit
-                            </button>
+                            {/* Total Pemasukan Display */}
+                            <div className="mb-4.5">
+                                <div className="rounded border border-stroke bg-primary/10 px-4 py-3 dark:border-strokedark dark:bg-primary/20">
+                                    <p className="text-lg font-semibold text-primary dark:text-white">
+                                        Total Pemasukan: Rp {totalPemasukan.toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Submit Button */}
+                            <div className="flex justify-end gap-3">
+                                <Link
+                                    href="/admin/laporan/private"
+                                    className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+                                >
+                                    Cancel
+                                </Link>
+                                <button
+                                    type="submit"
+                                    className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+                                >
+                                    Submit
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
-           
         </DefaultLayout>
     );
 };
