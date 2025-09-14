@@ -10,10 +10,12 @@ use App\Http\Controllers\MitraController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NewsEventController;
 
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PrivateController;
+use App\Http\Controllers\PublicNewsController;
 use Inertia\Inertia;
 
 Route::get('/login', function () {
@@ -282,6 +284,10 @@ Route::get('/', function () {
     return Inertia::render('Albri');
 });
 
+// Public News Events Routes
+Route::get('/berita-acara', [PublicNewsController::class, 'index'])->name('public.news-events.index');
+Route::get('/berita-acara/{slug}', [PublicNewsController::class, 'show'])->name('public.news-events.show');
+
 // Route::get('/users', function () {
 
 // Route::group(['middleware' => ['auth']], function () {
@@ -453,5 +459,17 @@ Route::get('/', function () {
 
 // Route::resource('cabangs', CabangController::class);
 
+/* -----------------------------------------
+                News Events Management (Admin Only)
+-------------------------------------------- */
+Route::prefix('admin/news-events')->middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/', [App\Http\Controllers\NewsEventController::class, 'index'])->name('admin.news-events.index');
+    Route::get('/create', [App\Http\Controllers\NewsEventController::class, 'create'])->name('admin.news-events.create');
+    Route::post('/', [App\Http\Controllers\NewsEventController::class, 'store'])->name('admin.news-events.store');
+    Route::get('/{newsEvent}', [App\Http\Controllers\NewsEventController::class, 'show'])->name('admin.news-events.show');
+    Route::get('/{newsEvent}/edit', [App\Http\Controllers\NewsEventController::class, 'edit'])->name('admin.news-events.edit');
+    Route::put('/{newsEvent}', [App\Http\Controllers\NewsEventController::class, 'update'])->name('admin.news-events.update');
+    Route::delete('/{newsEvent}', [App\Http\Controllers\NewsEventController::class, 'destroy'])->name('admin.news-events.destroy');
+});
 
 require __DIR__ . '/auth.php';

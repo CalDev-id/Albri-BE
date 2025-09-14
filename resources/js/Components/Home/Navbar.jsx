@@ -1,7 +1,7 @@
 import { Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 
-const Navbar = ({ method = "get", active }) => {
+const Navbar = ({ method = "get", active, forceBackground = false }) => {
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
@@ -23,7 +23,7 @@ const Navbar = ({ method = "get", active }) => {
     return (
         <div
             className={`w-full fixed z-[999999999] ${
-                isScrolled ? "bg-[#4bb0b2]" : "bg-transparent"
+                forceBackground || isScrolled ? "bg-[#4bb0b2]" : "bg-transparent"
             } transition duration-300 ease-in-out font-Geologica`} // Transisi yang halus saat bg berubah
         >
             <div className="md:container">
@@ -100,13 +100,26 @@ const Navbar = ({ method = "get", active }) => {
                                         href="/"
                                         method={method}
                                         className={
-                                            active === "national"
+                                            active === "guru"
                                                 ? "text-[#EB9928] active:bg-[#FFCE2E]"
                                                 : "active:bg-[#FFCE2E]"
                                         }
                                         as="button"
                                     >
                                         Gallery
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/berita-acara"
+                                        className={
+                                            active === "berita-acara"
+                                                ? "text-[#EB9928] active:bg-[#FFCE2E]"
+                                                : "active:bg-[#FFCE2E]"
+                                        }
+                                        as="button"
+                                    >
+                                        Berita Acara
                                     </Link>
                                 </li>
                             </ul>
@@ -173,6 +186,19 @@ const Navbar = ({ method = "get", active }) => {
                                         as="button"
                                     >
                                         Gallery
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/berita-acara"
+                                        className={
+                                            active === "berita-acara"
+                                                ? "border-b-2 border-white rounded-none text-white font-bold inline-block pb-2"
+                                                : "border-b-2 border-transparent rounded-none text-white inline-block pb-2"
+                                        }
+                                        as="button"
+                                    >
+                                        Berita Acara
                                     </Link>
                                 </li>
                                 {/* <li>
