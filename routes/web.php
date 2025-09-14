@@ -472,4 +472,14 @@ Route::prefix('admin/news-events')->middleware(['auth', 'role:Admin'])->group(fu
     Route::delete('/{newsEvent}', [App\Http\Controllers\NewsEventController::class, 'destroy'])->name('admin.news-events.destroy');
 });
 
+/* -----------------------------------------
+                Gaji Guru Management
+-------------------------------------------- */
+Route::prefix('gaji')->middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/guru', [App\Http\Controllers\GajiGuruController::class, 'index'])->name('gaji.guru.index');
+    Route::get('/guru/weekly', [App\Http\Controllers\GajiGuruController::class, 'weeklyReport'])->name('gaji.guru.weekly');
+    Route::get('/guru/export-excel', [App\Http\Controllers\GajiGuruController::class, 'exportExcel'])->name('gaji.guru.export-excel');
+    Route::get('/guru/export-pdf', [App\Http\Controllers\GajiGuruController::class, 'exportPdf'])->name('gaji.guru.export-pdf');
+});
+
 require __DIR__ . '/auth.php';
