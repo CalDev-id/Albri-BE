@@ -79,7 +79,7 @@ class GajiGuruController extends Controller
                         $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
                         foreach ($cabangGurus as $cabangGuru) {
                             $details[] = [
-                                'nama' => $cabangGuru->nama_guru,
+                                'nama' => $cabangGuru->guru_nama,
                                 'gaji' => $cabangGuru->gaji,
                                 'source' => 'Cabang'
                             ];
@@ -95,7 +95,7 @@ class GajiGuruController extends Controller
                         $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
                         foreach ($mitraGurus as $mitraGuru) {
                             $details[] = [
-                                'nama' => $mitraGuru->nama_guru,
+                                'nama' => $mitraGuru->mitra_nama,
                                 'gaji' => $mitraGuru->gaji,
                                 'source' => 'Mitra'
                             ];
@@ -111,7 +111,7 @@ class GajiGuruController extends Controller
                         if ($record->gurus) {
                             foreach ($record->gurus as $guruData) {
                                 $details[] = [
-                                    'nama' => $guruData['nama_guru'] ?? 'N/A',
+                                    'nama' => $guruData['guru_id'] ?? 'N/A',
                                     'gaji' => $guruData['gaji'] ?? 0,
                                     'source' => 'Private'
                                 ];
@@ -130,7 +130,7 @@ class GajiGuruController extends Controller
                         $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
                         foreach ($cabangGurus as $cabangGuru) {
                             $details[] = [
-                                'nama' => $cabangGuru->nama_guru,
+                                'nama' => $cabangGuru->guru_nama,
                                 'gaji' => $cabangGuru->gaji,
                                 'source' => 'Cabang'
                             ];
@@ -148,7 +148,7 @@ class GajiGuruController extends Controller
                         $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
                         foreach ($mitraGurus as $mitraGuru) {
                             $details[] = [
-                                'nama' => $mitraGuru->nama_guru,
+                                'nama' => $mitraGuru->mitra_nama,
                                 'gaji' => $mitraGuru->gaji,
                                 'source' => 'Mitra'
                             ];
@@ -166,7 +166,7 @@ class GajiGuruController extends Controller
                         if ($record->gurus) {
                             foreach ($record->gurus as $guruData) {
                                 $details[] = [
-                                    'nama' => $guruData['nama_guru'] ?? 'N/A',
+                                    'nama' => $guruData['guru_id'] ?? 'N/A',
                                     'gaji' => $guruData['gaji'] ?? 0,
                                     'source' => 'Private'
                                 ];

@@ -80,7 +80,7 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                         {gajiData.details.map((detail, index) => (
                             <div key={index} className="flex justify-between items-center">
                                 <span className="text-gray-600 dark:text-gray-300">
-                                    {detail.nama} ({detail.source})
+                                    {detail.nama}
                                 </span>
                                 <span className="font-medium text-black dark:text-white">
                                     {formatCurrency(detail.gaji)}
