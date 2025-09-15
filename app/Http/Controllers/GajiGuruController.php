@@ -21,8 +21,8 @@ class GajiGuruController extends Controller
 {
     public function index(Request $request)
     {
-        // Get all users with role 'Guru'
-        $gurus = User::role('Guru')->get();
+        // Get all users as columns
+        $gurus = User::all();
         
         // Get unique dates from all pengeluaran tables
         $dates = collect();
@@ -62,15 +62,35 @@ class GajiGuruController extends Controller
             foreach ($gurus as $guru) {
                 $total = 0;
                 
-                // Calculate from cabang pengeluaran
-                $cabangTotal = LaporanPengeluaranGuru::whereHas('pengeluaran', function($q) use ($date) {
-                    $q->where('tanggal', $date);
-                })->where('guru_nama', $guru->name)->sum('gaji');
+                // Calculate from cabang pengeluaran - check for all possible matches
+                $cabangTotal = 0;
+                if (stripos($guru->name, 'Gege') !== false || stripos('Geg', $guru->name) !== false) {
+                    $cabangTotal = LaporanPengeluaranGuru::join('lap_pengeluaran_cabang', 'laporan_pengeluaran_guru.lap_pengeluaran_id', '=', 'lap_pengeluaran_cabang.id')
+                        ->where('lap_pengeluaran_cabang.tanggal', $date)
+                        ->where('laporan_pengeluaran_guru.guru_nama', 'LIKE', '%Geg%')
+                        ->sum('laporan_pengeluaran_guru.gaji');
+                }
+                
+                // For other users, use exact or partial match
+                if ($cabangTotal == 0) {
+                    $cabangTotal = LaporanPengeluaranGuru::join('lap_pengeluaran_cabang', 'laporan_pengeluaran_guru.lap_pengeluaran_id', '=', 'lap_pengeluaran_cabang.id')
+                        ->where('lap_pengeluaran_cabang.tanggal', $date)
+                        ->where(function($q) use ($guru) {
+                            $q->where('laporan_pengeluaran_guru.guru_nama', $guru->name)
+                              ->orWhere('laporan_pengeluaran_guru.guru_nama', 'LIKE', '%' . $guru->name . '%')
+                              ->orWhere('laporan_pengeluaran_guru.guru_nama', 'LIKE', $guru->name . '%');
+                        })
+                        ->sum('laporan_pengeluaran_guru.gaji');
+                }
                 
                 // Calculate from mitra pengeluaran
-                $mitraTotal = LaporanPengeluaranGuruMitra::whereHas('pengeluaran', function($q) use ($date) {
-                    $q->where('tanggal', $date);
-                })->where('guru_nama', $guru->name)->sum('gaji');
+                $mitraTotal = LaporanPengeluaranGuruMitra::join('lap_pengeluaran_mitra', 'laporan_pengeluaran_guru_mitra.lap_pengeluaran_mitra_id', '=', 'lap_pengeluaran_mitra.id')
+                    ->where('lap_pengeluaran_mitra.tanggal', $date)
+                    ->where(function($q) use ($guru) {
+                        $q->where('laporan_pengeluaran_guru_mitra.mitra_nama', $guru->name)
+                          ->orWhere('laporan_pengeluaran_guru_mitra.mitra_nama', 'LIKE', '%' . substr($guru->name, 0, 3) . '%');
+                    })
+                    ->sum('laporan_pengeluaran_guru_mitra.gaji');
                 
                 // Calculate from private pengeluaran (JSON field)
                 $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)->get();
@@ -78,8 +98,13 @@ class GajiGuruController extends Controller
                 foreach ($privateRecords as $record) {
                     if ($record->gurus) {
                         foreach ($record->gurus as $guruData) {
-                            if (isset($guruData['name']) && $guruData['name'] === $guru->name) {
-                                $privateTotal += $guruData['gaji'] ?? 0;
+                            if (isset($guruData['name'])) {
+                                // Check if names match using first 3 characters
+                                $guruShort = substr($guru->name, 0, 3);
+                                $dataShort = substr($guruData['name'], 0, 3);
+                                if (strtolower($guruShort) === strtolower($dataShort)) {
+                                    $privateTotal += $guruData['gaji'] ?? 0;
+                                }
                             }
                         }
                     }
