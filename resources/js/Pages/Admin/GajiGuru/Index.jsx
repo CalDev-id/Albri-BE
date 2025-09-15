@@ -3,7 +3,7 @@ import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt } from "react-icons/fa";
 
-const GajiGuruIndex = ({ gajiGuru, filters }) => {
+const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
     const [search, setSearch] = useState(filters.search || "");
 
     const handleSearch = (e) => {
@@ -112,134 +112,34 @@ const GajiGuruIndex = ({ gajiGuru, filters }) => {
                                     <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
                                         Tanggal
                                     </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Gina
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Amel
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Lia
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Siti
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Nurul
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Hikma
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Safa
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Khoir
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Sarah
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Indri
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Aminah
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Rina
-                                    </th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Action
-                                    </th>
+                                    {gurus && gurus.map((guru) => (
+                                        <th key={guru.id} className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
+                                            {guru.name}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {gajiGuru.data.length > 0 ? (
-                                    gajiGuru.data.map((item, index) => (
-                                        <tr key={item.id} className="hover:bg-gray-1 dark:hover:bg-meta-4">
+                                {dates && dates.length > 0 ? (
+                                    dates.map((date, index) => (
+                                        <tr key={index} className="hover:bg-gray-1 dark:hover:bg-meta-4">
                                             <td className="border border-stroke py-5 px-4 dark:border-strokedark">
                                                 <div className="font-medium text-black dark:text-white">
-                                                    {item.hari}
-                                                </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {formatDate(item.tanggal)}
+                                                    {formatDate(date)}
                                                 </div>
                                             </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.gina)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.amel)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.lia)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.siti)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.nurul)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.hikma)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.safa)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.khoir)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.sarah)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.indri)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.aminah)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <span className="text-black dark:text-white">
-                                                    {formatCurrency(item.rina)}
-                                                </span>
-                                            </td>
-                                            <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded">
-                                                        <FaEdit size={12} />
-                                                    </button>
-                                                    <button className="bg-red-500 hover:bg-red-600 text-white p-2 rounded">
-                                                        <FaTrash size={12} />
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            {gurus && gurus.map((guru) => (
+                                                <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
+                                                    <span className="text-black dark:text-white">
+                                                        {formatCurrency(data[date] && data[date][guru.id] ? data[date][guru.id] : 0)}
+                                                    </span>
+                                                </td>
+                                            ))}
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="14" className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
+                                        <td colSpan={gurus ? gurus.length + 1 : 1} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
                                             <div className="text-gray-500 dark:text-gray-400">
                                                 Tidak ada data gaji guru yang ditemukan
                                             </div>
@@ -249,30 +149,6 @@ const GajiGuruIndex = ({ gajiGuru, filters }) => {
                             </tbody>
                         </table>
                     </div>
-
-                    {/* Pagination */}
-                    {gajiGuru.last_page > 1 && (
-                        <div className="flex justify-between items-center mt-6">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                Menampilkan {gajiGuru.from} sampai {gajiGuru.to} dari {gajiGuru.total} data
-                            </div>
-                            <div className="flex gap-2">
-                                {gajiGuru.links.map((link, index) => (
-                                    <Link
-                                        key={index}
-                                        href={link.url || "#"}
-                                        className={`px-3 py-2 rounded border ${
-                                            link.active
-                                                ? "bg-primary text-white border-primary"
-                                                : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-                                        } ${!link.url ? "opacity-50 cursor-not-allowed" : ""}`}
-                                        preserveState
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </DefaultLayout>

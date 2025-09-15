@@ -5,25 +5,95 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\GajiGuru;
+use App\Models\User;
+use App\Models\LaporanPengeluaranGuru;
+use App\Models\LaporanPengeluaranGuruMitra;
+use App\Models\LapPengeluaranPrivate;
+use App\Models\LapPengeluaranCabang;
+use App\Models\LapPengeluaranMitra;
 use App\Exports\GajiGuruExport;
 use App\Exports\GajiGuruMonthlyExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class GajiGuruController extends Controller
 {
     public function index(Request $request)
     {
-        $gajiGuru = GajiGuru::when($request->search, function ($query, $search) {
-                return $query->where('tanggal', 'like', "%{$search}%")
-                    ->orWhere('nama_guru', 'like', "%{$search}%")
-                    ->orWhere('hari', 'like', "%{$search}%");
-            })
-            ->orderBy('tanggal', 'desc')
-            ->paginate(15);
-
+        // Get all users with role 'Guru'
+        $gurus = User::role('Guru')->get();
+        
+        // Get unique dates from all pengeluaran tables
+        $dates = collect();
+        
+        // Get dates from cabang pengeluaran
+        $cabangDates = LapPengeluaranCabang::select('tanggal')->distinct()->get();
+        foreach ($cabangDates as $date) {
+            $dates->push($date->tanggal);
+        }
+        
+        // Get dates from mitra pengeluaran  
+        $mitraDates = LapPengeluaranMitra::select('tanggal')->distinct()->get();
+        foreach ($mitraDates as $date) {
+            $dates->push($date->tanggal);
+        }
+        
+        // Get dates from private pengeluaran
+        $privateDates = LapPengeluaranPrivate::select('tanggal')->distinct()->get();
+        foreach ($privateDates as $date) {
+            $dates->push($date->tanggal);
+        }
+        
+        // Remove duplicates and sort
+        $uniqueDates = $dates->unique()->sort()->values();
+        
+        // Initialize data array
+        $data = [];
+        foreach ($uniqueDates as $date) {
+            $data[$date] = [];
+            foreach ($gurus as $guru) {
+                $data[$date][$guru->id] = 0; // Default value
+            }
+        }
+        
+        // Calculate totals for each guru on each date
+        foreach ($uniqueDates as $date) {
+            foreach ($gurus as $guru) {
+                $total = 0;
+                
+                // Calculate from cabang pengeluaran
+                $cabangTotal = LaporanPengeluaranGuru::whereHas('pengeluaran', function($q) use ($date) {
+                    $q->where('tanggal', $date);
+                })->where('guru_nama', $guru->name)->sum('gaji');
+                
+                // Calculate from mitra pengeluaran
+                $mitraTotal = LaporanPengeluaranGuruMitra::whereHas('pengeluaran', function($q) use ($date) {
+                    $q->where('tanggal', $date);
+                })->where('guru_nama', $guru->name)->sum('gaji');
+                
+                // Calculate from private pengeluaran (JSON field)
+                $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)->get();
+                $privateTotal = 0;
+                foreach ($privateRecords as $record) {
+                    if ($record->gurus) {
+                        foreach ($record->gurus as $guruData) {
+                            if (isset($guruData['name']) && $guruData['name'] === $guru->name) {
+                                $privateTotal += $guruData['gaji'] ?? 0;
+                            }
+                        }
+                    }
+                }
+                
+                $total = $cabangTotal + $mitraTotal + $privateTotal;
+                $data[$date][$guru->id] = $total;
+            }
+        }
+        
         return Inertia::render('Admin/GajiGuru/Index', [
-            'gajiGuru' => $gajiGuru,
+            'dates' => $uniqueDates->toArray(),
+            'gurus' => $gurus,
+            'data' => $data,
             'filters' => $request->only(['search'])
         ]);
     }

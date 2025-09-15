@@ -121,34 +121,7 @@ const NewsEventsShow = ({ newsEvent }) => {
                 className="text-black dark:text-white leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: newsEvent.content }}
             />
-        </div>                        {/* SEO Info */}
-                        {newsEvent.meta_data && Object.keys(newsEvent.meta_data).length > 0 && (
-                            <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-                                <h3 className="text-lg font-semibold text-black dark:text-white mb-4">
-                                    Informasi SEO
-                                </h3>
-                                <div className="grid grid-cols-1 gap-4">
-                                    {newsEvent.meta_data.meta_title && (
-                                        <div>
-                                            <span className="font-medium text-gray-700 dark:text-gray-300">Meta Title:</span>
-                                            <p className="text-gray-600 dark:text-gray-400 mt-1">{newsEvent.meta_data.meta_title}</p>
-                                        </div>
-                                    )}
-                                    {newsEvent.meta_data.meta_description && (
-                                        <div>
-                                            <span className="font-medium text-gray-700 dark:text-gray-300">Meta Description:</span>
-                                            <p className="text-gray-600 dark:text-gray-400 mt-1">{newsEvent.meta_data.meta_description}</p>
-                                        </div>
-                                    )}
-                                    {newsEvent.meta_data.tags && (
-                                        <div>
-                                            <span className="font-medium text-gray-700 dark:text-gray-300">Tags:</span>
-                                            <p className="text-gray-600 dark:text-gray-400 mt-1">{newsEvent.meta_data.tags}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+        </div>
                     </div>
                 </div>
             </div>

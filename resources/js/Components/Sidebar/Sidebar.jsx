@@ -451,7 +451,7 @@ const menuGroupsAdmin = [
                         />
                     </svg>
                 ),
-                label: "Berita Acara",
+                label: "Postingan",
                 route: "/admin/news-events",
             },
         ],

@@ -71,7 +71,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                             <FaArrowLeft className="text-gray-500 hover:text-gray-700 cursor-pointer" />
                         </Link>
                         <h3 className="font-semibold text-black dark:text-white">
-                            Edit Berita Acara
+                            Edit Postingan
                         </h3>
                     </div>
                     <div className="flex gap-2">
@@ -95,11 +95,11 @@ const NewsEventsEdit = ({ newsEvent }) => {
                                     {/* Title */}
                                     <div>
                                         <label className="mb-2.5 block text-black dark:text-white font-medium">
-                                            Judul Berita Acara
+                                            Judul Postingan
                                         </label>
                                         <input
                                             type="text"
-                                            placeholder="Masukkan judul berita acara..."
+                                            placeholder="Masukkan judul postingan..."
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                                             value={data.title}
                                             onChange={handleTitleChange}
@@ -132,7 +132,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                                         </label>
                                         <textarea
                                             rows={3}
-                                            placeholder="Ringkasan singkat berita acara..."
+                                            placeholder="Ringkasan singkat postingan..."
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                                             value={data.excerpt}
                                             onChange={(e) => setData("excerpt", e.target.value)}
@@ -148,7 +148,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                                         <TextEditor
                                             value={data.content}
                                             onChange={(value) => setData("content", value)}
-                                            placeholder="Tulis konten berita acara di sini..."
+                                            placeholder="Tulis konten postingan di sini..."
                                         />
                                         {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
                                         <p className="text-xs text-gray-500 mt-1">
@@ -240,51 +240,6 @@ const NewsEventsEdit = ({ newsEvent }) => {
                                         </p>
                                         {errors.featured_image && <p className="text-red-500 text-sm mt-1">{errors.featured_image}</p>}
                                     </div>
-
-                                    {/* SEO Settings */}
-                                    <div className="rounded-sm border border-stroke bg-white p-4 shadow-default dark:border-strokedark dark:bg-boxdark">
-                                        <h4 className="mb-4 text-xl font-semibold text-black dark:text-white">
-                                            SEO
-                                        </h4>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="mb-2.5 block text-black dark:text-white font-medium">
-                                                    Meta Title
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Meta title untuk SEO..."
-                                                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
-                                                    value={data.meta_data?.meta_title || ""}
-                                                    onChange={(e) => handleMetaDataChange("meta_title", e.target.value)}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="mb-2.5 block text-black dark:text-white font-medium">
-                                                    Meta Description
-                                                </label>
-                                                <textarea
-                                                    rows={3}
-                                                    placeholder="Meta description untuk SEO..."
-                                                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
-                                                    value={data.meta_data?.meta_description || ""}
-                                                    onChange={(e) => handleMetaDataChange("meta_description", e.target.value)}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="mb-2.5 block text-black dark:text-white font-medium">
-                                                    Tags
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Tag1, Tag2, Tag3..."
-                                                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
-                                                    value={data.meta_data?.tags || ""}
-                                                    onChange={(e) => handleMetaDataChange("tags", e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -295,7 +250,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                         <div className="max-w-4xl mx-auto">
                             <div className="mb-6">
                                 <h1 className="text-3xl font-bold text-black dark:text-white mb-4">
-                                    {data.title || "Judul Berita Acara"}
+                                    {data.title || "Judul Postingan"}
                                 </h1>
                                 {data.excerpt && (
                                     <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
@@ -323,7 +278,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                             <div className="prose max-w-none">
                                 <div 
                                     className="text-black dark:text-white leading-relaxed"
-                                    dangerouslySetInnerHTML={{ __html: data.content || "Konten berita acara akan ditampilkan di sini..." }}
+                                    dangerouslySetInnerHTML={{ __html: data.content || "Konten postingan akan ditampilkan di sini..." }}
                                 />
                             </div>
                         </div>
