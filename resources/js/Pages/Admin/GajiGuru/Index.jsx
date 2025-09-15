@@ -1,10 +1,19 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt } from "react-icons/fa";
+import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
     const [search, setSearch] = useState(filters.search || "");
+    const [showDetails, setShowDetails] = useState({});
+
+    const toggleDetails = (date, guruId) => {
+        const key = `${date}-${guruId}`;
+        setShowDetails(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -21,7 +30,12 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
 
     const formatCurrency = (amount) => {
         if (!amount || amount === 0) return "-";
-        return new Intl.NumberFormat("id-ID").format(amount);
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
     };
 
     const formatDate = (dateString) => {
@@ -30,6 +44,61 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
             month: "2-digit",
             year: "numeric",
         });
+    };
+
+    const renderGajiCell = (date, guru) => {
+        const gajiData = data[date] && data[date][guru.id] ? data[date][guru.id] : { details: [], total: 0 };
+        const key = `${date}-${guru.id}`;
+        const isDetailsShown = showDetails[key];
+        
+        if (gajiData.total === 0) {
+            return (
+                <span className="text-gray-400 dark:text-gray-500">
+                    -
+                </span>
+            );
+        }
+        
+        return (
+            <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                    <span className="font-medium text-black dark:text-white">
+                        {formatCurrency(gajiData.total)}
+                    </span>
+                    {gajiData.details && gajiData.details.length > 0 && (
+                        <button
+                            onClick={() => toggleDetails(date, guru.id)}
+                            className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                            {isDetailsShown ? <FaEyeSlash size={12} /> : <FaEye size={12} />}
+                        </button>
+                    )}
+                </div>
+                
+                {isDetailsShown && gajiData.details && gajiData.details.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs space-y-1">
+                        {gajiData.details.map((detail, index) => (
+                            <div key={index} className="flex justify-between items-center">
+                                <span className="text-gray-600 dark:text-gray-300">
+                                    {detail.nama} ({detail.source})
+                                </span>
+                                <span className="font-medium text-black dark:text-white">
+                                    {formatCurrency(detail.gaji)}
+                                </span>
+                            </div>
+                        ))}
+                        <div className="border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
+                            <div className="flex justify-between items-center font-medium">
+                                <span className="text-gray-800 dark:text-gray-200">Total:</span>
+                                <span className="text-black dark:text-white">
+                                    {formatCurrency(gajiData.total)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -130,9 +199,7 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                                             </td>
                                             {gurus && gurus.map((guru) => (
                                                 <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                    <span className="text-black dark:text-white">
-                                                        {formatCurrency(data[date] && data[date][guru.id] ? data[date][guru.id] : 0)}
-                                                    </span>
+                                                    {renderGajiCell(date, guru)}
                                                 </td>
                                             ))}
                                         </tr>

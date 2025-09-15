@@ -53,13 +53,17 @@ class GajiGuruController extends Controller
         foreach ($uniqueDates as $date) {
             $data[$date] = [];
             foreach ($gurus as $guru) {
-                $data[$date][$guru->id] = 0; // Default value
+                $data[$date][$guru->id] = [
+                    'details' => [],
+                    'total' => 0
+                ]; // Default value
             }
         }
         
         // Calculate totals for each guru on each date
         foreach ($uniqueDates as $date) {
             foreach ($gurus as $guru) {
+                $details = [];
                 $total = 0;
                 
                 // Get user roles
@@ -67,79 +71,115 @@ class GajiGuruController extends Controller
                 
                 // Check if user is Admin (can access all three modules)
                 if (in_array('Admin', $userRoles)) {
-                    $cabangTotal = 0;
-                    $mitraTotal = 0;
-                    $privateTotal = 0;
-                    
-                    // Calculate from cabang - sum all gaji from reports created by this user
+                    // Calculate from cabang - get detail gaji from reports created by this user
                     $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
                         ->where('created_by', $guru->id)
                         ->get();
                     foreach ($cabangReports as $report) {
-                        $cabangTotal += LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)
-                            ->sum('gaji');
-                    }
-                    
-                    // Calculate from mitra - sum all gaji from reports created by this user
-                    $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
-                        ->where('created_by', $guru->id)
-                        ->get();
-                    foreach ($mitraReports as $report) {
-                        $mitraTotal += LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)
-                            ->sum('gaji');
-                    }
-                    
-                    // Calculate from private - sum all gaji from reports created by this user
-                    $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
-                        ->where('created_by', $guru->id)
-                        ->get();
-                    foreach ($privateRecords as $record) {
-                        if ($record->gurus) {
-                            foreach ($record->gurus as $guruData) {
-                                $privateTotal += $guruData['gaji'] ?? 0;
-                            }
+                        $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                        foreach ($cabangGurus as $cabangGuru) {
+                            $details[] = [
+                                'nama' => $cabangGuru->nama_guru,
+                                'gaji' => $cabangGuru->gaji,
+                                'source' => 'Cabang'
+                            ];
+                            $total += $cabangGuru->gaji;
                         }
                     }
                     
-                    $total = $cabangTotal + $mitraTotal + $privateTotal;
-                }
-                // Check if user has Guru role (only cabang)
-                elseif (in_array('Guru', $userRoles)) {
-                    // Sum all gaji from cabang reports created by this user
-                    $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
-                        ->where('created_by', $guru->id)
-                        ->get();
-                    foreach ($cabangReports as $report) {
-                        $total += LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)
-                            ->sum('gaji');
-                    }
-                }
-                // Check if user has Mitra role (only mitra)
-                elseif (in_array('Mitra', $userRoles)) {
-                    // Sum all gaji from mitra reports created by this user
+                    // Calculate from mitra - get detail gaji from reports created by this user
                     $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
                         ->where('created_by', $guru->id)
                         ->get();
                     foreach ($mitraReports as $report) {
-                        $total += LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)
-                            ->sum('gaji');
+                        $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                        foreach ($mitraGurus as $mitraGuru) {
+                            $details[] = [
+                                'nama' => $mitraGuru->nama_guru,
+                                'gaji' => $mitraGuru->gaji,
+                                'source' => 'Mitra'
+                            ];
+                            $total += $mitraGuru->gaji;
+                        }
                     }
-                }
-                // Check if user has Private role (only private)
-                elseif (in_array('Private', $userRoles)) {
-                    // Sum all gaji from private reports created by this user
+                    
+                    // Calculate from private - get detail gaji from reports created by this user
                     $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
                         ->where('created_by', $guru->id)
                         ->get();
                     foreach ($privateRecords as $record) {
                         if ($record->gurus) {
                             foreach ($record->gurus as $guruData) {
+                                $details[] = [
+                                    'nama' => $guruData['nama_guru'] ?? 'N/A',
+                                    'gaji' => $guruData['gaji'] ?? 0,
+                                    'source' => 'Private'
+                                ];
                                 $total += $guruData['gaji'] ?? 0;
                             }
                         }
                     }
                 }
-                $data[$date][$guru->id] = $total;
+                // Check if user has Guru role (only cabang)
+                elseif (in_array('Guru', $userRoles)) {
+                    // Get detail gaji from cabang reports created by this user
+                    $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($cabangReports as $report) {
+                        $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                        foreach ($cabangGurus as $cabangGuru) {
+                            $details[] = [
+                                'nama' => $cabangGuru->nama_guru,
+                                'gaji' => $cabangGuru->gaji,
+                                'source' => 'Cabang'
+                            ];
+                            $total += $cabangGuru->gaji;
+                        }
+                    }
+                }
+                // Check if user has Mitra role (only mitra)
+                elseif (in_array('Mitra', $userRoles)) {
+                    // Get detail gaji from mitra reports created by this user
+                    $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($mitraReports as $report) {
+                        $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                        foreach ($mitraGurus as $mitraGuru) {
+                            $details[] = [
+                                'nama' => $mitraGuru->nama_guru,
+                                'gaji' => $mitraGuru->gaji,
+                                'source' => 'Mitra'
+                            ];
+                            $total += $mitraGuru->gaji;
+                        }
+                    }
+                }
+                // Check if user has Private role (only private)
+                elseif (in_array('Private', $userRoles)) {
+                    // Get detail gaji from private reports created by this user
+                    $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($privateRecords as $record) {
+                        if ($record->gurus) {
+                            foreach ($record->gurus as $guruData) {
+                                $details[] = [
+                                    'nama' => $guruData['nama_guru'] ?? 'N/A',
+                                    'gaji' => $guruData['gaji'] ?? 0,
+                                    'source' => 'Private'
+                                ];
+                                $total += $guruData['gaji'] ?? 0;
+                            }
+                        }
+                    }
+                }
+                
+                $data[$date][$guru->id] = [
+                    'details' => $details,
+                    'total' => $total
+                ];
             }
         }
         
