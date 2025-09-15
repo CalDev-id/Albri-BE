@@ -478,8 +478,11 @@ Route::prefix('admin/news-events')->middleware(['auth', 'role:Admin'])->group(fu
 Route::prefix('gaji')->middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/guru', [App\Http\Controllers\GajiGuruController::class, 'index'])->name('gaji.guru.index');
     Route::get('/guru/weekly', [App\Http\Controllers\GajiGuruController::class, 'weeklyReport'])->name('gaji.guru.weekly');
+    Route::get('/guru/monthly', [App\Http\Controllers\GajiGuruController::class, 'monthlyReport'])->name('gaji.guru.monthly');
     Route::get('/guru/export-excel', [App\Http\Controllers\GajiGuruController::class, 'exportExcel'])->name('gaji.guru.export-excel');
     Route::get('/guru/export-pdf', [App\Http\Controllers\GajiGuruController::class, 'exportPdf'])->name('gaji.guru.export-pdf');
+    Route::get('/guru/monthly/export/excel', [App\Http\Controllers\GajiGuruController::class, 'exportMonthlyExcel'])->name('gaji.guru.monthly.export.excel');
+    Route::get('/guru/monthly/export/pdf', [App\Http\Controllers\GajiGuruController::class, 'exportMonthlyPdf'])->name('gaji.guru.monthly.export.pdf');
 });
 
 require __DIR__ . '/auth.php';

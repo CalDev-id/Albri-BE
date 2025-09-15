@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek } from "react-icons/fa";
+import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt } from "react-icons/fa";
 
 const GajiGuruIndex = ({ gajiGuru, filters }) => {
     const [search, setSearch] = useState(filters.search || "");
@@ -45,13 +45,21 @@ const GajiGuruIndex = ({ gajiGuru, filters }) => {
                         </h3>
                         
                         <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Weekly Report Button */}
+                            {/* Report Buttons */}
                             <Link
                                 href="/gaji/guru/weekly"
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
                             >
                                 <FaCalendarWeek size={16} />
                                 Laporan Mingguan
+                            </Link>
+                            
+                            <Link
+                                href="/gaji/guru/monthly"
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
+                            >
+                                <FaCalendarAlt size={16} />
+                                Laporan Bulanan
                             </Link>
                             
                             {/* Export Buttons */}

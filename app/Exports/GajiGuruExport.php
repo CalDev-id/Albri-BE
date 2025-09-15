@@ -33,6 +33,9 @@ class GajiGuruExport implements FromCollection, WithHeadings, WithMapping, WithS
             ->when(isset($this->filters['week_end']) && $this->filters['week_end'], function ($query) {
                 return $query->whereDate('tanggal', '<=', $this->filters['week_end']);
             })
+            ->when(isset($this->filters['year']) && $this->filters['year'], function ($query) {
+                return $query->whereYear('tanggal', $this->filters['year']);
+            })
             ->orderBy('tanggal', 'desc')
             ->get();
     }
