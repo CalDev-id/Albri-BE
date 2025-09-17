@@ -23,31 +23,31 @@ class GajiGuruController extends Controller
     {
         // Get all users as columns
         $gurus = User::all();
-        
+
         // Get unique dates from all pengeluaran tables
         $dates = collect();
-        
+
         // Get dates from cabang pengeluaran
         $cabangDates = LapPengeluaranCabang::select('tanggal')->distinct()->get();
         foreach ($cabangDates as $date) {
             $dates->push($date->tanggal);
         }
-        
+
         // Get dates from mitra pengeluaran  
         $mitraDates = LapPengeluaranMitra::select('tanggal')->distinct()->get();
         foreach ($mitraDates as $date) {
             $dates->push($date->tanggal);
         }
-        
+
         // Get dates from private pengeluaran
         $privateDates = LapPengeluaranPrivate::select('tanggal')->distinct()->get();
         foreach ($privateDates as $date) {
             $dates->push($date->tanggal);
         }
-        
+
         // Remove duplicates and sort
         $uniqueDates = $dates->unique()->sort()->values();
-        
+
         // Initialize data array
         $data = [];
         foreach ($uniqueDates as $date) {
@@ -59,16 +59,16 @@ class GajiGuruController extends Controller
                 ]; // Default value
             }
         }
-        
+
         // Calculate totals for each guru on each date
         foreach ($uniqueDates as $date) {
             foreach ($gurus as $guru) {
                 $details = [];
                 $total = 0;
-                
+
                 // Get user roles
                 $userRoles = $guru->getRoleNames()->toArray();
-                
+
                 // Check if user is Admin (can access all three modules)
                 if (in_array('Admin', $userRoles)) {
                     // Calculate from cabang - get detail gaji from reports created by this user
@@ -86,7 +86,7 @@ class GajiGuruController extends Controller
                             $total += $cabangGuru->gaji;
                         }
                     }
-                    
+
                     // Calculate from mitra - get detail gaji from reports created by this user
                     $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
                         ->where('created_by', $guru->id)
@@ -102,7 +102,7 @@ class GajiGuruController extends Controller
                             $total += $mitraGuru->gaji;
                         }
                     }
-                    
+
                     // Calculate from private - get detail gaji from reports created by this user
                     $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
                         ->where('created_by', $guru->id)
@@ -175,14 +175,14 @@ class GajiGuruController extends Controller
                         }
                     }
                 }
-                
+
                 $data[$date][$guru->id] = [
                     'details' => $details,
                     'total' => $total
                 ];
             }
         }
-        
+
         return Inertia::render('Admin/GajiGuru/Index', [
             'dates' => $uniqueDates->toArray(),
             'gurus' => $gurus,
@@ -227,7 +227,7 @@ class GajiGuruController extends Controller
             })
             ->orderBy('tanggal', 'asc')
             ->get()
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return $item->tanggal->format('m'); // Group by month
             });
 
@@ -236,7 +236,7 @@ class GajiGuruController extends Controller
         for ($month = 1; $month <= 12; $month++) {
             $monthKey = sprintf('%02d', $month);
             $monthData = $gajiGuru->get($monthKey, collect());
-            
+
             $monthlySummary[$month] = [
                 'month' => $month,
                 'month_name' => \Carbon\Carbon::create()->month($month)->locale('id')->monthName,
@@ -269,82 +269,293 @@ class GajiGuruController extends Controller
     public function exportExcel(Request $request)
     {
         $filters = $request->only(['search', 'start_date', 'end_date', 'week_start', 'week_end', 'year']);
-        
+
         return Excel::download(new GajiGuruExport($filters), 'gaji-guru-' . date('Y-m-d') . '.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
-        $query = GajiGuru::query();
-        
-        // Apply filters if provided
-        if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('tanggal', 'like', "%{$request->search}%")
-                  ->orWhere('nama_guru', 'like', "%{$request->search}%")
-                  ->orWhere('hari', 'like', "%{$request->search}%");
+        // Menggunakan logic yang sama dengan halaman web dan Excel (bukan model GajiGuru yang hardcode)
+
+        // Get all users as columns (dinamis dari database)
+        $gurus = User::all();
+
+        // Get unique dates from all pengeluaran tables
+        $dates = collect();
+
+        // Get dates from cabang pengeluaran
+        $cabangDates = LapPengeluaranCabang::select('tanggal')->distinct()->get();
+        foreach ($cabangDates as $date) {
+            $dates->push($date->tanggal);
+        }
+
+        // Get dates from mitra pengeluaran  
+        $mitraDates = LapPengeluaranMitra::select('tanggal')->distinct()->get();
+        foreach ($mitraDates as $date) {
+            $dates->push($date->tanggal);
+        }
+
+        // Get dates from private pengeluaran
+        $privateDates = LapPengeluaranPrivate::select('tanggal')->distinct()->get();
+        foreach ($privateDates as $date) {
+            $dates->push($date->tanggal);
+        }
+
+        // Remove duplicates and sort
+        $uniqueDates = $dates->unique()->sort()->values();
+
+        // Apply filters
+        if ($request->start_date) {
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($request) {
+                return $date >= $request->start_date;
             });
         }
-        
-        if ($request->start_date) {
-            $query->whereDate('tanggal', '>=', $request->start_date);
-        }
-        
+
         if ($request->end_date) {
-            $query->whereDate('tanggal', '<=', $request->end_date);
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($request) {
+                return $date <= $request->end_date;
+            });
         }
-        
-        // Add week filter support
+
         if ($request->week_start) {
-            $query->whereDate('tanggal', '>=', $request->week_start);
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($request) {
+                return $date >= $request->week_start;
+            });
         }
-        
+
         if ($request->week_end) {
-            $query->whereDate('tanggal', '<=', $request->week_end);
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($request) {
+                return $date <= $request->week_end;
+            });
         }
-        
-        // Add year filter support
+
         if ($request->year) {
-            $query->whereYear('tanggal', $request->year);
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($request) {
+                return date('Y', strtotime($date)) == $request->year;
+            });
         }
-        
-        $gajiGuru = $query->orderBy('tanggal', 'desc')->get();
-        
+
+        // Search filter
+        if ($request->search) {
+            $searchTerm = strtolower($request->search);
+            $uniqueDates = $uniqueDates->filter(function ($date) use ($searchTerm) {
+                return strpos(strtolower($date), $searchTerm) !== false ||
+                    strpos(strtolower($this->getDayName($date)), $searchTerm) !== false;
+            });
+        }
+
+        // Initialize data array
+        $data = [];
+        foreach ($uniqueDates as $date) {
+            $data[$date] = [];
+            foreach ($gurus as $guru) {
+                $data[$date][$guru->id] = [
+                    'details' => [],
+                    'total' => 0
+                ];
+            }
+        }
+
+        // Calculate totals for each guru on each date (logic yang sama dengan halaman web)
+        foreach ($uniqueDates as $date) {
+            foreach ($gurus as $guru) {
+                $details = [];
+                $total = 0;
+
+                // Get user roles
+                $userRoles = $guru->getRoleNames()->toArray();
+
+                // Check if user is Admin (can access all three modules)
+                if (in_array('Admin', $userRoles)) {
+                    // Calculate from cabang - get detail gaji from reports created by this user
+                    $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($cabangReports as $report) {
+                        $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                        foreach ($cabangGurus as $cabangGuru) {
+                            $details[] = [
+                                'nama' => $cabangGuru->guru_nama,
+                                'gaji' => $cabangGuru->gaji,
+                                'source' => 'Cabang'
+                            ];
+                            $total += $cabangGuru->gaji;
+                        }
+                    }
+
+                    // Calculate from mitra - get detail gaji from reports created by this user
+                    $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($mitraReports as $report) {
+                        $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                        foreach ($mitraGurus as $mitraGuru) {
+                            $details[] = [
+                                'nama' => $mitraGuru->mitra_nama,
+                                'gaji' => $mitraGuru->gaji,
+                                'source' => 'Mitra'
+                            ];
+                            $total += $mitraGuru->gaji;
+                        }
+                    }
+
+                    // Calculate from private - get detail gaji from reports created by this user
+                    $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($privateRecords as $record) {
+                        if ($record->gurus) {
+                            foreach ($record->gurus as $guruData) {
+                                $details[] = [
+                                    'nama' => $guruData['guru_id'] ?? 'N/A',
+                                    'gaji' => $guruData['gaji'] ?? 0,
+                                    'source' => 'Private'
+                                ];
+                                $total += $guruData['gaji'] ?? 0;
+                            }
+                        }
+                    }
+                }
+                // Check if user has Guru role (only cabang)
+                elseif (in_array('Guru', $userRoles)) {
+                    // Get detail gaji from cabang reports created by this user
+                    $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
+                        ->where('created_by', $guru->id)
+                        ->get();
+                    foreach ($cabangReports as $report) {
+                        $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                        foreach ($cabangGurus as $cabangGuru) {
+                            $details[] = [
+                                'nama' => $cabangGuru->guru_nama,
+                                'gaji' => $cabangGuru->gaji,
+                                'source' => 'Cabang'
+                            ];
+                            $total += $cabangGuru->gaji;
+                        }
+                    }
+                } else {
+                    // Role-based calculation for other specific roles
+                    if (in_array('Cabang', $userRoles)) {
+                        $cabangReports = LapPengeluaranCabang::where('tanggal', $date)
+                            ->where('created_by', $guru->id)
+                            ->get();
+                        foreach ($cabangReports as $report) {
+                            $cabangGurus = LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                            foreach ($cabangGurus as $cabangGuru) {
+                                $details[] = [
+                                    'nama' => $cabangGuru->guru_nama,
+                                    'gaji' => $cabangGuru->gaji,
+                                    'source' => 'Cabang'
+                                ];
+                                $total += $cabangGuru->gaji;
+                            }
+                        }
+                    }
+
+                    if (in_array('Mitra', $userRoles)) {
+                        $mitraReports = LapPengeluaranMitra::where('tanggal', $date)
+                            ->where('created_by', $guru->id)
+                            ->get();
+                        foreach ($mitraReports as $report) {
+                            $mitraGurus = LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                            foreach ($mitraGurus as $mitraGuru) {
+                                $details[] = [
+                                    'nama' => $mitraGuru->mitra_nama,
+                                    'gaji' => $mitraGuru->gaji,
+                                    'source' => 'Mitra'
+                                ];
+                                $total += $mitraGuru->gaji;
+                            }
+                        }
+                    }
+
+                    if (in_array('Private', $userRoles)) {
+                        $privateRecords = LapPengeluaranPrivate::where('tanggal', $date)
+                            ->where('created_by', $guru->id)
+                            ->get();
+                        foreach ($privateRecords as $record) {
+                            if ($record->gurus) {
+                                foreach ($record->gurus as $guruData) {
+                                    $details[] = [
+                                        'nama' => $guruData['guru_id'] ?? 'N/A',
+                                        'gaji' => $guruData['gaji'] ?? 0,
+                                        'source' => 'Private'
+                                    ];
+                                    $total += $guruData['gaji'] ?? 0;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $data[$date][$guru->id] = [
+                    'details' => $details,
+                    'total' => $total
+                ];
+            }
+        }
+
         // Add tanggal variable for PDF header with Indonesian format
         $bulanIndonesia = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
         ];
-        
+
         $hari = date('d');
         $bulan = $bulanIndonesia[date('n')];
         $tahun = date('Y');
         $tanggal = "$hari $bulan $tahun";
-        
-        $pdf = Pdf::loadView('exports.gaji-guru-pdf', compact('gajiGuru', 'tanggal'))
-                  ->setPaper('a4', 'landscape');
-        
+
+        // Pass data dinamis ke view PDF
+        $pdf = Pdf::loadView('exports.gaji-guru-pdf', compact('gurus', 'data', 'uniqueDates', 'tanggal'))
+            ->setPaper('a4', 'landscape'); // Landscape untuk menampung banyak kolom
+
         return $pdf->download('gaji-guru-' . date('Y-m-d') . '.pdf');
+    }
+
+    private function getDayName($date)
+    {
+        $days = [
+            'Sunday' => 'Minggu',
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu'
+        ];
+
+        $dayName = date('l', strtotime($date));
+        return $days[$dayName] ?? $dayName;
     }
 
     public function exportMonthlyExcel(Request $request)
     {
         $year = $request->year ?? now()->year;
         $filters = ['year' => $year, 'type' => 'monthly'];
-        
+
         return Excel::download(new GajiGuruMonthlyExport($filters), 'gaji-guru-bulanan-' . $year . '.xlsx');
     }
 
     public function exportMonthlyPdf(Request $request)
     {
         $year = $request->year ?? now()->year;
-        
+
         // Get all data for the selected year grouped by month
         $gajiGuru = GajiGuru::whereYear('tanggal', $year)
             ->orderBy('tanggal', 'asc')
             ->get()
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return $item->tanggal->format('m');
             });
 
@@ -353,7 +564,7 @@ class GajiGuruController extends Controller
         for ($month = 1; $month <= 12; $month++) {
             $monthKey = sprintf('%02d', $month);
             $monthData = $gajiGuru->get($monthKey, collect());
-            
+
             $monthlySummary[$month] = [
                 'month' => $month,
                 'month_name' => \Carbon\Carbon::create()->month($month)->locale('id')->monthName,
@@ -377,19 +588,28 @@ class GajiGuruController extends Controller
         }
 
         $bulanIndonesia = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
         ];
-        
+
         $hari = date('d');
         $bulan = $bulanIndonesia[date('n')];
         $tahunSekarang = date('Y');
         $tanggal = "$hari $bulan $tahunSekarang";
 
         $pdf = Pdf::loadView('exports.gaji-guru-monthly-pdf', compact('monthlySummary', 'year', 'tanggal'))
-                  ->setPaper('a4', 'landscape');
-        
+            ->setPaper('a4', 'landscape');
+
         return $pdf->download('gaji-guru-bulanan-' . $year . '.pdf');
     }
 }
