@@ -10,7 +10,7 @@ import Footer from "@/Components/Home/Footer";
 import Map from "@/Components/Home/Map";
 import { Head } from "@inertiajs/react";
 
-const Albri = () => {
+const Albri = ({ latestNews }) => {
     return (
         <div className="relative">
           <Head title="Home" />
@@ -20,7 +20,7 @@ const Albri = () => {
             <div className="relative z-0">
                 <Hero />
             </div>
-            <Page />
+            <Page latestNews={latestNews} />
             <Page2 />
             <Page3 />
             <Page4 />

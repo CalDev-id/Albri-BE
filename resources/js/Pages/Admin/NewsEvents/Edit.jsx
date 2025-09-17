@@ -50,6 +50,20 @@ const NewsEventsEdit = ({ newsEvent }) => {
         });
     };
 
+    const handleStatusChange = (e) => {
+        const status = e.target.value;
+        const newData = { ...data, status: status };
+        
+        // Jika status berubah ke published dan belum ada tanggal publish, set ke sekarang
+        if (status === 'published' && !data.published_at) {
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            newData.published_at = localDateTime;
+        }
+        
+        setData(newData);
+    };
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setData("featured_image", file);
@@ -173,7 +187,7 @@ const NewsEventsEdit = ({ newsEvent }) => {
                                                 <select
                                                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
                                                     value={data.status}
-                                                    onChange={(e) => setData("status", e.target.value)}
+                                                    onChange={handleStatusChange}
                                                 >
                                                     <option value="draft">Draft</option>
                                                     <option value="published">Published</option>

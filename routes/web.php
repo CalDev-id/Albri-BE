@@ -16,6 +16,7 @@ use App\Http\Controllers\NewsEventController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PrivateController;
 use App\Http\Controllers\PublicNewsController;
+use App\Http\Controllers\HomeController;
 use Inertia\Inertia;
 
 Route::get('/login', function () {
@@ -286,9 +287,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/', function () {
-    return Inertia::render('Albri');
-});
+Route::get('/', [HomeController::class, 'index']);
 
 // Public News Events Routes
 Route::get('/berita-acara', [PublicNewsController::class, 'index'])->name('public.news-events.index');
