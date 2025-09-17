@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
+import Swal from 'sweetalert2';
 
 import "flowbite/dist/flowbite.min.js";
 import { usePage } from "@inertiajs/react";
@@ -18,6 +19,9 @@ const TablePengeluaranRekap = ({
     prevMonth,
     prevYear,
 }) => {
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+
     const goToMonth = (month, year) => {
         Inertia.get(route("admin.rekap.cabang"), {
             bulan: month,
@@ -25,7 +29,19 @@ const TablePengeluaranRekap = ({
         });
     };
     const calculateTotal = (field) => {
-        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
+        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => {
+            if (field === "gaji") {
+                // kalau ada array guru, jumlahkan semua gaji guru
+                if (pengeluaran.gurus && pengeluaran.gurus.length > 0) {
+                    return sum + pengeluaran.gurus.reduce((gSum, g) => gSum + (g.gaji || 0), 0);
+                }
+                // fallback ke gaji langsung
+                return sum + (pengeluaran.gaji || 0);
+            }
+
+            // field normal (atk, sewa, dll)
+            return sum + (pengeluaran[field] || 0);
+        }, 0);
     };
     const downloadExcelPengeluaran = (laporanPengeluaranCabang, judul) => {
         // Data pengeluaran
@@ -75,6 +91,89 @@ const TablePengeluaranRekap = ({
         XLSX.writeFile(workbook, fileName);
     };
 
+    // Fungsi untuk mengelola checkbox individual
+    const handleItemSelect = (id) => {
+        setSelectedItems(prev => {
+            if (prev.includes(id)) {
+                return prev.filter(item => item !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
+    };
+
+    // Fungsi untuk select all checkbox
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(laporanPengeluaranCabang.data.map(item => item.id));
+        }
+        setSelectAll(!selectAll);
+    };
+
+    // Fungsi untuk bulk delete
+    const handleBulkDelete = () => {
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Data',
+                text: 'Pilih item yang ingin dihapus terlebih dahulu',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: `Yakin ingin menghapus ${selectedItems.length} item yang dipilih?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const itemCount = selectedItems.length;
+                Inertia.post('/admin/laporan/pengeluaran/bulk-delete', {
+                    ids: selectedItems
+                }, {
+                    preserveScroll: true,
+                    onStart: () => {
+                        setSelectedItems([]);
+                        setSelectAll(false);
+                    },
+                    onSuccess: () => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: `${itemCount} item berhasil dihapus`,
+                            confirmButtonColor: '#3085d6',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghapus data',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                });
+            }
+        });
+    };
+
+    // Update selectAll status berdasarkan selectedItems
+    React.useEffect(() => {
+        if (laporanPengeluaranCabang.data.length > 0) {
+            setSelectAll(selectedItems.length === laporanPengeluaranCabang.data.length);
+        }
+    }, [selectedItems, laporanPengeluaranCabang.data]);
+
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
@@ -82,7 +181,7 @@ const TablePengeluaranRekap = ({
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Rekap Pengeluaran Cabang - {bulan} {tahun}
                 </h4>
-                <div>
+                <div className="flex gap-2">
                     {/* <Link href="/admin/laporan/pengeluaran/create">
                 <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                     Tambah Pengeluaran
@@ -95,6 +194,14 @@ const TablePengeluaranRekap = ({
                     >
                         Download Excel
                     </button>
+                    {selectedItems.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                            Hapus Terpilih ({selectedItems.length})
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -102,6 +209,15 @@ const TablePengeluaranRekap = ({
                 <table className="w-full table-auto">
                     <thead>
                         <tr className="bg-gray-2 dark:bg-meta-4">
+                            {/* Checkbox select all */}
+                            <th className="py-4 px-4 text-center">
+                                <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                    className="checkbox checkbox-sm"
+                                />
+                            </th>
                             {/* Table Headers */}
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
@@ -121,6 +237,15 @@ const TablePengeluaranRekap = ({
                     <tbody>
                         {laporanPengeluaranCabang.data.map((pengeluaran, key) => (
                             <tr key={key} className="border-b border-stroke dark:border-strokedark">
+                                {/* Checkbox untuk item individual */}
+                                <td className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedItems.includes(pengeluaran.id)}
+                                        onChange={() => handleItemSelect(pengeluaran.id)}
+                                        className="checkbox checkbox-sm"
+                                    />
+                                </td>
                                 {/* Data Rows */}
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
@@ -153,9 +278,20 @@ const TablePengeluaranRekap = ({
                                             as="button"
                                             data={{ id: pengeluaran.id }}
                                             onClick={(e) => {
-                                                if (!confirm("Are you sure you want to delete this item?")) {
-                                                    e.preventDefault();
-                                                }
+                                                Swal.fire({
+                                                    title: 'Konfirmasi Hapus',
+                                                    text: 'Yakin hapus item ini?',
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#d33',
+                                                    cancelButtonColor: '#3085d6',
+                                                    confirmButtonText: 'Ya, Hapus!',
+                                                    cancelButtonText: 'Batal'
+                                                }).then((result) => {
+                                                    if (!result.isConfirmed) {
+                                                        e.preventDefault();
+                                                    }
+                                                });
                                             }}
                                         >
                                             <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
@@ -169,6 +305,7 @@ const TablePengeluaranRekap = ({
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                            <td className="py-4 px-4"></td> {/* Empty cell for checkbox column */}
                             <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>

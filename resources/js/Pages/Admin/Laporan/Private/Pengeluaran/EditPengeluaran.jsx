@@ -116,13 +116,7 @@ const EditCabang = () => {
                                     <label className="block text-sm font-medium text-black dark:text-white">
                                         Guru & Gaji
                                     </label>
-                                    <button
-                                        type="button"
-                                        onClick={addGuru}
-                                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                                    >
-                                        + Tambah Guru
-                                    </button>
+                          
                                 </div>
 
                                 {data.gurus.map((guru, index) => (
@@ -155,17 +149,21 @@ const EditCabang = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => removeGuru(index)}
-                                                className="bg-red-500 text-white px-3 py-3 rounded hover:bg-red-600"
+                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
                                             >
-                                                Hapus
+                                                 ✕
                                             </button>
                                         )}
                                     </div>
                                 ))}
 
-                                <div className="mt-3 p-3 bg-gray-100 rounded">
+                                {/* <div className="mt-3 p-3 bg-gray-100 rounded">
                                     <span className="font-medium">Total Gaji: Rp {getTotalGaji().toLocaleString()}</span>
-                                </div>
+                                </div> */}
+
+                                 <button type="button" onClick={addGuru} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
+                                    + Tambah Guru
+                                </button>
                             </div>
 
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
@@ -281,7 +279,7 @@ const EditCabang = () => {
                             </div>
 
                             {/* Total Pengeluaran Display */}
-                            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            {/* <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                 <h3 className="text-lg font-semibold text-blue-800 mb-2">Total Pengeluaran</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>Total Gaji: Rp {getTotalGaji().toLocaleString()}</div>
@@ -297,7 +295,7 @@ const EditCabang = () => {
                                         TOTAL: Rp {getTotalPengeluaran().toLocaleString()}
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                                 Submit

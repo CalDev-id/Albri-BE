@@ -7,9 +7,12 @@ import { Head } from "@inertiajs/react";
 const Laporan = () => {
     const { paketMitra } = usePage().props; // props dari backend
 
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     const { data, setData, post, errors } = useForm({
         hari: "Senin",
-        tanggal: "",
+        tanggal: today,
         pakets: {}, // { paket_id: jumlah }
         daftar: 0,
         modul: 0,
@@ -98,7 +101,7 @@ const Laporan = () => {
                                             type="number"
                                             min="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                                            value={data.pakets[paket.id] || ""}
+                                            value={data.pakets[paket.id] || 0}
                                             onChange={(e) =>
                                                 handleChangePaket(paket.id, e.target.value)
                                             }

@@ -9,21 +9,25 @@ import { useEffect } from "react";
 const CreatePengeluaran = () => {
 
     const { users } = usePage().props;
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     const { data, setData, post, errors } = useForm({
-        hari: "senin",
-        tanggal: "",
-        gurus: [{ guru_id: "", gaji: "" }], // Dynamic guru list untuk private
-        atk: "",
-        sewa: "",
-        intensif: "",
-        lisensi: "",
-        thr: "",
-        lainlain: "",
+        hari: "Senin",
+        tanggal: today,
+        gurus: [{ guru_id: "", gaji: 0 }], // Dynamic guru list untuk private
+        atk: 0,
+        sewa: 0,
+        intensif: 0,
+        lisensi: 0,
+        thr: 0,
+        lainlain: 0,
     });
 
     // Tambah input guru baru
     const addGuru = () => {
-        setData("gurus", [...data.gurus, { guru_id: "", gaji: "" }]);
+        setData("gurus", [...data.gurus, { guru_id: "", gaji: 0 }]);
     };
 
     // Ubah value guru
@@ -117,7 +121,7 @@ const CreatePengeluaran = () => {
                                         <div className="w-full xl:w-1/3">
                                             <input
                                                 type="number"
-                                                value={guru.gaji}
+                                                value={guru.gaji || 0}
                                                 onChange={(e) => updateGuru(index, "gaji", e.target.value)}
                                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                                 placeholder="Gaji"

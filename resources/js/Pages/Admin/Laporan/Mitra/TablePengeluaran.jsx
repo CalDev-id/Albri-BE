@@ -194,7 +194,7 @@ const TablePengeluaran = () => {
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                            <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
+                            <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotalGajiAllMitra().toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>

@@ -161,8 +161,8 @@ const TablePemasukan = () => {
             <thead>
               <tr className="bg-gray-2 dark:bg-meta-4">
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
-                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Nama</th>
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
+                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Nama</th>
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Cabang</th>
 
                 {/* Kolom paket dinamis */}
@@ -187,8 +187,9 @@ const TablePemasukan = () => {
               {laporanCabang.data.map((laporan) => (
                 <tr key={laporan.id} className="border-b border-stroke dark:border-strokedark">
                   <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.hari}</td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.tanggal}</td>
+
                   <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.user ? laporan.user.name : "N/A"}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.tanggal}</td>
                   <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.cabang ? laporan.cabang.nama : "N/A"}</td>
 
                   {/* Nilai jumlah per paket dari pivot */}

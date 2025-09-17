@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
+import Swal from 'sweetalert2';
 
 import "flowbite/dist/flowbite.min.js";
 import { usePage } from "@inertiajs/react";
@@ -10,6 +11,10 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
 const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, nextYear, prevMonth, prevYear }) => {
+
+    // State untuk mengelola checkbox
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
 
     // console.log(laporanCabang.data);
     const goToMonth = (month, year) => {
@@ -130,6 +135,89 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
         XLSX.writeFile(wb, fileName);
     };
 
+    // Fungsi untuk mengelola checkbox individual
+    const handleItemSelect = (id) => {
+        setSelectedItems(prev => {
+            if (prev.includes(id)) {
+                return prev.filter(item => item !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
+    };
+
+    // Fungsi untuk select all checkbox
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(laporanCabang.data.map(item => item.id));
+        }
+        setSelectAll(!selectAll);
+    };
+
+    // Fungsi untuk bulk delete
+    const handleBulkDelete = () => {
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Data',
+                text: 'Pilih item yang ingin dihapus terlebih dahulu',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: `Yakin ingin menghapus ${selectedItems.length} item yang dipilih?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const itemCount = selectedItems.length;
+                Inertia.post('/admin/laporan/cabang/bulk-delete', {
+                    ids: selectedItems
+                }, {
+                    preserveScroll: true,
+                    onStart: () => {
+                        setSelectedItems([]);
+                        setSelectAll(false);
+                    },
+                    onSuccess: () => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: `${itemCount} item berhasil dihapus`,
+                            confirmButtonColor: '#3085d6',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghapus data',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                });
+            }
+        });
+    };
+
+    // Update selectAll status berdasarkan selectedItems
+    React.useEffect(() => {
+        if (laporanCabang.data.length > 0) {
+            setSelectAll(selectedItems.length === laporanCabang.data.length);
+        }
+    }, [selectedItems, laporanCabang.data]);
+
 
 
     return (
@@ -141,18 +229,26 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
                             Rekap Pemasukan Cabang - {bulan}/{tahun}
                         </h4>
                     </div>
-                    <div>
+                    <div className="flex gap-2">
                         <button
                             onClick={() => downloadExcel(laporanCabang, `${bulan}_${tahun}`)}
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
                         >
                             Download Excel
                         </button>
-                        <Link href="/admin/laporan/cabang/paket/">
+                        {selectedItems.length > 0 && (
+                            <button
+                                onClick={handleBulkDelete}
+                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                            >
+                                Hapus Terpilih ({selectedItems.length})
+                            </button>
+                        )}
+                        {/* <Link href="/admin/laporan/cabang/paket/">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 ml-2">
                                 Setting Harga
                             </button>
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
 
@@ -160,10 +256,19 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
                     <table className="w-full table-auto">
                         <thead>
                             <tr className="bg-gray-2 dark:bg-meta-4">
+                                {/* Checkbox select all */}
+                                <th className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAll}
+                                        className="checkbox checkbox-sm"
+                                    />
+                                </th>
                                 {/* Header cells */}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Nama</th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Nama</th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Cabang</th>
 
                                 {/* Kolom paket dinamis */}
@@ -186,9 +291,18 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
                         <tbody>
                             {laporanCabang.data.map((laporan) => (
                                 <tr key={laporan.id} className="border-b border-stroke dark:border-strokedark">
+                                    {/* Checkbox untuk item individual */}
+                                    <td className="py-4 px-4 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItems.includes(laporan.id)}
+                                            onChange={() => handleItemSelect(laporan.id)}
+                                            className="checkbox checkbox-sm"
+                                        />
+                                    </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.hari}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.user ? laporan.user.name : "N/A"}</td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.tanggal}</td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.user ? laporan.user.name : "N/A"}</td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.cabang ? laporan.cabang.nama : "N/A"}</td>
 
                                     {/* Nilai jumlah per paket dari pivot */}
@@ -217,7 +331,20 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
                                                 as="button"
                                                 data={{ id: laporan.id }}
                                                 onClick={(e) => {
-                                                    if (!confirm("Yakin hapus laporan ini?")) e.preventDefault();
+                                                    Swal.fire({
+                                                        title: 'Konfirmasi Hapus',
+                                                        text: 'Yakin hapus laporan ini?',
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: '#d33',
+                                                        cancelButtonColor: '#3085d6',
+                                                        confirmButtonText: 'Ya, Hapus!',
+                                                        cancelButtonText: 'Batal'
+                                                    }).then((result) => {
+                                                        if (!result.isConfirmed) {
+                                                            e.preventDefault();
+                                                        }
+                                                    });
                                                 }}
                                             >
                                                 <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
@@ -229,6 +356,7 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                                <td className="py-4 px-4"></td> {/* Empty cell for checkbox column */}
                                 <td colSpan={4} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
 
                                 {/* Total per paket */}

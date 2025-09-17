@@ -46,16 +46,16 @@ const Laporan = ({
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
 
-        // Hitung total students berdasarkan paket dinamis
-        const totalStudents = laporanPrivateData.reduce((sum, laporan) => {
-            if (!paketPrivate || !laporan.pakets) return sum;
-            let studentCount = 0;
-            paketPrivate.forEach(paket => {
-                const paketValue = laporan.pakets[paket.id] ? parseInt(laporan.pakets[paket.id]) : 0;
-                studentCount += paketValue;
-            });
-            return sum + studentCount;
-        }, 0);
+        // Hitung total students (biaya)
+        const totalStudents = laporanPrivateData.reduce(
+            (sum, laporan) =>
+                sum +
+                ((laporan.biaya_30 || 0) +
+                    (laporan.biaya_35 || 0) +
+                    (laporan.biaya_40 || 0) +
+                    (laporan.biaya_45 || 0)),
+            0
+        );
 
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
@@ -74,8 +74,8 @@ const Laporan = ({
         const dataGabungan = [];
 
         // Hitung posisi header pengeluaran berdasarkan jumlah kolom pemasukan
-        // Kolom pemasukan: Hari, Tanggal, Nama + jumlah paket dinamis + 7 kolom lainnya (Total Biaya, Daftar, Modul, Kaos, Kas, Lain Lain, Jumlah) + 1 kolom jarak
-        const jumlahKolomPemasukan = 3 + safePaketPrivate.length + 7 + 1; // 3 kolom awal + paket dinamis + 7 kolom akhir + 1 jarak
+        // Kolom pemasukan: Hari, Tanggal, Nama + 4 kolom paket (30, 35, 40, 45) + 7 kolom lainnya (Total Biaya, Daftar, Modul, Kaos, Kas, Lain Lain, Jumlah) + 1 kolom jarak
+        const jumlahKolomPemasukan = 3 + 4 + 7 + 1; // 3 kolom awal + 4 paket tetap + 7 kolom akhir + 1 jarak
 
         // Buat array header utama dengan posisi yang tepat
         const headerUtama = [`LAPORAN PEMASUKAN BULAN ${bulan.toUpperCase()} ${tahun}`];
@@ -90,10 +90,8 @@ const Laporan = ({
 
         // Header kolom pemasukan
         const headerPemasukan = ["Hari", "Tanggal", "Nama"];
-        // Tambahkan kolom paket private dinamis
-        safePaketPrivate.forEach(p => {
-            headerPemasukan.push(`${p.nama_paket} (${p.harga.toLocaleString()})`);
-        });
+        // Tambahkan kolom paket private yang tetap (30, 35, 40, 45)
+        headerPemasukan.push("30 Menit", "35 Menit", "40 Menit", "45 Menit");
         headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", ""); // Tambah kolom jarak kosong
 
         // Header kolom pengeluaran
@@ -102,13 +100,6 @@ const Laporan = ({
         // Gabungkan header
         const headerLengkap = [...headerPemasukan, ...headerPengeluaran];
         dataGabungan.push(headerLengkap);
-
-        // Helper functions untuk pemasukan private
-        const getJumlahPaketInRow = (laporan, paketId) => {
-            if (!laporan.pakets) return 0;
-            const paketValue = laporan.pakets[paketId] ? parseInt(laporan.pakets[paketId]) : 0;
-            return paketValue;
-        };
 
         // Buat map untuk data harian
         const hariMap = new Map();
@@ -123,7 +114,10 @@ const Laporan = ({
                         tanggal: lap.tanggal,
                         pemasukan: {
                             nama: [],
-                            pakets: {},
+                            biaya_30: 0,
+                            biaya_35: 0,
+                            biaya_40: 0,
+                            biaya_45: 0,
                             totalbiaya: 0,
                             daftar: 0,
                             modul: 0,
@@ -155,13 +149,11 @@ const Laporan = ({
                     }
                 }
 
-                // Akumulasi data paket private dinamis
-                safePaketPrivate.forEach(p => {
-                    if (!dayData.pemasukan.pakets[p.id]) dayData.pemasukan.pakets[p.id] = 0;
-                    dayData.pemasukan.pakets[p.id] += getJumlahPaketInRow(lap, p.id);
-                });
-
-                // Akumulasi data pemasukan private lainnya
+                // Akumulasi data pemasukan private
+                dayData.pemasukan.biaya_30 += n(lap.biaya_30);
+                dayData.pemasukan.biaya_35 += n(lap.biaya_35);
+                dayData.pemasukan.biaya_40 += n(lap.biaya_40);
+                dayData.pemasukan.biaya_45 += n(lap.biaya_45);
                 dayData.pemasukan.totalbiaya += n(lap.totalbiaya);
                 dayData.pemasukan.daftar += n(lap.daftar);
                 dayData.pemasukan.modul += n(lap.modul);
@@ -182,7 +174,10 @@ const Laporan = ({
                         tanggal: pengeluaran.tanggal,
                         pemasukan: {
                             nama: [],
-                            pakets: {},
+                            biaya_30: 0,
+                            biaya_35: 0,
+                            biaya_40: 0,
+                            biaya_45: 0,
                             totalbiaya: 0,
                             daftar: 0,
                             modul: 0,
@@ -214,50 +209,15 @@ const Laporan = ({
                     }
                 }
 
-                // Kumpulkan detail gaji private (sistem dinamis dengan fallback)
-                let gajiDetailFound = false;
-
-                // Prioritas 1: Gunakan field gurus (JSON array) jika ada
-                if (pengeluaran.gurus && Array.isArray(pengeluaran.gurus) && pengeluaran.gurus.length > 0) {
-                    pengeluaran.gurus.forEach((guru, index) => {
-                        if (guru && guru.guru_id && guru.gaji) {
-                            const gajiInfo = `${guru.guru_id}: Rp ${n(guru.gaji).toLocaleString()}`;
-                            if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
-                                dayData.pengeluaran.gajiDetail.push(gajiInfo);
-                                gajiDetailFound = true;
-                            }
+                // Kumpulkan detail gaji private (sistem dinamis)
+                if (pengeluaran.gurus && pengeluaran.gurus.length > 0) {
+                    pengeluaran.gurus.forEach(guru => {
+                        if (guru.guru_id && guru.gaji) {
+                            dayData.pengeluaran.gajiDetail.push(`${guru.guru_id}: ${n(guru.gaji).toLocaleString()}`);
                         }
                     });
-                }
-
-                // Prioritas 2: Fallback ke field gaji dan user name jika tersedia
-                if (!gajiDetailFound && pengeluaran.gaji && n(pengeluaran.gaji) > 0) {
-                    let namaGuru = "Private"; // Default name
-
-                    // Coba ambil nama dari relasi user
-                    if (pengeluaran.user && pengeluaran.user.name) {
-                        namaGuru = pengeluaran.user.name;
-                    }
-
-                    const gajiInfo = `${namaGuru}: Rp ${n(pengeluaran.gaji).toLocaleString()}`;
-                    if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
-                        dayData.pengeluaran.gajiDetail.push(gajiInfo);
-                        gajiDetailFound = true;
-                    }
-                }
-
-                // Prioritas 3: Fallback ke privateBimbles jika ada relasi
-                if (!gajiDetailFound && pengeluaran.private_bimbles && Array.isArray(pengeluaran.private_bimbles) && pengeluaran.private_bimbles.length > 0) {
-                    pengeluaran.private_bimbles.forEach(bimble => {
-                        if (bimble.pivot && bimble.pivot.gaji) {
-                            const namaGuru = bimble.nama || "Private";
-                            const gajiInfo = `${namaGuru}: Rp ${n(bimble.pivot.gaji).toLocaleString()}`;
-                            if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
-                                dayData.pengeluaran.gajiDetail.push(gajiInfo);
-                                gajiDetailFound = true;
-                            }
-                        }
-                    });
+                } else if (pengeluaran.gaji && n(pengeluaran.gaji) > 0) {
+                    dayData.pengeluaran.gajiDetail.push(`Private: ${n(pengeluaran.gaji).toLocaleString()}`);
                 }
 
                 // Akumulasi data pengeluaran
@@ -277,25 +237,10 @@ const Laporan = ({
         // Buat baris data
         let totalPemasukanBulan = 0;
         let totalPengeluaranBulan = 0;
-        let totalTotalBiayaBulan = 0;
-        let totalDaftarBulan = 0;
-        let totalModulBulan = 0;
-        let totalKaosBulan = 0;
-        let totalKasBulan = 0;
-        let totalLainLainPemasukanBulan = 0;
-        let totalAtkBulan = 0;
-        let totalSewaBulan = 0;
-        let totalIntensifBulan = 0;
-        let totalLisensiBulan = 0;
-        let totalThrBulan = 0;
-        let totalLainLainPengeluaranBulan = 0;
-        let totalGajiBulan = 0; // Tambah total gaji
-        const totalPaketBulan = {};
-        const allGajiDetail = []; // Kumpulkan semua detail gaji untuk ditotalkan
-
-        safePaketPrivate.forEach(p => {
-            totalPaketBulan[p.id] = 0;
-        });
+        let totalBiaya30Bulan = 0;
+        let totalBiaya35Bulan = 0;
+        let totalBiaya40Bulan = 0;
+        let totalBiaya45Bulan = 0;
 
         sortedData.forEach(dayData => {
             const row = [];
@@ -305,12 +250,11 @@ const Laporan = ({
             row.push(dayData.tanggal);
             row.push(dayData.pemasukan.nama.join(", ") || "N/A"); // Nama pembuat pemasukan
 
-            // Data paket private dinamis
-            safePaketPrivate.forEach(p => {
-                const jumlahPaket = dayData.pemasukan.pakets[p.id] || 0;
-                row.push(jumlahPaket);
-                totalPaketBulan[p.id] += jumlahPaket;
-            });
+            // Data paket private
+            row.push(dayData.pemasukan.biaya_30 || 0);
+            row.push(dayData.pemasukan.biaya_35 || 0);
+            row.push(dayData.pemasukan.biaya_40 || 0);
+            row.push(dayData.pemasukan.biaya_45 || 0);
 
             // Data pemasukan lainnya
             row.push(dayData.pemasukan.totalbiaya || 0);
@@ -339,83 +283,39 @@ const Laporan = ({
 
             dataGabungan.push(row);
 
-            // Update total bulanan pemasukan
+            // Update total bulanan
             totalPemasukanBulan += dayData.pemasukan.total || 0;
-            totalTotalBiayaBulan += dayData.pemasukan.totalbiaya || 0;
-            totalDaftarBulan += dayData.pemasukan.daftar || 0;
-            totalModulBulan += dayData.pemasukan.modul || 0;
-            totalKaosBulan += dayData.pemasukan.kaos || 0;
-            totalKasBulan += dayData.pemasukan.kas || 0;
-            totalLainLainPemasukanBulan += dayData.pemasukan.lainlain || 0;
-
-            // Update total bulanan pengeluaran
             totalPengeluaranBulan += dayData.pengeluaran.total || 0;
-            totalAtkBulan += dayData.pengeluaran.atk || 0;
-            totalSewaBulan += dayData.pengeluaran.sewa || 0;
-            totalIntensifBulan += dayData.pengeluaran.intensif || 0;
-            totalLisensiBulan += dayData.pengeluaran.lisensi || 0;
-            totalThrBulan += dayData.pengeluaran.thr || 0;
-            totalLainLainPengeluaranBulan += dayData.pengeluaran.lainlain || 0;
-
-            // Kumpulkan detail gaji untuk total (hindari duplikasi)
-            dayData.pengeluaran.gajiDetail.forEach(gaji => {
-                // Ekstrak nama guru dari gaji detail
-                const namaGuru = gaji.split(':')[0].trim();
-
-                // Cek apakah nama guru sudah ada dalam allGajiDetail
-                const existingIndex = allGajiDetail.findIndex(detail => detail.startsWith(namaGuru + ':'));
-
-                if (existingIndex === -1) {
-                    // Jika belum ada, tambahkan
-                    allGajiDetail.push(gaji);
-
-                    // Ekstrak nilai gaji dari string untuk dijumlahkan
-                    const gajiMatch = gaji.match(/Rp ([\d,]+)/);
-                    if (gajiMatch) {
-                        const gajiValue = parseInt(gajiMatch[1].replace(/,/g, ''));
-                        totalGajiBulan += gajiValue;
-                    }
-                }
-            });
+            totalBiaya30Bulan += dayData.pemasukan.biaya_30 || 0;
+            totalBiaya35Bulan += dayData.pemasukan.biaya_35 || 0;
+            totalBiaya40Bulan += dayData.pemasukan.biaya_40 || 0;
+            totalBiaya45Bulan += dayData.pemasukan.biaya_45 || 0;
         });
 
         // Tambahkan baris kosong untuk pemisah
-        const emptyRow = [];
-        for (let i = 0; i < headerLengkap.length; i++) {
-            emptyRow.push("");
-        }
-        dataGabungan.push(emptyRow);
+        dataGabungan.push(["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
 
         // Tambahkan baris total
         const rowTotal = [];
         rowTotal.push("TOTAL");
         rowTotal.push("");
         rowTotal.push("");
-
-        // Total paket dinamis
-        safePaketPrivate.forEach(p => {
-            rowTotal.push(totalPaketBulan[p.id]);
-        });
-
-        // Total kolom pemasukan lainnya
-        rowTotal.push(totalTotalBiayaBulan);
-        rowTotal.push(totalDaftarBulan);
-        rowTotal.push(totalModulBulan);
-        rowTotal.push(totalKaosBulan);
-        rowTotal.push(totalKasBulan);
-        rowTotal.push(totalLainLainPemasukanBulan);
+        rowTotal.push(totalBiaya30Bulan);
+        rowTotal.push(totalBiaya35Bulan);
+        rowTotal.push(totalBiaya40Bulan);
+        rowTotal.push(totalBiaya45Bulan);
+        // Skip kolom total biaya sampai jumlah pemasukan
+        for (let i = 7; i < 12; i++) {
+            rowTotal.push("");
+        }
         rowTotal.push(totalPemasukanBulan);
         rowTotal.push(""); // Kolom jarak
         rowTotal.push(""); // Pembuat laporan
-        rowTotal.push(`Total Gaji: Rp ${totalGajiBulan.toLocaleString()}`); // Total detail gaji
-
-        // Total kolom pengeluaran
-        rowTotal.push(totalAtkBulan);
-        rowTotal.push(totalSewaBulan);
-        rowTotal.push(totalIntensifBulan);
-        rowTotal.push(totalLisensiBulan);
-        rowTotal.push(totalThrBulan);
-        rowTotal.push(totalLainLainPengeluaranBulan);
+        rowTotal.push(""); // Detail gaji
+        // Skip kolom ATK sampai lain-lain
+        for (let i = 16; i < 22; i++) {
+            rowTotal.push("");
+        }
         rowTotal.push(totalPengeluaranBulan);
         rowTotal.push(totalPemasukanBulan - totalPengeluaranBulan); // Total laba
 
@@ -429,15 +329,10 @@ const Laporan = ({
             { wch: 10 }, // Hari
             { wch: 12 }, // Tanggal
             { wch: 15 }, // Nama Pemasukan
-        ];
-
-        // Tambah lebar kolom untuk paket dinamis
-        safePaketPrivate.forEach(() => {
-            colWidths.push({ wch: 15 });
-        });
-
-        // Tambah lebar kolom untuk data lainnya
-        colWidths.push(
+            { wch: 12 }, // 30 Menit
+            { wch: 12 }, // 35 Menit
+            { wch: 12 }, // 40 Menit
+            { wch: 12 }, // 45 Menit
             { wch: 12 }, // Total Biaya
             { wch: 10 }, // Daftar
             { wch: 10 }, // Modul
@@ -456,8 +351,7 @@ const Laporan = ({
             { wch: 12 }, // Lain Lain
             { wch: 15 }, // Jumlah Pengeluaran
             { wch: 15 }  // Laba
-        );
-
+        ];
         worksheet['!cols'] = colWidths;
 
         // Style untuk header utama (bold dan center)
@@ -479,6 +373,7 @@ const Laporan = ({
 
         // Apply style ke header utama (baris 1)
         if (dataGabungan.length > 0) {
+            const headerRange = XLSX.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: colWidths.length - 1, r: 0 } });
             worksheet[XLSX.utils.encode_cell({ c: 0, r: 0 })] = {
                 ...worksheet[XLSX.utils.encode_cell({ c: 0, r: 0 })],
                 s: headerMainStyle
@@ -517,7 +412,6 @@ const Laporan = ({
         const fileName = `${judul}_${bulan}_${tahun}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
-
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">

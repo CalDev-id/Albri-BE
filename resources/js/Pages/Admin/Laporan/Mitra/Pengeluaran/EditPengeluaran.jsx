@@ -113,7 +113,7 @@ const EditPengeluaran = () => {
 
                             <div className="form-control mb-4">
                                 <label className="label">
-                                    <span className="label-text">Nama Mitra & Gaji</span>
+                                    <span className="label-text">Nama Guru & Gaji</span>
                                 </label>
                                 {console.log('About to render mitras, data.mitras:', data.mitras)}
                                 {data && data.mitras && Array.isArray(data.mitras) && data.mitras.length > 0 ? (
@@ -137,15 +137,32 @@ const EditPengeluaran = () => {
                                                     placeholder="Gaji"
                                                 />
                                             </div>
+                                                       {data.mitras.length > 1 && (
+                                            <div className="xl:w-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeMitra(index)}
+                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
+                                                    title="Hapus Guru"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
                                         </div>
                                     ))
                                 ) : (
                                     <div>No mitras data available</div>
                                 )}
-                                <button type="button" onClick={addMitra} className="mb-4 rounded bg-meta-3 px-6 py-2 text-white hover:bg-opacity-90">
+
+
+                                {/* <button type="button" onClick={addMitra} className="mb-4 rounded bg-meta-3 px-6 py-2 text-white hover:bg-opacity-90">
                                     + Tambah Mitra
-                                </button>
+                                </button> */}
                             </div>
+                            <button type="button" onClick={addMitra} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
+                                + Tambah Guru
+                            </button>
 
                             <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                                 <div className="w-full xl:w-1/2">

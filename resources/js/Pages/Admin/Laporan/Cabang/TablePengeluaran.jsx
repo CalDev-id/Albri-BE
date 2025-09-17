@@ -19,9 +19,23 @@ const TablePengeluaran = () => {
     };
 
     // Function to calculate totals for the columns
-    const calculateTotal = (field) => {
-        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
-    };
+const calculateTotal = (field) => {
+    return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => {
+        if (field === "gaji") {
+            // kalau ada array guru, jumlahkan semua gaji guru
+            if (pengeluaran.gurus && pengeluaran.gurus.length > 0) {
+                return sum + pengeluaran.gurus.reduce((gSum, g) => gSum + (g.gaji || 0), 0);
+            }
+            // fallback ke gaji langsung
+            return sum + (pengeluaran.gaji || 0);
+        }
+
+        // field normal (atk, sewa, dll)
+        return sum + (pengeluaran[field] || 0);
+    }, 0);
+};
+
+
     const downloadExcelPengeluaran = (laporanPengeluaranCabang, judul) => {
         // Data pengeluaran
         const data = laporanPengeluaranCabang.data.map((pengeluaran) => ({
@@ -68,6 +82,7 @@ const TablePengeluaran = () => {
 
         // Simpan file
         XLSX.writeFile(workbook, fileName);
+        
     };
 
 

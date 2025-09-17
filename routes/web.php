@@ -124,6 +124,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::get('/{id}/edit', [AdminController::class, 'editlaporancabang'])->name('admin.laporan.cabang.show');
         Route::put('/{id}', [AdminController::class, 'updatelaporancabang'])->name('admin.laporan.cabang.update');
         Route::delete('/{id}', [AdminController::class, 'destroylaporancabang'])->name('admin.laporan.cabang.destroy');
+        Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyCabang'])->name('admin.laporan.cabang.bulk-delete');
     });
     /* -----------------------------------------
                     Pengeluaran Cabang 
@@ -134,6 +135,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::get('/{id}/edit', [AdminController::class, 'editpengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.show');
         Route::put('/{id}', [AdminController::class, 'updatepengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.update');
         Route::delete('/{id}', [AdminController::class, 'destroypengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.destroy');
+        Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyPengeluaranCabang'])->name('admin.laporan.pengeluaran.cabang.bulk-delete');
     });
 });
 /* -----------------------------------------
@@ -146,6 +148,7 @@ Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra/{id}/edit', [AdminController::class, 'editlaporanmitra'])->name('admin.laporan.mitra.show');
     Route::put('/admin/laporan/mitra/{id}', [AdminController::class, 'updatelaporanmitra'])->name('admin.laporan.mitra.update');
     Route::delete('/admin/laporan/mitra/{id}', [AdminController::class, 'destroylaporanmitra'])->name('admin.laporan.mitra.destroy');
+    Route::post('/admin/laporan/mitra/bulk-delete', [AdminController::class, 'bulkDestroyMitra'])->name('admin.laporan.mitra.bulk-delete');
 
     // Setting Harga Paket Mitra
     Route::get('/admin/laporan/mitra/setting-harga', [AdminController::class, 'settingHargaMitra'])->name('admin.laporan.mitra.setting-harga');
@@ -164,6 +167,7 @@ Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/pengeluaranmitra/{id}/edit', [AdminController::class, 'editpengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.show');
     Route::put('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'updatepengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.update');
     Route::delete('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'destroypengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.destroy');
+    Route::post('/admin/laporan/pengeluaranmitra/bulk-delete', [AdminController::class, 'bulkDestroyPengeluaranMitra'])->name('admin.laporan.pengeluaran.mitra.bulk-delete');
 });
 /* -----------------------------------------
                 Laporan Private 
@@ -177,6 +181,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
         Route::get('/{id}/edit', [AdminController::class, 'editlaporanprivate'])->name('admin.laporan.private.show');
         Route::put('/{id}', [AdminController::class, 'updatelaporanprivate'])->name('admin.laporan.private.update');
         Route::delete('/{id}', [AdminController::class, 'destroylaporanprivate'])->name('admin.laporan.private.destroy');
+        Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyPrivate'])->name('admin.laporan.private.bulk-delete');
     });
     /* -----------------------------------------
                     Pengeluaran Private 
@@ -187,6 +192,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
         Route::get('/{id}/edit', [AdminController::class, 'editpengeluaranprivate'])->name('admin.laporan.pengeluaran.private.edit');
         Route::put('/{id}', [AdminController::class, 'updatepengeluaranprivate'])->name('admin.laporan.pengeluaran.private.update');
         Route::delete('/{id}', [AdminController::class, 'destroypengeluaranprivate'])->name('admin.laporan.pengeluaran.private.destroy');
+        Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyPengeluaranPrivate'])->name('admin.laporan.pengeluaran.private.bulk-delete');
     });
 });
 /* -----------------------------------------

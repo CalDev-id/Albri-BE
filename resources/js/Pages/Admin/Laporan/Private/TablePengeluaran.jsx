@@ -17,7 +17,10 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
         const data = laporanPengeluaranPrivate.data.map((pengeluaran) => ({
             Hari: pengeluaran.hari,
             Tanggal: pengeluaran.tanggal,
-            "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
+            Pembuat: pengeluaran.user ? pengeluaran.user.name : "N/A",
+            "Nama Private": pengeluaran.private_bimbles && pengeluaran.private_bimbles.length > 0
+                ? pengeluaran.private_bimbles.map(pb => pb.name).join(', ')
+                : "N/A",
             Gaji: pengeluaran.gaji || 0,
             ATK: pengeluaran.atk || 0,
             Intensif: pengeluaran.intensif || 0,
@@ -30,7 +33,8 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
         const totals = {
             Hari: "Total",
             Tanggal: "",
-            "Nama Guru": "",
+            Pembuat: "",
+            "Nama Private": "",
             Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
             ATK: data.reduce((sum, row) => sum + row.ATK, 0),
             Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
@@ -46,7 +50,8 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
         const headers = [
             "Hari",
             "Tanggal",
-            "Nama Guru",
+            "Pembuat",
+            "Nama Private",
             "Gaji",
             "ATK",
             "Intensif",
@@ -100,7 +105,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                             {/* Table Headers */}
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Nama Guru</th>
+                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Pembuat</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Gaji</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">ATK</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Intensif</th>
@@ -117,7 +122,15 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.gaji.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {pengeluaran.gurus && pengeluaran.gurus.length > 0
+                                        ? pengeluaran.gurus.map((guru, index) => (
+                                            <div key={index}>
+                                                {guru.guru_id} - Rp {parseInt(guru.gaji).toLocaleString()}
+                                            </div>
+                                        ))
+                                        : `Rp ${pengeluaran.gaji ? pengeluaran.gaji.toLocaleString() : 0}`}
+                                </td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
@@ -158,6 +171,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran').toLocaleString()}</td>
                             <td className="py-4 px-4"></td>
+                            
                         </tr>
                     </tfoot>
                 </table>

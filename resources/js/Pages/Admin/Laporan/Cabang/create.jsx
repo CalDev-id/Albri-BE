@@ -5,16 +5,19 @@ import DefaultLayout from "@/Layouts/DefaultLayout";
 const Laporan = () => {
     const { cabangs, pakets } = usePage().props; // props dari backend
 
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     const { data, setData, post } = useForm({
         hari: "Senin",
-        tanggal: "",
+        tanggal: today,
         cabang_id: cabangs.length > 0 ? cabangs[0].id : "",
         pakets: {}, // { paket_id: jumlah }
-        daftar: "",
-        modul: "",
-        kaos: "",
-        kas: "",
-        lainlain: "",
+        daftar: 0,
+        modul: 0,
+        kaos: 0,
+        kas: 0,
+        lainlain: 0,
     });
 
     // auto set cabang default
@@ -53,7 +56,7 @@ const Laporan = () => {
                                         value={data.hari}
                                         onChange={(e) => setData("hari", e.target.value)}
                                     >
-                                        {["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"].map((h) => (
+                                        {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"].map((h) => (
                                             <option key={h} value={h}>{h}</option>
                                         ))}
                                     </select>
@@ -95,7 +98,7 @@ const Laporan = () => {
                                             type="number"
                                             min="0"
                                             className="w-full rounded border px-3 py-2"
-                                            value={data.pakets[paket.id] || ""}
+                                            value={data.pakets[paket.id] || 0}
                                             onChange={(e) =>
                                                 handleChangePaket(paket.id, e.target.value)
                                             }
@@ -106,7 +109,7 @@ const Laporan = () => {
 
                             {/* Biaya lain */}
                             <div className="grid grid-cols-2 gap-4">
-                                {["daftar","modul","kaos","kas","lainlain"].map((field) => (
+                                {["daftar", "modul", "kaos", "kas", "lainlain"].map((field) => (
                                     <div key={field}>
                                         <label className="block mb-2 capitalize">{field}</label>
                                         <input

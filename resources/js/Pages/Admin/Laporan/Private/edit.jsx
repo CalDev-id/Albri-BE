@@ -239,13 +239,13 @@ const EditCabang = () => {
                             </div>
 
                             {/* Total Pemasukan Display */}
-                            <div className="mb-4.5">
+                            {/* <div className="mb-4.5">
                                 <div className="rounded border border-stroke bg-primary/10 px-4 py-3 dark:border-strokedark dark:bg-primary/20">
                                     <p className="text-lg font-semibold text-primary dark:text-white">
                                         Total Pemasukan: Rp {totalPemasukan.toLocaleString()}
                                     </p>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Submit Button */}
                             <div className="flex justify-end gap-3">

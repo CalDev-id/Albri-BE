@@ -18,6 +18,19 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
             0
         );
     };
+
+    // Calculate total for dynamic paket
+    const getPaketTotal = (paketId) => {
+        return laporanPrivate.data.reduce(
+            (sum, laporan) => {
+                const paketValue = laporan.pakets && laporan.pakets[paketId] ? parseInt(laporan.pakets[paketId]) : 0;
+                return sum + paketValue;
+            },
+            0
+        );
+    };
+
+
     const downloadExcel = (laporanPrivate, judul) => {
         // Buat object data dengan struktur dinamis berdasarkan paket
         const data = laporanPrivate.data.map((laporan) => {
@@ -25,16 +38,16 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                 Hari: laporan.hari,
                 Tanggal: laporan.tanggal,
             };
-            
+
             // Tambahkan kolom paket secara dinamis
             if (paketPrivate && paketPrivate.length > 0) {
                 paketPrivate.forEach((paket) => {
                     const headerName = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
-                    const fieldName = `biaya_${paket.harga}`;
-                    row[headerName] = laporan[fieldName] || 0;
+                    const paketValue = laporan.pakets && laporan.pakets[paket.id] ? laporan.pakets[paket.id] : 0;
+                    row[headerName] = paketValue;
                 });
             }
-            
+
             // Tambahkan kolom lainnya
             row["Total Biaya"] = laporan.totalbiaya || 0;
             row["Daftar"] = laporan.daftar || 0;
@@ -43,7 +56,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
             row["Kas"] = laporan.kas || 0;
             row["Lain Lain"] = laporan.lainlain || 0;
             row["Total Pemasukan"] = laporan.totalpemasukan || 0;
-            
+
             return row;
         });
 
@@ -52,7 +65,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
             Hari: "Total",
             Tanggal: "",
         };
-        
+
         // Total untuk paket
         if (paketPrivate && paketPrivate.length > 0) {
             paketPrivate.forEach((paket) => {
@@ -60,7 +73,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                 totals[headerName] = data.reduce((sum, row) => sum + row[headerName], 0);
             });
         }
-        
+
         // Total untuk kolom lainnya
         totals["Total Biaya"] = data.reduce((sum, row) => sum + row["Total Biaya"], 0);
         totals["Daftar"] = data.reduce((sum, row) => sum + row.Daftar, 0);
@@ -139,12 +152,15 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Hari
                                 </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
-                                    Nama
-                                </th>
+
 
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
+                                </th>
+
+
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
+                                    Nama
                                 </th>
 
                                 {/* Dynamic paket headers */}
@@ -191,19 +207,22 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                                         {laporan.hari}
                                     </td>
 
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
-                                        {laporan.user ? laporan.user.name : "N/A"}
-                                    </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.tanggal}
                                     </td>
 
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                                        {laporan.user ? laporan.user.name : "N/A"}
+                                    </td>
+
+
                                     {/* Dynamic paket data */}
                                     {paketPrivate && paketPrivate.length > 0 && paketPrivate.map((paket, index) => {
-                                        const fieldName = `biaya_${paket.harga}`;
+                                        // Get value from JSON pakets field using paket ID
+                                        const paketValue = laporan.pakets && laporan.pakets[paket.id] ? parseInt(laporan.pakets[paket.id]) : 0;
                                         return (
                                             <td key={index} className="py-4 px-4 text-sm text-black dark:text-white">
-                                                {laporan[fieldName] || 0}
+                                                {paketValue.toLocaleString()}
                                             </td>
                                         );
                                     })}
@@ -270,10 +289,9 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
 
                                 {/* Dynamic paket totals */}
                                 {paketPrivate && paketPrivate.length > 0 && paketPrivate.map((paket, index) => {
-                                    const fieldName = `biaya_${paket.harga}`;
                                     return (
                                         <td key={index} className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                            {getTotal(fieldName)}
+                                            {getPaketTotal(paket.id).toLocaleString()}
                                         </td>
                                     );
                                 })}

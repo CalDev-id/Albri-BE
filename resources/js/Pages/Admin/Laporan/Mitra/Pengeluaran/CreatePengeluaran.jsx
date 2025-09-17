@@ -9,19 +9,23 @@ import { useEffect } from "react";
 const CreatePengeluaran = () => {
 
     const { users } = usePage().props;
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     const { data, setData, post, errors } = useForm({
         hari: "Senin",
-        tanggal: "",
-        mitras: [{ mitra_id: "", gaji: "" }], // bisa tambah banyak
-        atk: "",
-        intensif: "",
-        lisensi: "",
-        lainlain: "",
+        tanggal: today,
+        mitras: [{ mitra_id: "", gaji: 0 }], // bisa tambah banyak
+        atk: 0,
+        intensif: 0,
+        lisensi: 0,
+        lainlain: 0,
     });
 
     // Tambah input mitra baru
     const addMitra = () => {
-        setData("mitras", [...data.mitras, { mitra_id: "", gaji: "" }]);
+        setData("mitras", [...data.mitras, { mitra_id: "", gaji: 0 }]);
     };
 
     // Ubah value mitra
@@ -31,7 +35,11 @@ const CreatePengeluaran = () => {
         setData("mitras", updated);
     };
 
-
+    const removeMitra = (index) => {
+        const currentMitras = data.mitras || [];
+        const updatedMitras = currentMitras.filter((_, i) => i !== index);
+        setData("mitras", updatedMitras);
+    };
 
 
     const handlesubmit = (e) => {
@@ -107,15 +115,28 @@ const CreatePengeluaran = () => {
                                         <div className="w-full xl:w-1/2">
                                             <input
                                                 type="number"
-                                                value={mitra.gaji}
+                                                value={mitra.gaji || 0}
                                                 onChange={(e) => updateMitra(index, "gaji", e.target.value)}
                                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                                 placeholder="Gaji"
                                             />
                                         </div>
+
+                                        {data.mitras.length > 1 && (
+                                            <div className="xl:w-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeMitra(index)}
+                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
+                                                    title="Hapus Guru"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
-                                <button type="button" onClick={addMitra} className="mb-4 rounded bg-meta-3 px-6 py-2 text-white hover:bg-opacity-90">
+                                <button type="button" onClick={addMitra} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
                                     + Tambah Mitra
                                 </button>
                             </div>
@@ -128,7 +149,7 @@ const CreatePengeluaran = () => {
                                             ATK
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.atk}
                                             onChange={(e) => setData("atk", e.target.value)}
                                             placeholder=""
@@ -142,7 +163,7 @@ const CreatePengeluaran = () => {
                                             Intensif
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.intensif}
                                             onChange={(e) => setData("intensif", e.target.value)}
                                             placeholder=""
@@ -159,7 +180,7 @@ const CreatePengeluaran = () => {
                                             Lisensi
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.lisensi}
                                             onChange={(e) => setData("lisensi", e.target.value)}
                                             placeholder=""

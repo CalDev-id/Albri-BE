@@ -4,7 +4,6 @@ import DefaultLayout from "@/Layouts/DefaultLayout";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
 import "flowbite/dist/flowbite.min.js";
-import { Inertia } from "@inertiajs/inertia";
 import TablePemasukan from "./TablePemasukanRekap";
 import TablePengeluaran from "./TablePengeluaranRekap";
 
@@ -60,6 +59,336 @@ const Laporan = () => {
         laporanCabang?.data || [],
         laporanPengeluaranCabang?.data || []
     );
+
+    // Fungsi untuk download Excel gabungan dalam 1 halaman
+    const downloadExcelGabungan = (laporanCabang, laporanPengeluaranCabang, pakets, judul) => {
+        const workbook = XLSX.utils.book_new();
+        const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+        const safePakets = pakets || [];
+
+        // Data gabungan dalam satu sheet
+        const dataGabungan = [];
+
+        // Hitung posisi header pengeluaran berdasarkan jumlah kolom pemasukan
+        // Kolom pemasukan: Hari, Tanggal, Nama, Cabang + jumlah paket + 7 kolom lainnya (Total Biaya, Daftar, Modul, Kaos, Kas, Lain Lain, Jumlah) + 1 kolom jarak
+        const jumlahKolomPemasukan = 4 + safePakets.length + 7 + 1; // 4 kolom awal + paket dinamis + 7 kolom akhir + 1 jarak
+
+        // Buat array header utama dengan posisi yang tepat
+        const headerUtama = [`LAPORAN PEMASUKAN BULAN ${bulan.toUpperCase()} ${tahun}`];
+        // Isi kolom kosong sampai posisi pembuat laporan (kolom pertama pengeluaran)
+        for (let i = 1; i < jumlahKolomPemasukan; i++) {
+            headerUtama.push("");
+        }
+        // Tambahkan header pengeluaran di posisi yang tepat
+        headerUtama.push(`LAPORAN PENGELUARAN BULAN ${bulan.toUpperCase()}`);
+
+        dataGabungan.push(headerUtama);
+
+        // Header kolom pemasukan
+        const headerPemasukan = ["Hari", "Tanggal", "Nama", "Cabang"];
+        safePakets.forEach(p => {
+            headerPemasukan.push(`${p.nama_paket} (${p.harga.toLocaleString()})`);
+        });
+        headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", ""); // Tambah kolom jarak kosong
+
+        // Header kolom pengeluaran
+        const headerPengeluaran = ["Pembuat Laporan", "Cabang", "Detail Gaji Guru", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Laba"];
+
+        // Gabungkan header
+        const headerLengkap = [...headerPemasukan, ...headerPengeluaran];
+        dataGabungan.push(headerLengkap);
+
+        // Helper functions untuk pemasukan
+        const getJumlahPaketInRow = (laporan, paketId) => {
+            if (!laporan.pakets) return 0;
+            const found = laporan.pakets.find((p) => p.id === paketId);
+            return found ? n(found.pivot?.jumlah) : 0;
+        };
+
+        // Buat map untuk data harian
+        const hariMap = new Map();
+
+        // Kumpulkan data pemasukan
+        if (laporanCabang && laporanCabang.data) {
+            laporanCabang.data.forEach(lap => {
+                const key = lap.tanggal;
+                if (!hariMap.has(key)) {
+                    hariMap.set(key, {
+                        hari: lap.hari,
+                        tanggal: lap.tanggal,
+                        pemasukan: {
+                            nama: [],
+                            cabang: [],
+                            pakets: {},
+                            totalbiaya: 0,
+                            daftar: 0,
+                            modul: 0,
+                            kaos: 0,
+                            kas: 0,
+                            lainlain: 0,
+                            total: 0
+                        },
+                        pengeluaran: {
+                            pembuat: [],
+                            cabang: [],
+                            gajiDetail: [],
+                            atk: 0,
+                            sewa: 0,
+                            intensif: 0,
+                            lisensi: 0,
+                            thr: 0,
+                            lainlain: 0,
+                            total: 0
+                        }
+                    });
+                }
+
+                const dayData = hariMap.get(key);
+
+                // Kumpulkan nama pembuat pemasukan
+                if (lap.user && lap.user.name) {
+                    if (!dayData.pemasukan.nama.includes(lap.user.name)) {
+                        dayData.pemasukan.nama.push(lap.user.name);
+                    }
+                }
+
+                // Kumpulkan cabang pemasukan
+                if (lap.cabang && lap.cabang.nama) {
+                    if (!dayData.pemasukan.cabang.includes(lap.cabang.nama)) {
+                        dayData.pemasukan.cabang.push(lap.cabang.nama);
+                    }
+                }
+
+                // Akumulasi data pemasukan
+                safePakets.forEach(p => {
+                    if (!dayData.pemasukan.pakets[p.id]) dayData.pemasukan.pakets[p.id] = 0;
+                    dayData.pemasukan.pakets[p.id] += getJumlahPaketInRow(lap, p.id);
+                });
+
+                dayData.pemasukan.totalbiaya += n(lap.totalbiaya);
+                dayData.pemasukan.daftar += n(lap.daftar);
+                dayData.pemasukan.modul += n(lap.modul);
+                dayData.pemasukan.kaos += n(lap.kaos);
+                dayData.pemasukan.kas += n(lap.kas);
+                dayData.pemasukan.lainlain += n(lap.lainlain);
+                dayData.pemasukan.total += n(lap.totalpemasukan);
+            });
+        }
+
+        // Kumpulkan data pengeluaran
+        if (laporanPengeluaranCabang && laporanPengeluaranCabang.data) {
+            laporanPengeluaranCabang.data.forEach(pengeluaran => {
+                const key = pengeluaran.tanggal;
+                if (!hariMap.has(key)) {
+                    hariMap.set(key, {
+                        hari: pengeluaran.hari,
+                        tanggal: pengeluaran.tanggal,
+                        pemasukan: {
+                            nama: [],
+                            cabang: [],
+                            pakets: {},
+                            totalbiaya: 0,
+                            daftar: 0,
+                            modul: 0,
+                            kaos: 0,
+                            kas: 0,
+                            lainlain: 0,
+                            total: 0
+                        },
+                        pengeluaran: {
+                            pembuat: [],
+                            cabang: [],
+                            gajiDetail: [],
+                            atk: 0,
+                            sewa: 0,
+                            intensif: 0,
+                            lisensi: 0,
+                            thr: 0,
+                            lainlain: 0,
+                            total: 0
+                        }
+                    });
+                }
+
+                const dayData = hariMap.get(key);
+
+                // Kumpulkan nama pembuat pengeluaran
+                if (pengeluaran.user && pengeluaran.user.name) {
+                    if (!dayData.pengeluaran.pembuat.includes(pengeluaran.user.name)) {
+                        dayData.pengeluaran.pembuat.push(pengeluaran.user.name);
+                    }
+                }
+
+                // Kumpulkan cabang pengeluaran
+                if (pengeluaran.cabang && pengeluaran.cabang.nama) {
+                    if (!dayData.pengeluaran.cabang.includes(pengeluaran.cabang.nama)) {
+                        dayData.pengeluaran.cabang.push(pengeluaran.cabang.nama);
+                    }
+                }
+
+                // Kumpulkan detail gaji guru (sistem dinamis)
+                if (pengeluaran.gurus && pengeluaran.gurus.length > 0) {
+                    pengeluaran.gurus.forEach(guru => {
+                        const gajiInfo = `${guru.guru_nama}: Rp ${(guru.gaji || 0).toLocaleString()}`;
+                        if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
+                            dayData.pengeluaran.gajiDetail.push(gajiInfo);
+                        }
+                    });
+                }
+
+                // Akumulasi data pengeluaran
+                dayData.pengeluaran.atk += n(pengeluaran.atk);
+                dayData.pengeluaran.sewa += n(pengeluaran.sewa);
+                dayData.pengeluaran.intensif += n(pengeluaran.intensif);
+                dayData.pengeluaran.lisensi += n(pengeluaran.lisensi);
+                dayData.pengeluaran.thr += n(pengeluaran.thr);
+                dayData.pengeluaran.lainlain += n(pengeluaran.lainlain);
+                dayData.pengeluaran.total += n(pengeluaran.totalpengeluaran);
+            });
+        }
+
+        // Convert map to array dan sort by date
+        const sortedData = Array.from(hariMap.values()).sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+        // Buat baris data
+        let totalPemasukanBulan = 0;
+        let totalPengeluaranBulan = 0;
+        const totalPaketBulan = {};
+
+        safePakets.forEach(p => {
+            totalPaketBulan[p.id] = 0;
+        });
+
+        sortedData.forEach(dayData => {
+            const row = [];
+
+            // Kolom pemasukan
+            row.push(dayData.hari);
+            row.push(dayData.tanggal);
+            row.push(dayData.pemasukan.nama.join(", ") || "N/A"); // Nama pembuat pemasukan
+            row.push(dayData.pemasukan.cabang.join(", ") || "N/A"); // Cabang pemasukan
+
+            // Kolom paket
+            safePakets.forEach(p => {
+                const jumlahPaket = dayData.pemasukan.pakets[p.id] || 0;
+                row.push(jumlahPaket);
+                totalPaketBulan[p.id] += jumlahPaket;
+            });
+
+            row.push(dayData.pemasukan.totalbiaya);
+            row.push(dayData.pemasukan.daftar);
+            row.push(dayData.pemasukan.modul);
+            row.push(dayData.pemasukan.kaos);
+            row.push(dayData.pemasukan.kas);
+            row.push(dayData.pemasukan.lainlain);
+            row.push(dayData.pemasukan.total);
+            row.push(""); // Kolom jarak kosong
+            totalPemasukanBulan += dayData.pemasukan.total;
+
+            // Kolom pengeluaran
+            row.push(dayData.pengeluaran.pembuat.join(", ") || "N/A"); // Nama pembuat pengeluaran
+            row.push(dayData.pengeluaran.cabang.join(", ") || "N/A"); // Cabang pengeluaran
+            row.push(dayData.pengeluaran.gajiDetail.join("; ") || "N/A"); // Detail gaji guru dinamis
+            row.push(dayData.pengeluaran.atk);
+            row.push(dayData.pengeluaran.sewa);
+            row.push(dayData.pengeluaran.intensif);
+            row.push(dayData.pengeluaran.lisensi);
+            row.push(dayData.pengeluaran.thr);
+            row.push(dayData.pengeluaran.lainlain);
+            row.push(dayData.pengeluaran.total);
+            row.push(dayData.pemasukan.total - dayData.pengeluaran.total); // Laba harian
+            totalPengeluaranBulan += dayData.pengeluaran.total;
+
+            dataGabungan.push(row);
+        });
+
+        // Baris total
+        const totalRow = [];
+        totalRow.push("TOTAL");
+        totalRow.push("");
+        totalRow.push(""); // Kolom nama
+        totalRow.push(""); // Kolom cabang
+
+        // Total paket
+        safePakets.forEach(p => {
+            totalRow.push(totalPaketBulan[p.id]);
+        });
+
+        // Total pemasukan lainnya (hitung dari data asli)
+        const totalTotalBiaya = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.totalbiaya), 0) || 0;
+        const totalDaftar = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.daftar), 0) || 0;
+        const totalModul = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.modul), 0) || 0;
+        const totalKaos = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.kaos), 0) || 0;
+        const totalKas = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.kas), 0) || 0;
+        const totalLainLainPemasukan = laporanCabang?.data?.reduce((sum, lap) => sum + n(lap.lainlain), 0) || 0;
+
+        totalRow.push(totalTotalBiaya);
+        totalRow.push(totalDaftar);
+        totalRow.push(totalModul);
+        totalRow.push(totalKaos);
+        totalRow.push(totalKas);
+        totalRow.push(totalLainLainPemasukan);
+        totalRow.push(totalProfit);
+        totalRow.push(""); // Kolom jarak kosong
+
+        // Total pengeluaran
+        totalRow.push(""); // Kolom pembuat laporan
+        totalRow.push(""); // Kolom cabang
+
+        // Total gaji dari semua guru (sistem dinamis)
+        let totalGajiSemuaGuru = 0;
+        if (laporanPengeluaranCabang?.data) {
+            laporanPengeluaranCabang.data.forEach(p => {
+                if (p.gurus && p.gurus.length > 0) {
+                    totalGajiSemuaGuru += p.gurus.reduce((sum, guru) => sum + (guru.gaji || 0), 0);
+                } else {
+                    totalGajiSemuaGuru += n(p.gaji);
+                }
+            });
+        }
+        totalRow.push(`Total Gaji: Rp ${totalGajiSemuaGuru.toLocaleString()}`); // Detail total gaji
+
+        const totalAtk = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.atk), 0) || 0;
+        const totalSewa = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.sewa), 0) || 0;
+        const totalIntensif = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.intensif), 0) || 0;
+        const totalLisensi = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.lisensi), 0) || 0;
+        const totalThr = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.thr), 0) || 0;
+        const totalLainLainPengeluaran = laporanPengeluaranCabang?.data?.reduce((sum, p) => sum + n(p.lainlain), 0) || 0;
+
+        totalRow.push(totalAtk);
+        totalRow.push(totalSewa);
+        totalRow.push(totalIntensif);
+        totalRow.push(totalLisensi);
+        totalRow.push(totalThr);
+        totalRow.push(totalLainLainPengeluaran);
+        totalRow.push(totalOutcome);
+        totalRow.push(totalLaba); // Total Laba
+
+        dataGabungan.push(totalRow);
+
+        // Buat worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(dataGabungan);
+
+        // Set column widths
+        const wscols = headerLengkap.map(() => ({ width: 15 }));
+        worksheet['!cols'] = wscols;
+
+        // Apply bold formatting untuk baris total (baris terakhir)
+        const totalRowIndex = dataGabungan.length - 1;
+        for (let col = 0; col < headerLengkap.length; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: totalRowIndex, c: col });
+            if (!worksheet[cellRef]) worksheet[cellRef] = {};
+            worksheet[cellRef].s = {
+                font: { bold: true }
+            };
+        }
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Gabungan");
+
+        // Download file
+        const fileName = `Rekap_Gabungan_${judul}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    };
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
@@ -167,6 +496,19 @@ const Laporan = () => {
                         />
                     </svg>
                 </CardDataStats>
+            </div>
+
+            {/* Tombol Download Excel Gabungan */}
+            <div className="flex justify-center mb-6">
+                <button
+                    onClick={() => downloadExcelGabungan(laporanCabang, laporanPengeluaranCabang, pakets, `${bulan}_${tahun}`)}
+                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded flex items-center"
+                >
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Download Excel Gabungan
+                </button>
             </div>
 
             <TablePemasukan laporanCabang={laporanCabang} pakets={pakets || []} bulan={bulan} tahun={tahun} nextMonth={nextMonth} nextYear={nextYear} prevMonth={prevMonth} prevYear={prevYear} />

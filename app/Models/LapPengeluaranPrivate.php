@@ -33,7 +33,13 @@ class LapPengeluaranPrivate extends Model
 
     public function user()
     {
-
-        return $this->belongsTo(User::class, 'guru_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function privateBimbles()
+    {
+        return $this->belongsToMany(Private_bimble::class, 'pengeluaran_private_pivot', 'pengeluaran_id', 'private_bimble_id')
+            ->withPivot('gaji');
+    }
+    
 }

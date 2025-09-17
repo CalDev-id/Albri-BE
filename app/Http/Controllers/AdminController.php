@@ -214,7 +214,7 @@ class AdminController extends Controller
         ])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
-            ->paginate(50, ['*'], 'laporanCabangPage');
+            ->paginate(5000, ['*'], 'laporanCabangPage');
 
         $laporanPengeluaranCabang = LapPengeluaranCabang::with([
             'user',
@@ -224,7 +224,7 @@ class AdminController extends Controller
         ])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
-            ->paginate(50, ['*'], 'laporanPengeluaranCabangPage');
+            ->paginate(5000, ['*'], 'laporanPengeluaranCabangPage');
 
 
         // daftar paket untuk header kolom dinamis
@@ -255,17 +255,22 @@ class AdminController extends Controller
             'cabang_id' => 'required|exists:cabangalbris,id',
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'pakets' => 'required|array', // contoh: [1 => 5, 2 => 3]
+            'pakets' => 'nullable|array', // contoh: [1 => 5, 2 => 3]
             'pakets.*' => 'integer|min:0',
-            'daftar' => 'required|integer',
-            'modul' => 'required|integer',
-            'kaos' => 'required|integer',
-            'kas' => 'required|integer',
-            'lainlain' => 'required|integer',
+            'daftar' => 'required|integer|min:0',
+            'modul' => 'required|integer|min:0',
+            'kaos' => 'required|integer|min:0',
+            'kas' => 'required|integer|min:0',
+            'lainlain' => 'required|integer|min:0',
         ]);
 
+        // Pastikan pakets array tidak null
+        $validatedData['pakets'] = $validatedData['pakets'] ?? [];
+
         // ambil data paket yang dipilih
-        $pakets = Paket::whereIn('id', array_keys($validatedData['pakets']))->get();
+        $pakets = count($validatedData['pakets']) > 0
+            ? Paket::whereIn('id', array_keys($validatedData['pakets']))->get()
+            : collect();
 
         // hitung total biaya dari pivot
         $totalbiaya = 0;
@@ -408,6 +413,19 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.cabang');
     }
 
+    public function bulkDestroyCabang(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada item yang dipilih');
+        }
+
+        LapPemasukanCabang::whereIn('id', $ids)->delete();
+
+        return back()->with('success', count($ids) . ' item berhasil dihapus');
+    }
+
 
 
     /* -----------------------------------------
@@ -436,7 +454,7 @@ class AdminController extends Controller
             'cabang_id' => 'required|exists:cabangalbris,id',
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'gurus' => 'required|array', // contoh: [ [guru_id => 1, gaji => 500000], ... ]
+            'gurus' => 'nullable|array', // contoh: [ [guru_id => 1, gaji => 500000], ... ]
             // 'gurus.*.guru_id' => 'required|exists:users,id',
             'gurus.*.guru_id' => 'required|string',
             'gurus.*.gaji' => 'required|integer|min:0',
@@ -447,6 +465,9 @@ class AdminController extends Controller
             'thr' => 'required|integer|min:0',
             'lainlain' => 'required|integer|min:0',
         ]);
+
+        // Pastikan gurus array tidak null
+        $validatedData['gurus'] = $validatedData['gurus'] ?? [];
 
         // hitung total gaji semua guru
         $totalGaji = collect($validatedData['gurus'])->sum('gaji');
@@ -590,6 +611,19 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.cabang');
     }
 
+    public function bulkDestroyPengeluaranCabang(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada item yang dipilih');
+        }
+
+        LapPengeluaranCabang::whereIn('id', $ids)->delete();
+
+        return back()->with('success', count($ids) . ' item berhasil dihapus');
+    }
+
 
 
     /* -----------------------------------------
@@ -644,17 +678,22 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'pakets' => 'required|array', // contoh: [1 => 5, 2 => 3]
+            'pakets' => 'nullable|array', // contoh: [1 => 5, 2 => 3]
             'pakets.*' => 'integer|min:0',
-            'daftar' => 'required|integer',
-            'modul' => 'required|integer',
-            'kaos' => 'required|integer',
-            'kas' => 'required|integer',
-            'lainlain' => 'required|integer',
+            'daftar' => 'required|integer|min:0',
+            'modul' => 'required|integer|min:0',
+            'kaos' => 'required|integer|min:0',
+            'kas' => 'required|integer|min:0',
+            'lainlain' => 'required|integer|min:0',
         ]);
 
+        // Pastikan pakets array tidak null
+        $validatedData['pakets'] = $validatedData['pakets'] ?? [];
+
         // ambil data paket yang dipilih
-        $pakets = PaketMitra::whereIn('id', array_keys($validatedData['pakets']))->get();
+        $pakets = count($validatedData['pakets']) > 0
+            ? PaketMitra::whereIn('id', array_keys($validatedData['pakets']))->get()
+            : collect();
 
         // hitung total biaya dari pivot
         $totalbiaya = 0;
@@ -712,7 +751,6 @@ class AdminController extends Controller
 
     public function updatelaporanmitra(Request $request, $id): RedirectResponse
     {
-        dd($request->all());
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
@@ -777,6 +815,19 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.mitra');
     }
 
+    public function bulkDestroyMitra(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada item yang dipilih');
+        }
+
+        LapPemasukanMitra::whereIn('id', $ids)->delete();
+
+        return back()->with('success', count($ids) . ' item berhasil dihapus');
+    }
+
     // Laporan Pengeluaran Mitra Admin
     public function createpengeluaranmitralaporan(): Response
     {
@@ -793,7 +844,7 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'mitras' => 'required|array', // contoh: [ [mitra_id => nama, gaji => 500000], ... ]
+            'mitras' => 'nullable|array', // contoh: [ [mitra_id => nama, gaji => 500000], ... ]
             'mitras.*.mitra_id' => 'required|string',
             'mitras.*.gaji' => 'required|integer|min:0',
             'atk' => 'required|integer|min:0',
@@ -801,6 +852,9 @@ class AdminController extends Controller
             'lisensi' => 'required|integer|min:0',
             'lainlain' => 'required|integer|min:0',
         ]);
+
+        // Pastikan mitras array tidak null
+        $validatedData['mitras'] = $validatedData['mitras'] ?? [];
 
         // hitung total gaji semua mitra
         $totalGaji = collect($validatedData['mitras'])->sum('gaji');
@@ -908,6 +962,19 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.mitra');
     }
 
+    public function bulkDestroyPengeluaranMitra(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada item yang dipilih');
+        }
+
+        LapPengeluaranMitra::whereIn('id', $ids)->delete();
+
+        return back()->with('success', count($ids) . ' item berhasil dihapus');
+    }
+
     /* -----------------------------------------
             Setting Harga Paket Mitra
         -------------------------------------------- */
@@ -984,13 +1051,13 @@ class AdminController extends Controller
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
 
-        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user', 'privateBimbles',])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
 
         $laporanPrivateFull = LapPemasukanPrivate::all();
-        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
+        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with(['user', 'privateBimbles'])->get();
 
         // Ambil data paket private untuk header tabel
         $paketPrivate = PaketPrivate::orderBy('nama_paket')->get();
@@ -1021,14 +1088,17 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'pakets' => 'required|array', // Dynamic paket data
+            'pakets' => 'nullable|array', // Dynamic paket data
             'pakets.*' => 'integer|min:0', // Each paket value must be integer >= 0
-            'daftar' => 'required|integer',
-            'modul' => 'required|integer',
-            'kaos' => 'required|integer',
-            'kas' => 'required|integer',
-            'lainlain' => 'required|integer',
+            'daftar' => 'required|integer|min:0',
+            'modul' => 'required|integer|min:0',
+            'kaos' => 'required|integer|min:0',
+            'kas' => 'required|integer|min:0',
+            'lainlain' => 'required|integer|min:0',
         ]);
+
+        // Pastikan pakets array tidak null
+        $validatedData['pakets'] = $validatedData['pakets'] ?? [];
 
         // Calculate total biaya using dynamic pakets
         $totalbiaya = 0;
@@ -1213,7 +1283,7 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'gurus' => 'required|array', // Dynamic gurus array
+            'gurus' => 'nullable|array', // Dynamic gurus array
             'gurus.*.guru_id' => 'required|string', // Can be user ID or name
             'gurus.*.gaji' => 'required|integer|min:0',
             'atk' => 'required|integer|min:0',
@@ -1223,6 +1293,9 @@ class AdminController extends Controller
             'thr' => 'required|integer|min:0',
             'lainlain' => 'required|integer|min:0',
         ]);
+
+        // Pastikan gurus array tidak null
+        $validatedData['gurus'] = $validatedData['gurus'] ?? [];
 
         // Calculate total gaji from all gurus
         $totalGaji = collect($validatedData['gurus'])->sum('gaji');
@@ -1358,6 +1431,28 @@ class AdminController extends Controller
         return redirect()->route('admin.laporan.private');
     }
 
+    public function bulkDestroyPrivate(Request $request)
+    {
+        $request->validate([
+            'ids' => 'nullable|array',
+            'ids.*' => 'exists:lap_pemasukan_private,id'
+        ]);
+
+        LapPemasukanPrivate::whereIn('id', $request->ids)->delete();
+        return back()->with('success', 'Data berhasil dihapus');
+    }
+
+    public function bulkDestroyPengeluaranPrivate(Request $request)
+    {
+        $request->validate([
+            'ids' => 'nullable|array',
+            'ids.*' => 'exists:lap_pengeluaran_private,id'
+        ]);
+
+        LapPengeluaranPrivate::whereIn('id', $request->ids)->delete();
+        return back()->with('success', 'Data berhasil dihapus');
+    }
+
 
 
     /* -----------------------------------------
@@ -1427,11 +1522,15 @@ class AdminController extends Controller
         $tahun = $request->input('tahun', date('Y'));
 
         // Filter data berdasarkan bulan dan tahun
-        $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
+        $laporanMitra = LapPemasukanMitra::with([
+            'user',
+            'pakets:id,nama_paket,harga',
+        ])
+            ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
-        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with(['user', 'mitras'])
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
@@ -1468,11 +1567,55 @@ class AdminController extends Controller
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
-        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user'])
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanPrivatePage');
+            ->get()
+            ->map(function ($pengeluaran) {
+                // Pastikan field gurus ter-cast dengan benar (sudah diatur di model)
+                $gurus = $pengeluaran->gurus;
+
+                // Jika gurus kosong atau null, coba buat dari data legacy
+                if (empty($gurus) && $pengeluaran->guru_id && $pengeluaran->gaji) {
+                    // Cari nama user berdasarkan guru_id jika itu adalah ID
+                    $guruName = $pengeluaran->guru_id;
+                    if (is_numeric($pengeluaran->guru_id)) {
+                        $user = \App\Models\User::find($pengeluaran->guru_id);
+                        if ($user) {
+                            $guruName = $user->name;
+                        }
+                    }
+
+                    $pengeluaran->gurus = [
+                        [
+                            'guru_id' => $guruName,
+                            'gaji' => $pengeluaran->gaji
+                        ]
+                    ];
+                }
+
+                return $pengeluaran;
+            })
+            ->groupBy(function ($item) {
+                return $item->tanggal;
+            })
+            ->map(function ($items) {
+                return $items->values();
+            });
+
+        // Convert back to paginated format for frontend compatibility
+        $laporanPengeluaranPrivateFlat = $laporanPengeluaranPrivate->flatten();
+        $currentPage = 1;
+        $perPage = 50; // Show more items per page for better Excel generation
+        $currentItems = $laporanPengeluaranPrivateFlat->slice(($currentPage - 1) * $perPage, $perPage);
+        $laporanPengeluaranPrivate = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $laporanPengeluaranPrivateFlat->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'pageName' => 'laporanPrivatePage']
+        );
         // Ambil data paket private untuk header tabel
         $paketPrivate = PaketPrivate::orderBy('nama_paket')->get();
 

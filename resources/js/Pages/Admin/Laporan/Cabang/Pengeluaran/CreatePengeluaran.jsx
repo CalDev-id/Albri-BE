@@ -9,24 +9,28 @@ import { useEffect } from "react";
 const CreatePengeluaran = () => {
 
     const { cabangs, users } = usePage().props;
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
     const { data, setData, post, errors } = useForm({
-        hari: "senin",
-        tanggal: "",
+        hari: "Senin",
+        tanggal: today,
         cabang_id: cabangs.length > 0 ? cabangs[0].id : "", // Set the default value to the first cabang's id if available
         guru_id: users.length > 0 ? users[0].id : "", // Set the default value to the first user's id if available
-        gurus: [{ guru_id: "", gaji: "" }], // bisa tambah banyak
-        atk: "",
-        sewa: "",
-        intensif: "",
-        lisensi: "",
-        thr: "",
-        lainlain: "",
+        gurus: [{ guru_id: "", gaji: 0 }], // bisa tambah banyak
+        atk: 0,
+        sewa: 0,
+        intensif: 0,
+        lisensi: 0,
+        thr: 0,
+        lainlain: 0,
 
     });
 
     // Tambah input guru baru
     const addGuru = () => {
-        setData("gurus", [...data.gurus, { guru_id: "", gaji: "" }]);
+        setData("gurus", [...data.gurus, { guru_id: "", gaji: 0 }]);
     };
 
     // Hapus input guru
@@ -149,7 +153,7 @@ const CreatePengeluaran = () => {
                                         <div className="w-full xl:w-1/2">
                                             <input
                                                 type="number"
-                                                value={guru.gaji}
+                                                value={guru.gaji || 0}
                                                 onChange={(e) => updateGuru(index, "gaji", e.target.value)}
                                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                                 placeholder="Gaji"
