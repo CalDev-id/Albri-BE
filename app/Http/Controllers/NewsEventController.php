@@ -69,8 +69,17 @@ class NewsEventController extends Controller
         }
 
         // Set published_at jika status published
-        if ($request->status === 'published' && !$request->published_at) {
-            $data['published_at'] = now();
+        if ($request->status === 'published') {
+            if ($request->published_at) {
+                // Jika user mengisi tanggal, gunakan tanggal tersebut
+                $data['published_at'] = $request->published_at;
+            } else {
+                // Jika tidak ada tanggal, gunakan waktu sekarang
+                $data['published_at'] = now();
+            }
+        } else {
+            // Jika draft, hapus published_at
+            $data['published_at'] = null;
         }
 
         NewsEvent::create($data);
@@ -149,9 +158,19 @@ class NewsEventController extends Controller
             $data['featured_image'] = $request->file('featured_image')->store('news-events', 'public');
         }
 
-        // Set published_at jika status published dan belum ada
-        if ($request->status === 'published' && !$newsEvent->published_at && !$request->published_at) {
-            $data['published_at'] = now();
+        // Set published_at berdasarkan status
+        if ($request->status === 'published') {
+            if ($request->published_at) {
+                // Jika user mengisi tanggal, gunakan tanggal tersebut
+                $data['published_at'] = $request->published_at;
+            } else if (!$newsEvent->published_at) {
+                // Jika belum pernah publish dan tidak ada tanggal, gunakan sekarang
+                $data['published_at'] = now();
+            }
+            // Jika sudah ada published_at sebelumnya, biarkan tetap
+        } else {
+            // Jika status draft, set published_at ke null
+            $data['published_at'] = null;
         }
 
         $newsEvent->update($data);
