@@ -102,6 +102,9 @@ Route::put('/admin/cabang/{id}', [CabangController::class, 'update'])
 Route::delete('/admin/cabang/{id}', [CabangController::class, 'destroy'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.cabangs.destroy');
+Route::delete('/admin/cabang/{id}/force', [CabangController::class, 'forceDestroy'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.force-destroy');
 
 
 Route::get('/admin/mitra', [AdminController::class, 'mitra'])
