@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import { Head, Link, router } from "@inertiajs/react";
-import DefaultLayout from "@/Layouts/DefaultLayout";
+// Entire file content removed
 import { FaSearch, FaFileExcel, FaFilePdf, FaCalendarWeek, FaArrowLeft } from "react-icons/fa";
 
 const GajiGuruWeeklyReport = ({ gajiGuru, filters, week_start, week_end }) => {

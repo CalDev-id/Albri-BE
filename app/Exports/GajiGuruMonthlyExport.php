@@ -21,101 +21,140 @@ class GajiGuruMonthlyExport implements FromArray, WithHeadings, WithStyles, With
     public function array(): array
     {
         $year = $this->filters['year'] ?? now()->year;
-        
-        // Get all data for the selected year grouped by month
-        $gajiGuru = GajiGuru::whereYear('tanggal', $year)
-            ->orderBy('tanggal', 'asc')
-            ->get()
-            ->groupBy(function($item) {
-                return $item->tanggal->format('m');
-            });
-
-        $data = [];
+        $monthFilter = isset($this->filters['month']) ? $this->filters['month'] : null;
+        $gurus = \App\Models\User::all();
         $bulanIndonesia = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
-        // Process each month
-        for ($month = 1; $month <= 12; $month++) {
+        // Get all dates for the year, filter by month if needed
+        $dates = collect();
+        $cabangDates = \App\Models\LapPengeluaranCabang::select('tanggal')->distinct()->get();
+        foreach ($cabangDates as $date) { $dates->push($date->tanggal); }
+        $mitraDates = \App\Models\LapPengeluaranMitra::select('tanggal')->distinct()->get();
+        foreach ($mitraDates as $date) { $dates->push($date->tanggal); }
+        $privateDates = \App\Models\LapPengeluaranPrivate::select('tanggal')->distinct()->get();
+        foreach ($privateDates as $date) { $dates->push($date->tanggal); }
+        $uniqueDates = $dates->unique()->sort()->filter(function ($date) use ($year, $monthFilter) {
+            $isYear = date('Y', strtotime($date)) == $year;
+            $isMonth = $monthFilter ? date('m', strtotime($date)) == sprintf('%02d', $monthFilter) : true;
+            return $isYear && $isMonth;
+        })->values();
+
+        $data = [];
+        $monthList = $monthFilter ? [intval($monthFilter)] : range(1, 12);
+        foreach ($monthList as $month) {
             $monthKey = sprintf('%02d', $month);
-            $monthData = $gajiGuru->get($monthKey, collect());
-            
-            if ($monthData->count() > 0) {
-                // Add month header
-                $data[] = [
+            $monthDates = $uniqueDates->filter(function ($date) use ($monthKey) {
+                return date('m', strtotime($date)) == $monthKey;
+            });
+            if ($monthDates->count() > 0) {
+                // Always start each month section with the BULAN header at row 1 of that section
+                $monthSection = [];
+                $monthSection[] = [
                     'BULAN ' . strtoupper($bulanIndonesia[$month]) . ' ' . $year,
-                    '', '', '', '', '', '', '', '', '', '', '', '', ''
-                ];
-                
-                // Add month data
-                foreach ($monthData as $item) {
-                    $data[] = [
-                        $item->hari,
-                        $item->tanggal->format('d/m/Y'),
-                        $item->gina ?: 0,
-                        $item->amel ?: 0,
-                        $item->lia ?: 0,
-                        $item->siti ?: 0,
-                        $item->nurul ?: 0,
-                        $item->hikma ?: 0,
-                        $item->safa ?: 0,
-                        $item->khoir ?: 0,
-                        $item->sarah ?: 0,
-                        $item->indri ?: 0,
-                        $item->aminah ?: 0,
-                        $item->rina ?: 0,
-                        $item->total ?: 0,
-                    ];
-                }
-                
-                // Add monthly total
-                $data[] = [
-                    'JUMLAH',
                     '',
-                    $monthData->sum('gina'),
-                    $monthData->sum('amel'),
-                    $monthData->sum('lia'),
-                    $monthData->sum('siti'),
-                    $monthData->sum('nurul'),
-                    $monthData->sum('hikma'),
-                    $monthData->sum('safa'),
-                    $monthData->sum('khoir'),
-                    $monthData->sum('sarah'),
-                    $monthData->sum('indri'),
-                    $monthData->sum('aminah'),
-                    $monthData->sum('rina'),
-                    $monthData->sum('total'),
+                    ...array_fill(0, $gurus->count(), ''),
+                    ''
                 ];
-                
-                // Add empty row between months
-                $data[] = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+                foreach ($monthDates as $date) {
+                    $row = [
+                        date('l', strtotime($date)),
+                        date('d/m/Y', strtotime($date)),
+                    ];
+                    $total = 0;
+                    foreach ($gurus as $guru) {
+                        // Sum all gaji for this guru on this date from all sources
+                        $guruTotal = 0;
+                        // Cabang
+                        $cabangReports = \App\Models\LapPengeluaranCabang::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($cabangReports as $report) {
+                            $cabangGurus = \App\Models\LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                            foreach ($cabangGurus as $cabangGuru) {
+                                $guruTotal += $cabangGuru->gaji;
+                            }
+                        }
+                        // Mitra
+                        $mitraReports = \App\Models\LapPengeluaranMitra::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($mitraReports as $report) {
+                            $mitraGurus = \App\Models\LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                            foreach ($mitraGurus as $mitraGuru) {
+                                $guruTotal += $mitraGuru->gaji;
+                            }
+                        }
+                        // Private
+                        $privateRecords = \App\Models\LapPengeluaranPrivate::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($privateRecords as $record) {
+                            if ($record->gurus) {
+                                foreach ($record->gurus as $guruData) {
+                                    $guruTotal += $guruData['gaji'] ?? 0;
+                                }
+                            }
+                        }
+                        $row[] = $guruTotal;
+                        $total += $guruTotal;
+                    }
+                    $row[] = $total;
+                    $monthSection[] = $row;
+                }
+                // Monthly total
+                $rowTotal = ['JUMLAH', ''];
+                $grandTotal = 0;
+                foreach ($gurus as $guru) {
+                    $sum = 0;
+                    foreach ($monthDates as $date) {
+                        // Sum all gaji for this guru on this date from all sources
+                        $guruTotal = 0;
+                        $cabangReports = \App\Models\LapPengeluaranCabang::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($cabangReports as $report) {
+                            $cabangGurus = \App\Models\LaporanPengeluaranGuru::where('lap_pengeluaran_id', $report->id)->get();
+                            foreach ($cabangGurus as $cabangGuru) {
+                                $guruTotal += $cabangGuru->gaji;
+                            }
+                        }
+                        $mitraReports = \App\Models\LapPengeluaranMitra::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($mitraReports as $report) {
+                            $mitraGurus = \App\Models\LaporanPengeluaranGuruMitra::where('lap_pengeluaran_mitra_id', $report->id)->get();
+                            foreach ($mitraGurus as $mitraGuru) {
+                                $guruTotal += $mitraGuru->gaji;
+                            }
+                        }
+                        $privateRecords = \App\Models\LapPengeluaranPrivate::where('tanggal', $date)->where('created_by', $guru->id)->get();
+                        foreach ($privateRecords as $record) {
+                            if ($record->gurus) {
+                                foreach ($record->gurus as $guruData) {
+                                    $guruTotal += $guruData['gaji'] ?? 0;
+                                }
+                            }
+                        }
+                        $sum += $guruTotal;
+                    }
+                    $rowTotal[] = $sum;
+                    $grandTotal += $sum;
+                }
+                $rowTotal[] = $grandTotal;
+                $monthSection[] = $rowTotal;
+                $monthSection[] = array_fill(0, 2 + $gurus->count() + 1, '');
+                // Push the whole month section to the main data array
+                foreach ($monthSection as $row) {
+                    $data[] = $row;
+                }
             }
         }
-
         return $data;
     }
 
     public function headings(): array
     {
-        return [
-            'Hari',
-            'Tanggal',
-            'Gina',
-            'Amel',
-            'Lia',
-            'Siti',
-            'Nurul',
-            'Hikma',
-            'Safa',
-            'Khoir',
-            'Sarah',
-            'Indri',
-            'Aminah',
-            'Rina',
-            'Total'
-        ];
+        $gurus = \App\Models\User::all();
+        $headings = ['Hari', 'Tanggal'];
+        foreach ($gurus as $guru) {
+            $headings[] = $guru->name;
+        }
+        $headings[] = 'Total';
+        return $headings;
     }
 
     public function styles(Worksheet $sheet)

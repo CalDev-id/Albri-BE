@@ -135,69 +135,46 @@
     </div>
 
     @foreach($monthlySummary as $summary)
-        @if($summary['data']->count() > 0)
+    @if(count($summary['data']) > 0)
             <div class="month-section {{ $loop->index > 2 && $loop->index % 3 == 0 ? 'page-break' : '' }}">
                 <div class="month-title">
                     {{ strtoupper($summary['month_name']) }} {{ $year }}
                 </div>
-                
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th class="hari-col">Hari</th>
                                 <th class="tanggal-col">Tanggal</th>
-                                <th class="guru-col">Gina</th>
-                                <th class="guru-col">Amel</th>
-                                <th class="guru-col">Lia</th>
-                                <th class="guru-col">Siti</th>
-                                <th class="guru-col">Nurul</th>
-                                <th class="guru-col">Hikma</th>
-                                <th class="guru-col">Safa</th>
-                                <th class="guru-col">Khoir</th>
-                                <th class="guru-col">Sarah</th>
-                                <th class="guru-col">Indri</th>
-                                <th class="guru-col">Aminah</th>
-                                <th class="guru-col">Rina</th>
+                                @foreach(array_keys($summary['totals']) as $guruName)
+                                    @if($guruName !== 'total')
+                                        <th class="guru-col">{{ $guruName }}</th>
+                                    @endif
+                                @endforeach
                                 <th class="total-col">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($summary['data'] as $item)
                             <tr>
-                                <td class="hari-col">{{ $item->hari }}</td>
-                                <td class="date-cell tanggal-col">{{ $item->tanggal->format('d/m/Y') }}</td>
-                                <td class="currency">{{ $item->gina ? number_format($item->gina, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->amel ? number_format($item->amel, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->lia ? number_format($item->lia, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->siti ? number_format($item->siti, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->nurul ? number_format($item->nurul, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->hikma ? number_format($item->hikma, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->safa ? number_format($item->safa, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->khoir ? number_format($item->khoir, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->sarah ? number_format($item->sarah, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->indri ? number_format($item->indri, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->aminah ? number_format($item->aminah, 0, ',', '.') : '-' }}</td>
-                                <td class="currency">{{ $item->rina ? number_format($item->rina, 0, ',', '.') : '-' }}</td>
-                                <td class="currency total-col">{{ number_format($item->total, 0, ',', '.') }}</td>
+                                <td class="hari-col">{{ $item['hari'] ?? '-' }}</td>
+                                <td class="date-cell tanggal-col">{{ $item['tanggal'] ?? '-' }}</td>
+                                @foreach(array_keys($summary['totals']) as $guruName)
+                                    @if($guruName !== 'total')
+                                        <td class="currency">{{ isset($item[$guruName]) ? number_format($item[$guruName], 0, ',', '.') : '-' }}</td>
+                                    @endif
+                                @endforeach
+                                <td class="currency total-col">{{ isset($item['total']) ? number_format($item['total'], 0, ',', '.') : '-' }}</td>
                             </tr>
                             @endforeach
-                            
                             <!-- Monthly Total -->
                             <tr class="month-total">
                                 <td colspan="2" class="date-cell"><strong>JUMLAH</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['gina'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['amel'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['lia'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['siti'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['nurul'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['hikma'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['safa'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['khoir'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['sarah'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['indri'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['aminah'], 0, ',', '.') }}</strong></td>
-                                <td class="currency"><strong>{{ number_format($summary['totals']['rina'], 0, ',', '.') }}</strong></td>
+                                @foreach(array_keys($summary['totals']) as $guruName)
+                                    @if($guruName !== 'total')
+                                        <td class="currency"><strong>{{ number_format($summary['totals'][$guruName], 0, ',', '.') }}</strong></td>
+                                    @endif
+                                @endforeach
                                 <td class="currency total-col"><strong>{{ number_format($summary['totals']['total'], 0, ',', '.') }}</strong></td>
                             </tr>
                         </tbody>
@@ -223,38 +200,24 @@
                 <thead>
                     <tr>
                         <th>Bulan</th>
-                        <th class="guru-col">Gina</th>
-                        <th class="guru-col">Amel</th>
-                        <th class="guru-col">Lia</th>
-                        <th class="guru-col">Siti</th>
-                        <th class="guru-col">Nurul</th>
-                        <th class="guru-col">Hikma</th>
-                        <th class="guru-col">Safa</th>
-                        <th class="guru-col">Khoir</th>
-                        <th class="guru-col">Sarah</th>
-                        <th class="guru-col">Indri</th>
-                        <th class="guru-col">Aminah</th>
-                        <th class="guru-col">Rina</th>
+                        @foreach(array_keys($monthlySummary[0]['totals']) as $guruName)
+                            @if($guruName !== 'total')
+                                <th class="guru-col">{{ $guruName }}</th>
+                            @endif
+                        @endforeach
                         <th class="total-col">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($monthlySummary as $summary)
-                        @if($summary['data']->count() > 0)
+                        @if(count($summary['data']) > 0)
                         <tr>
                             <td>{{ $summary['month_name'] }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['gina'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['amel'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['lia'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['siti'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['nurul'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['hikma'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['safa'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['khoir'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['sarah'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['indri'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['aminah'], 0, ',', '.') }}</td>
-                            <td class="currency">{{ number_format($summary['totals']['rina'], 0, ',', '.') }}</td>
+                            @foreach(array_keys($summary['totals']) as $guruName)
+                                @if($guruName !== 'total')
+                                    <td class="currency">{{ number_format($summary['totals'][$guruName], 0, ',', '.') }}</td>
+                                @endif
+                            @endforeach
                             <td class="currency total-col">{{ number_format($summary['totals']['total'], 0, ',', '.') }}</td>
                         </tr>
                         @endif
@@ -263,19 +226,12 @@
                     <!-- Grand Total -->
                     <tr class="month-total">
                         <td><strong>GRAND TOTAL</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.gina'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.amel'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.lia'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.siti'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.nurul'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.hikma'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.safa'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.khoir'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.sarah'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.indri'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.aminah'), 0, ',', '.') }}</strong></td>
-                        <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum('totals.rina'), 0, ',', '.') }}</strong></td>
-                        <td class="currency total-col"><strong>{{ number_format(collect($monthlySummary)->sum('totals.total'), 0, ',', '.') }}</strong></td>
+                        @foreach(array_keys($monthlySummary[0]['totals']) as $guruName)
+                            @if($guruName !== 'total')
+                                <td class="currency"><strong>{{ number_format(collect($monthlySummary)->sum(function($summary) use ($guruName) { return $summary['totals'][$guruName] ?? 0; }), 0, ',', '.') }}</strong></td>
+                            @endif
+                        @endforeach
+                        <td class="currency total-col"><strong>{{ number_format(collect($monthlySummary)->sum(function($summary) { return $summary['totals']['total'] ?? 0; }), 0, ',', '.') }}</strong></td>
                     </tr>
                 </tbody>
             </table>

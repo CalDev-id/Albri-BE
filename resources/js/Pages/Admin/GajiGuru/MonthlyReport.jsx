@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { FaSearch, FaFileExcel, FaFilePdf, FaCalendarAlt, FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaPrint } from "react-icons/fa";
 
 const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
     const [search, setSearch] = useState(filters.search || "");
@@ -23,6 +24,10 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
 
     const handleExportPdf = () => {
         window.location.href = `/gaji/guru/monthly/export/pdf?year=${selectedYear}&search=${search}`;
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     const formatCurrency = (amount) => {
@@ -57,7 +62,6 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
     return (
         <DefaultLayout>
             <Head title="Laporan Penggajian Guru - Per Bulan" />
-            
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 {/* Header */}
                 <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
@@ -74,7 +78,6 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
                                 Laporan Penggajian Guru - Per Bulan ({selectedYear})
                             </h3>
                         </div>
-                        
                         <div className="flex flex-col sm:flex-row gap-3">
                             {/* Export Buttons */}
                             <button
@@ -150,156 +153,130 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
                 {/* Monthly Summary */}
                 <div className="p-6.5">
                     <div className="space-y-6">
-                        {Object.values(monthlySummary).map((monthData) => (
-                            <div key={monthData.month} className="border border-stroke rounded-lg dark:border-strokedark">
-                                {/* Month Header */}
-                                <div 
-                                    className="bg-gray-2 dark:bg-meta-4 p-4 cursor-pointer"
-                                    onClick={() => toggleMonth(monthData.month)}
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <h4 className="font-semibold text-black dark:text-white text-lg">
-                                            {monthData.month_name} {selectedYear}
-                                        </h4>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm text-black dark:text-white">
-                                                Total: <span className="font-semibold">{formatCurrency(monthData.totals.total)}</span>
-                                            </span>
-                                            <span className="text-sm text-black dark:text-white">
-                                                ({monthData.data.length} hari)
-                                            </span>
-                                            {expandedMonths[monthData.month] ? (
-                                                <FaChevronUp className="text-primary" />
-                                            ) : (
-                                                <FaChevronDown className="text-primary" />
-                                            )}
+                        {Object.values(monthlySummary).map((monthData) => {
+                            // Ambil nama guru dinamis dari backend
+                            const guruNames = Object.keys(monthData.totals).filter((n) => n !== 'total');
+                            return (
+                                <div key={monthData.month} className="border border-stroke rounded-lg dark:border-strokedark">
+                                    {/* Month Header */}
+                                    <div 
+                                        className="bg-gray-2 dark:bg-meta-4 p-4 cursor-pointer"
+                                        onClick={() => toggleMonth(monthData.month)}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="font-semibold text-black dark:text-white text-lg">
+                                                {monthData.month_name} {selectedYear}
+                                            </h4>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-sm text-black dark:text-white">
+                                                    Total: <span className="font-semibold">{formatCurrency(monthData.totals.total)}</span>
+                                                </span>
+                                                <span className="text-sm text-black dark:text-white">
+                                                    ({monthData.data.length} hari)
+                                                </span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.location.href = `/gaji/guru/monthly/export/excel?year=${selectedYear}&month=${monthData.month}`;
+                                                    }}
+                                                    className="inline-flex items-center gap-2 rounded bg-success py-1 px-3 text-white hover:bg-opacity-90 transition duration-300 text-xs"
+                                                >
+                                                    <FaFileExcel className="text-base" />
+                                                    Excel Bulan Ini
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.location.href = `/gaji/guru/monthly/export/pdf?year=${selectedYear}&month=${monthData.month}`;
+                                                    }}
+                                                    className="inline-flex items-center gap-2 rounded bg-danger py-1 px-3 text-white hover:bg-opacity-90 transition duration-300 text-xs"
+                                                >
+                                                    <FaFilePdf className="text-base" />
+                                                    PDF Bulan Ini
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.open(`/gaji/guru/monthly/print/pdf?year=${selectedYear}&month=${monthData.month}`, '_blank');
+                                                    }}
+                                                    className="inline-flex items-center gap-2 rounded bg-warning py-1 px-3 text-white hover:bg-opacity-90 transition duration-300 text-xs"
+                                                >
+                                                    <FaPrint className="text-base" />
+                                                    Print PDF
+                                                </button>
+                                                {expandedMonths[monthData.month] ? (
+                                                    <FaChevronUp className="text-primary" />
+                                                ) : (
+                                                    <FaChevronDown className="text-primary" />
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Month Detail */}
-                                {expandedMonths[monthData.month] && (
-                                    <div className="p-4">
-                                        {monthData.data.length > 0 ? (
-                                            <>
-                                                {/* Detail Table */}
-                                                <div className="overflow-x-auto mb-4">
-                                                    <table className="w-full table-auto text-sm">
-                                                        <thead>
-                                                            <tr className="bg-gray-50 text-left dark:bg-meta-4">
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Hari</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Tanggal</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Gina</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Amel</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Lia</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Siti</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Nurul</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Hikma</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Safa</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Khoir</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Sarah</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Indri</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Aminah</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Rina</th>
-                                                                <th className="py-2 px-2 font-medium text-black dark:text-white">Total</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {monthData.data.map((item, index) => (
-                                                                <tr key={index} className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
-                                                                    <td className="py-2 px-2 text-black dark:text-white">{item.hari}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white">{formatDate(item.tanggal)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.gina)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.amel)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.lia)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.siti)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.nurul)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.hikma)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.safa)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.khoir)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.sarah)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.indri)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.aminah)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(item.rina)}</td>
-                                                                    <td className="py-2 px-2 text-black dark:text-white text-right font-semibold">{formatCurrency(item.total)}</td>
+                                    {/* Month Detail */}
+                                    {expandedMonths[monthData.month] && (
+                                        <div className="p-4">
+                                            {monthData.data.length > 0 ? (
+                                                <>
+                                                    {/* Detail Table */}
+                                                    <div className="overflow-x-auto mb-4">
+                                                        <table className="w-full table-auto text-sm">
+                                                            <thead>
+                                                                <tr className="bg-gray-50 text-left dark:bg-meta-4">
+                                                                    <th className="py-2 px-2 font-medium text-black dark:text-white">Hari</th>
+                                                                    <th className="py-2 px-2 font-medium text-black dark:text-white">Tanggal</th>
+                                                                    {guruNames.map((name) => (
+                                                                        <th key={name} className="py-2 px-2 font-medium text-black dark:text-white">{name}</th>
+                                                                    ))}
+                                                                    <th className="py-2 px-2 font-medium text-black dark:text-white">Total</th>
                                                                 </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                            </thead>
+                                                            <tbody>
+                                                                {monthData.data.map((item, index) => (
+                                                                    <tr key={index} className="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
+                                                                        <td className="py-2 px-2 text-black dark:text-white">{item.hari}</td>
+                                                                        <td className="py-2 px-2 text-black dark:text-white">{item.tanggal && !isNaN(new Date(item.tanggal)) ? formatDate(item.tanggal) : '-'}</td>
+                                                                        {guruNames.map((name) => (
+                                                                            <td key={name} className="py-2 px-2 text-black dark:text-white text-right">{formatCurrency(monthData.totals[name])}</td>
+                                                                        ))}
+                                                                        <td className="py-2 px-2 text-black dark:text-white text-right font-semibold">{formatCurrency(item.total)}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
 
-                                                {/* Monthly Summary */}
-                                                <div className="bg-primary/5 p-4 rounded border border-primary/20">
-                                                    <h5 className="font-semibold text-black dark:text-white mb-3">
-                                                        Ringkasan {monthData.month_name} {selectedYear}
-                                                    </h5>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 text-sm">
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Gina</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.gina)}</div>
+                                                    {/* Monthly Summary */}
+                                                    <div className="bg-primary/5 p-4 rounded border border-primary/20">
+                                                        <h5 className="font-semibold text-black dark:text-white mb-3">
+                                                            Ringkasan {monthData.month_name} {selectedYear}
+                                                        </h5>
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 text-sm">
+                                                            {guruNames.map((name) => (
+                                                                <div key={name} className="bg-white dark:bg-meta-4 p-2 rounded">
+                                                                    <div className="text-black dark:text-white font-medium">{name}</div>
+                                                                    <div className="text-primary font-semibold">{formatCurrency(monthData.totals[name])}</div>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Amel</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.amel)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Lia</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.lia)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Siti</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.siti)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Nurul</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.nurul)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Hikma</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.hikma)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Safa</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.safa)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Khoir</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.khoir)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Sarah</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.sarah)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Indri</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.indri)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Aminah</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.aminah)}</div>
-                                                        </div>
-                                                        <div className="bg-white dark:bg-meta-4 p-2 rounded">
-                                                            <div className="text-black dark:text-white font-medium">Rina</div>
-                                                            <div className="text-primary font-semibold">{formatCurrency(monthData.totals.rina)}</div>
+                                                        <div className="mt-3 pt-3 border-t border-primary/20">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="font-semibold text-black dark:text-white">Total Bulan:</span>
+                                                                <span className="font-bold text-primary text-lg">{formatCurrency(monthData.totals.total)}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="mt-3 pt-3 border-t border-primary/20">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="font-semibold text-black dark:text-white">Total Bulan:</span>
-                                                            <span className="font-bold text-primary text-lg">{formatCurrency(monthData.totals.total)}</span>
-                                                        </div>
-                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <p className="text-black dark:text-white">Tidak ada data untuk bulan {monthData.month_name}</p>
                                                 </div>
-                                            </>
-                                        ) : (
-                                            <div className="text-center py-8">
-                                                <p className="text-black dark:text-white">Tidak ada data untuk bulan {monthData.month_name}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

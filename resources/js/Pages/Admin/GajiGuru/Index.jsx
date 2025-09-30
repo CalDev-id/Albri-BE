@@ -115,13 +115,6 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                         
                         <div className="flex flex-col sm:flex-row gap-3">
                             {/* Report Buttons */}
-                            <Link
-                                href="/gaji/guru/weekly"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
-                            >
-                                <FaCalendarWeek size={16} />
-                                Laporan Mingguan
-                            </Link>
                             
                             <Link
                                 href="/gaji/guru/monthly"
@@ -178,9 +171,8 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                         <table className="w-full table-auto border-collapse">
                             <thead>
                                 <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
-                                        Tanggal
-                                    </th>
+                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Tanggal</th>
+                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Total</th>
                                     {gurus && gurus.map((guru) => (
                                         <th key={guru.id} className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
                                             {guru.name}
@@ -190,20 +182,30 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                             </thead>
                             <tbody>
                                 {dates && dates.length > 0 ? (
-                                    dates.map((date, index) => (
-                                        <tr key={index} className="hover:bg-gray-1 dark:hover:bg-meta-4">
-                                            <td className="border border-stroke py-5 px-4 dark:border-strokedark">
-                                                <div className="font-medium text-black dark:text-white">
-                                                    {formatDate(date)}
-                                                </div>
-                                            </td>
-                                            {gurus && gurus.map((guru) => (
-                                                <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                    {renderGajiCell(date, guru)}
+                                    dates.map((date, index) => {
+                                        // Calculate total for this row
+                                        const totalRow = gurus.reduce((sum, guru) => {
+                                            const gajiData = data[date] && data[date][guru.id] ? data[date][guru.id] : { total: 0 };
+                                            return sum + (gajiData.total || 0);
+                                        }, 0);
+                                        return (
+                                            <tr key={index} className="hover:bg-gray-1 dark:hover:bg-meta-4">
+                                                <td className="border border-stroke py-5 px-4 dark:border-strokedark">
+                                                    <div className="font-medium text-black dark:text-white">
+                                                        {formatDate(date)}
+                                                    </div>
                                                 </td>
-                                            ))}
-                                        </tr>
-                                    ))
+                                                <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark font-bold text-primary">
+                                                    {formatCurrency(totalRow)}
+                                                </td>
+                                                {gurus && gurus.map((guru) => (
+                                                    <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
+                                                        {renderGajiCell(date, guru)}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        );
+                                    })
                                 ) : (
                                     <tr>
                                         <td colSpan={gurus ? gurus.length + 1 : 1} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">

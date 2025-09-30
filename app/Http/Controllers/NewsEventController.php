@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NewsEvent;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -115,6 +116,14 @@ class NewsEventController extends Controller
      */
     public function update(Request $request, NewsEvent $newsEvent)
     {
+        // Debug: log incoming payload and content-type to diagnose missing fields
+        try {
+            Log::info('NewsEvent update request payload', $request->all());
+            Log::info('NewsEvent update content-type', ['content-type' => $request->header('content-type')]);
+        } catch (\Exception $e) {
+            // swallow logging errors to avoid interfering with request flow
+            Log::error('NewsEvent update logging failed: ' . $e->getMessage());
+        }
         // Build validation rules dynamically
         $rules = [
             'excerpt' => 'nullable|string|max:500',
@@ -134,19 +143,7 @@ class NewsEventController extends Controller
 
         $request->validate($rules);
 
-        $data = $request->only(['excerpt', 'status', 'published_at', 'meta_data']);
-        
-        // Only update title and slug if title is provided and not empty
-        if ($request->filled('title')) {
-            $data['title'] = $request->input('title');
-            $data['slug'] = Str::slug($request->input('title'));
-        }
-        
-        // Only update content if provided and not empty
-        if ($request->filled('content')) {
-            $data['content'] = $request->input('content');
-        }
-        
+        $data = $request->all();
         $data['updated_by'] = Auth::id();
 
         // Handle file upload
@@ -161,15 +158,11 @@ class NewsEventController extends Controller
         // Set published_at berdasarkan status
         if ($request->status === 'published') {
             if ($request->published_at) {
-                // Jika user mengisi tanggal, gunakan tanggal tersebut
                 $data['published_at'] = $request->published_at;
             } else if (!$newsEvent->published_at) {
-                // Jika belum pernah publish dan tidak ada tanggal, gunakan sekarang
                 $data['published_at'] = now();
             }
-            // Jika sudah ada published_at sebelumnya, biarkan tetap
         } else {
-            // Jika status draft, set published_at ke null
             $data['published_at'] = null;
         }
 

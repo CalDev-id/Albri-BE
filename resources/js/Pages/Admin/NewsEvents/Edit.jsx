@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "@inertiajs/react";
+import { useForm, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { Link } from "@inertiajs/react";
 import { FaArrowLeft, FaSave, FaEye } from "react-icons/fa";
@@ -25,11 +25,35 @@ const NewsEventsEdit = ({ newsEvent }) => {
 
     const handleSubmit = (e, status = null) => {
         e.preventDefault();
+
         if (status) {
-            setData("status", status);
+            // Build FormData with all values from React state
+            const formData = new FormData();
+            formData.append('title', data.title || '');
+            formData.append('slug', data.slug || '');
+            formData.append('excerpt', data.excerpt || '');
+            formData.append('content', data.content || '');
+            formData.append('status', status);
+            formData.append('published_at', data.published_at || '');
+            if (data.featured_image) {
+                formData.append('featured_image', data.featured_image);
+            }
+            if (data.meta_data) {
+                Object.keys(data.meta_data).forEach((key) => {
+                    formData.append(`meta_data[${key}]`, data.meta_data[key] || '');
+                });
+            }
+            router.post(`/admin/news-events/${newsEvent.id}?_method=put`, formData, {
+                forceFormData: true,
+                preserveScroll: true,
+                onError: (err) => {
+                    // Optionally handle errors
+                },
+            });
+            return;
         }
-        post(`/admin/news-events/${newsEvent.id}`, {
-            _method: 'put',
+
+        put(`/admin/news-events/${newsEvent.id}`, {
             forceFormData: true,
         });
     };
@@ -304,3 +328,5 @@ const NewsEventsEdit = ({ newsEvent }) => {
 };
 
 export default NewsEventsEdit;
+
+

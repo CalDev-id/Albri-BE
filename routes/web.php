@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NewsEventController;
-
-
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PrivateController;
 use App\Http\Controllers\PublicNewsController;
 use App\Http\Controllers\HomeController;
 use Inertia\Inertia;
+
+
+
 
 Route::get('/login', function () {
     return Inertia::render('Auth/Login', [
@@ -484,8 +485,14 @@ Route::prefix('admin/news-events')->middleware(['auth', 'role:Admin'])->group(fu
                 Gaji Guru Management
 -------------------------------------------- */
 Route::prefix('gaji')->middleware(['auth', 'role:Admin'])->group(function () {
+    // Print PDF Gaji Guru Bulanan (halaman print dengan iframe)
+    Route::get('/guru/monthly/print/pdf', function (\Illuminate\Http\Request $request) {
+        $year = $request->year ?? date('Y');
+        $month = $request->month ?? date('n');
+        $pdfUrl = url("/gaji/guru/monthly/export/pdf?year=$year&month=$month");
+        return view('exports.print-gaji-guru-monthly-pdf', compact('pdfUrl'));
+    })->name('gaji.guru.monthly.print.pdf');
     Route::get('/guru', [App\Http\Controllers\GajiGuruController::class, 'index'])->name('gaji.guru.index');
-    Route::get('/guru/weekly', [App\Http\Controllers\GajiGuruController::class, 'weeklyReport'])->name('gaji.guru.weekly');
     Route::get('/guru/monthly', [App\Http\Controllers\GajiGuruController::class, 'monthlyReport'])->name('gaji.guru.monthly');
     Route::get('/guru/export-excel', [App\Http\Controllers\GajiGuruController::class, 'exportExcel'])->name('gaji.guru.export-excel');
     Route::get('/guru/export-pdf', [App\Http\Controllers\GajiGuruController::class, 'exportPdf'])->name('gaji.guru.export-pdf');
