@@ -62,6 +62,31 @@ const EditCabang = () => {
         put(`/admin/laporan/pengeluaranprivate/${pengeluaranprivate.id}`);
     };
 
+    // Helper functions for numeric inputs
+    const handleNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleNumericBlur = (e, field) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            setData(field, 0);
+        }
+    };
+
+    const handleGuruNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleGuruNumericBlur = (e, index) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            updateGuru(index, "gaji", 0);
+        }
+    };
+
     return (
         <DefaultLayout>
             <div className="flex flex-col gap-9">
@@ -116,7 +141,7 @@ const EditCabang = () => {
                                     <label className="block text-sm font-medium text-black dark:text-white">
                                         Guru & Gaji
                                     </label>
-                          
+
                                 </div>
 
                                 {data.gurus.map((guru, index) => (
@@ -141,6 +166,8 @@ const EditCabang = () => {
                                                 type="number"
                                                 value={guru.gaji}
                                                 onChange={(e) => updateGuru(index, "gaji", parseInt(e.target.value) || 0)}
+                                                onFocus={handleGuruNumericFocus}
+                                                onBlur={(e) => handleGuruNumericBlur(e, index)}
                                                 placeholder="0"
                                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                             />
@@ -149,9 +176,9 @@ const EditCabang = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => removeGuru(index)}
-                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
+                                                className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
                                             >
-                                                 ✕
+                                                ✕
                                             </button>
                                         )}
                                     </div>
@@ -161,7 +188,7 @@ const EditCabang = () => {
                                     <span className="font-medium">Total Gaji: Rp {getTotalGaji().toLocaleString()}</span>
                                 </div> */}
 
-                                 <button type="button" onClick={addGuru} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
+                                <button type="button" onClick={addGuru} className="mb-4 rounded bg-blue-600 px-6 py-2 text-white hover:bg-opacity-90">
                                     + Tambah Guru
                                 </button>
                             </div>
@@ -177,6 +204,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.atk}
                                             onChange={(e) => setData("atk", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "atk")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -195,6 +224,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.intensif}
                                             onChange={(e) => setData("intensif", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "intensif")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -224,6 +255,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.sewa}
                                             onChange={(e) => setData("sewa", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "sewa")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -239,6 +272,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.thr}
                                             onChange={(e) => setData("thr", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "thr")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -256,6 +291,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.lainlain}
                                             onChange={(e) => setData("lainlain", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lainlain")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -271,6 +308,8 @@ const EditCabang = () => {
                                             type="number"
                                             value={data.lisensi}
                                             onChange={(e) => setData("lisensi", parseInt(e.target.value) || 0)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lisensi")}
                                             placeholder="0"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />

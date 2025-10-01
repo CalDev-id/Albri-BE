@@ -60,6 +60,31 @@ const Laporan = () => {
         setData("pakets", { ...data.pakets, [id]: value });
     };
 
+    // Helper functions for numeric inputs
+    const handleNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleNumericBlur = (e, field) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            setData(field, 0);
+        }
+    };
+
+    const handlePaketNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handlePaketNumericBlur = (e, paketId) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            handleChangePaket(paketId, 0);
+        }
+    };
+
     return (
         <DefaultLayout>
             <div className="flex flex-col gap-9">
@@ -111,6 +136,8 @@ const Laporan = () => {
                                             className="w-full rounded border px-3 py-2"
                                             value={data.pakets[paket.id] || 0}
                                             onChange={(e) => handleChangePaket(paket.id, e.target.value)}
+                                            onFocus={handlePaketNumericFocus}
+                                            onBlur={(e) => handlePaketNumericBlur(e, paket.id)}
                                         />
                                     </div>
                                 ))}
@@ -125,6 +152,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data[field]}
                                             onChange={(e) => handleNumberChange(field, e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, field)}
                                             className="w-full rounded border px-3 py-2"
                                         />
                                     </div>

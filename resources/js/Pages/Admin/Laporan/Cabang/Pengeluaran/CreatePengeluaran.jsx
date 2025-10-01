@@ -63,6 +63,32 @@ const CreatePengeluaran = () => {
         post("/admin/laporan/pengeluaran/store");
     }
 
+    // Helper functions for numeric inputs
+    const handleNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleNumericBlur = (e, field) => {
+        if (e.target.value === '' || e.target.value === '0') {
+            setData(field, 0);
+            e.target.value = '0';
+        }
+    };
+
+    const handleGuruNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleGuruNumericBlur = (e, index) => {
+        if (e.target.value === '' || e.target.value === '0') {
+            updateGuru(index, "gaji", 0);
+            e.target.value = '0';
+        }
+    };
 
     return (
         <DefaultLayout>
@@ -155,6 +181,8 @@ const CreatePengeluaran = () => {
                                                 type="number"
                                                 value={guru.gaji || 0}
                                                 onChange={(e) => updateGuru(index, "gaji", e.target.value)}
+                                                onFocus={handleGuruNumericFocus}
+                                                onBlur={(e) => handleGuruNumericBlur(e, index)}
                                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                                 placeholder="Gaji"
                                             />
@@ -186,9 +214,11 @@ const CreatePengeluaran = () => {
                                             ATK
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.atk}
                                             onChange={(e) => setData("atk", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "atk")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -203,9 +233,11 @@ const CreatePengeluaran = () => {
                                             sewa
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.sewa}
                                             onChange={(e) => setData("sewa", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "sewa")}
                                             placeholder="sewa"
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -217,9 +249,11 @@ const CreatePengeluaran = () => {
                                             Intensif
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.intensif}
                                             onChange={(e) => setData("intensif", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "intensif")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -236,9 +270,11 @@ const CreatePengeluaran = () => {
                                             Lisensi
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.lisensi}
                                             onChange={(e) => setData("lisensi", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lisensi")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -252,9 +288,10 @@ const CreatePengeluaran = () => {
                                         </label>
                                         <input
                                             type="number"
-
                                             value={data.thr}
                                             onChange={(e) => setData("thr", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "thr")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -271,6 +308,8 @@ const CreatePengeluaran = () => {
                                             type="number"
                                             value={data.lainlain}
                                             onChange={(e) => setData("lainlain", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lainlain")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />

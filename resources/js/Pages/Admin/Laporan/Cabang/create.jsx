@@ -8,11 +8,18 @@ const Laporan = () => {
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
 
+
+    // Buat object default untuk pakets
+    const defaultPakets = pakets.reduce((acc, p) => {
+        acc[p.id] = 0;
+        return acc;
+    }, {});
+
     const { data, setData, post } = useForm({
         hari: "Senin",
         tanggal: today,
         cabang_id: cabangs.length > 0 ? cabangs[0].id : "",
-        pakets: {}, // { paket_id: jumlah }
+        pakets: defaultPakets, // sudah ada semua id paket dengan value 0
         daftar: 0,
         modul: 0,
         kaos: 0,
@@ -96,16 +103,19 @@ const Laporan = () => {
                                         </label>
                                         <input
                                             type="number"
-                                            min="0"
                                             className="w-full rounded border px-3 py-2"
-                                            value={data.pakets[paket.id] || 0}
-                                            onChange={(e) =>
-                                                handleChangePaket(paket.id, e.target.value)
-                                            }
+                                            value={data.pakets[paket.id] === 0 ? "" : data.pakets[paket.id]}
+                                            placeholder="0"
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                handleChangePaket(paket.id, val === "" ? 0 : parseInt(val, 10));
+                                            }}
                                         />
+
                                     </div>
                                 ))}
                             </div>
+
 
                             {/* Biaya lain */}
                             <div className="grid grid-cols-2 gap-4">
@@ -114,10 +124,15 @@ const Laporan = () => {
                                         <label className="block mb-2 capitalize">{field}</label>
                                         <input
                                             type="number"
-                                            value={data[field]}
-                                            onChange={(e) => setData(field, e.target.value)}
+                                            value={data[field] === 0 ? "" : data[field]}
+                                            placeholder="0"
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setData(field, val === "" ? 0 : parseInt(val, 10));
+                                            }}
                                             className="w-full rounded border px-3 py-2"
                                         />
+
                                     </div>
                                 ))}
                             </div>

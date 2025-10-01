@@ -251,6 +251,7 @@ class AdminController extends Controller
 
     public function storelaporancabang(Request $request)
     {
+
         $validatedData = $request->validate([
             'cabang_id' => 'required|exists:cabangalbris,id',
             'hari' => 'required|string',
@@ -338,6 +339,7 @@ class AdminController extends Controller
 
     public function updatelaporancabang(Request $request, $id): RedirectResponse
     {
+
         // Validasi data input
         $validatedData = $request->validate([
             'cabang_id' => 'required|exists:cabangalbris,id',
@@ -751,6 +753,8 @@ class AdminController extends Controller
 
     public function updatelaporanmitra(Request $request, $id): RedirectResponse
     {
+
+        dd($request->all());
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
@@ -1180,6 +1184,8 @@ class AdminController extends Controller
 
     public function updatelaporanprivate(Request $request, $id): RedirectResponse
     {
+
+        
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',

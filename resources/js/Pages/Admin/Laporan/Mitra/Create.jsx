@@ -46,6 +46,31 @@ const Laporan = () => {
         setData("pakets", { ...data.pakets, [id]: value });
     };
 
+    // Helper functions for numeric inputs
+    const handleNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleNumericBlur = (e, field) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            setData(field, 0);
+        }
+    };
+
+    const handlePaketNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handlePaketNumericBlur = (e, paketId) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            handleChangePaket(paketId, 0);
+        }
+    };
+
     return (
         <DefaultLayout>
             <Head title="Tambah Laporan Pemasukan Mitra" />
@@ -105,6 +130,8 @@ const Laporan = () => {
                                             onChange={(e) =>
                                                 handleChangePaket(paket.id, e.target.value)
                                             }
+                                            onFocus={handlePaketNumericFocus}
+                                            onBlur={(e) => handlePaketNumericBlur(e, paket.id)}
                                         />
                                     </div>
                                 ))}
@@ -121,6 +148,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data.daftar}
                                             onChange={(e) => setData("daftar", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "daftar")}
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
@@ -134,6 +163,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data.modul}
                                             onChange={(e) => setData("modul", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "modul")}
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
@@ -150,6 +181,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data.kaos}
                                             onChange={(e) => setData("kaos", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "kaos")}
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
@@ -163,6 +196,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data.kas}
                                             onChange={(e) => setData("kas", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "kas")}
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
@@ -179,6 +214,8 @@ const Laporan = () => {
                                             type="number"
                                             value={data.lainlain}
                                             onChange={(e) => setData("lainlain", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lainlain")}
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>

@@ -63,6 +63,31 @@ const EditPengeluaran = () => {
         put(`/admin/laporan/pengeluaranmitra/${laporanMitra.id}`);
     };
 
+    // Helper functions for numeric inputs
+    const handleNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleNumericBlur = (e, field) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            setData(field, 0);
+        }
+    };
+
+    const handleMitraNumericFocus = (e) => {
+        if (e.target.value === '0') {
+            e.target.value = '';
+        }
+    };
+
+    const handleMitraNumericBlur = (e, index) => {
+        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+            updateMitra(index, "gaji", 0);
+        }
+    };
+
     return (
         <DefaultLayout>
             <div className="flex flex-col gap-9">
@@ -133,22 +158,24 @@ const EditPengeluaran = () => {
                                                     type="number"
                                                     value={mitra?.gaji || ""}
                                                     onChange={(e) => updateMitra(index, "gaji", e.target.value)}
+                                                    onFocus={handleMitraNumericFocus}
+                                                    onBlur={(e) => handleMitraNumericBlur(e, index)}
                                                     className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                                     placeholder="Gaji"
                                                 />
                                             </div>
-                                                       {data.mitras.length > 1 && (
-                                            <div className="xl:w-auto">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeMitra(index)}
-                                                    className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
-                                                    title="Hapus Guru"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        )}
+                                            {data.mitras.length > 1 && (
+                                                <div className="xl:w-auto">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeMitra(index)}
+                                                        className="rounded bg-red-600 px-4 py-3 text-white hover:bg-opacity-90"
+                                                        title="Hapus Guru"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     ))
                                 ) : (
@@ -171,9 +198,11 @@ const EditPengeluaran = () => {
                                             ATK
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.atk}
                                             onChange={(e) => setData("atk", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "atk")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -185,9 +214,11 @@ const EditPengeluaran = () => {
                                             Intensif
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.intensif}
                                             onChange={(e) => setData("intensif", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "intensif")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -216,6 +247,8 @@ const EditPengeluaran = () => {
                                             type="number"
                                             value={data.lainlain}
                                             onChange={(e) => setData("lainlain", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lainlain")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -228,9 +261,11 @@ const EditPengeluaran = () => {
                                             Lisensi
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             value={data.lisensi}
                                             onChange={(e) => setData("lisensi", e.target.value)}
+                                            onFocus={handleNumericFocus}
+                                            onBlur={(e) => handleNumericBlur(e, "lisensi")}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />

@@ -46,6 +46,8 @@
 //     );
 // }
 // export default CreateCabang;
+// import DefaultLayout from "@/Layouts/DefaultLayout";
+import DefaultLayout from "@/Layouts/DefaultLayout";
 
 import { useForm } from "@inertiajs/react";
 
@@ -61,6 +63,8 @@ export default function Create() {
   };
 
   return (
+        <DefaultLayout>
+
     <form onSubmit={submit} className="p-6">
       <h1 className="text-xl font-bold mb-4">Tambah Paket</h1>
 
@@ -80,5 +84,6 @@ export default function Create() {
         Simpan
       </button>
     </form>
+  </DefaultLayout>
   );
 }
