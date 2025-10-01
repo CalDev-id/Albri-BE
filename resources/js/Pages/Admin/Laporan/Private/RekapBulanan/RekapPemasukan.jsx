@@ -54,6 +54,7 @@ const RekapPemasukan = ({
             const row = {
                 Hari: laporan.hari,
                 Tanggal: laporan.tanggal,
+                "Pembuat Laporan": laporan.user?.name || 'N/A',
             };
 
             // Tambahkan kolom paket secara dinamis
@@ -81,6 +82,7 @@ const RekapPemasukan = ({
         const totals = {
             Hari: "Total",
             Tanggal: "",
+            "Pembuat Laporan": "",
         };
 
         // Total untuk paket
@@ -104,7 +106,7 @@ const RekapPemasukan = ({
         data.push(totals);
 
         // Buat headers dinamis
-        const headers = ["Hari", "Tanggal"];
+        const headers = ["Hari", "Tanggal", "Pembuat Laporan"];
         if (paketPrivate && paketPrivate.length > 0) {
             paketPrivate.forEach((paket) => {
                 headers.push(`${paket.nama_paket} (${paket.harga.toLocaleString()})`);
@@ -266,6 +268,9 @@ const RekapPemasukan = ({
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                    Pembuat Laporan
+                                </th>
 
                                 {/* Dynamic paket headers */}
                                 {paketPrivate && paketPrivate.length > 0 ? (
@@ -331,6 +336,9 @@ const RekapPemasukan = ({
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.tanggal}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {laporan.user?.name || 'N/A'}
                                     </td>
 
                                     {/* Dynamic paket data */}
@@ -404,7 +412,7 @@ const RekapPemasukan = ({
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                                 <td
-                                    colSpan="3"
+                                    colSpan="4"
                                     className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
                                 >
                                     Total

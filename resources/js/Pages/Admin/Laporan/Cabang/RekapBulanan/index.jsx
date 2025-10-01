@@ -92,7 +92,7 @@ const Laporan = () => {
         headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", ""); // Tambah kolom jarak kosong
 
         // Header kolom pengeluaran
-        const headerPengeluaran = ["Pembuat Laporan", "Cabang", "Detail Gaji Guru", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Laba"];
+        const headerPengeluaran = ["Pembuat Laporan", "Cabang", "Detail Gaji Guru", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Albri"];
 
         // Gabungkan header
         const headerLengkap = [...headerPemasukan, ...headerPengeluaran];

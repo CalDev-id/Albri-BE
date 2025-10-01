@@ -1568,11 +1568,13 @@ class AdminController extends Controller
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
 
-        // Filter data berdasarkan bulan dan tahun
-        $laporanPrivate = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
+        // Filter data berdasarkan bulan dan tahun - ADD user relationship here
+        $laporanPrivate = LapPemasukanPrivate::with('user') // Added user relationship
+            ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
+
         $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user'])
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
