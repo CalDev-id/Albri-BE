@@ -21,26 +21,115 @@ class GajiGuruController extends Controller
 {
     public function index(Request $request)
     {
+        // Get all available months with data
+        $allDates = collect();
+        
+        // Collect all dates from all tables
+        $cabangAllDates = LapPengeluaranCabang::select('tanggal')->distinct()->get();
+        foreach ($cabangAllDates as $d) {
+            $allDates->push($d->tanggal);
+        }
+        
+        $mitraAllDates = LapPengeluaranMitra::select('tanggal')->distinct()->get();
+        foreach ($mitraAllDates as $d) {
+            $allDates->push($d->tanggal);
+        }
+        
+        $privateAllDates = LapPengeluaranPrivate::select('tanggal')->distinct()->get();
+        foreach ($privateAllDates as $d) {
+            $allDates->push($d->tanggal);
+        }
+        
+        // Get unique month-year combinations that have data
+        $availableMonths = $allDates->unique()
+            ->filter(function($date) {
+                return !empty($date);
+            })
+            ->map(function($date) {
+                $carbonDate = Carbon::parse($date);
+                return [
+                    'month' => $carbonDate->month,
+                    'year' => $carbonDate->year,
+                    'key' => $carbonDate->format('Y-m')
+                ];
+            })
+            ->unique('key')
+            ->sortBy('key')
+            ->values();
+        
+        // If no data exists, use current month
+        if ($availableMonths->isEmpty()) {
+            $month = now()->month;
+            $year = now()->year;
+            $currentMonthKey = now()->format('Y-m');
+            $prevMonth = null;
+            $nextMonth = null;
+        } else {
+            // Get month and year from request, default to first available month
+            $requestedMonth = $request->input('month');
+            $requestedYear = $request->input('year');
+            
+            if ($requestedMonth && $requestedYear) {
+                $month = $requestedMonth;
+                $year = $requestedYear;
+                $currentMonthKey = sprintf('%04d-%02d', $year, $month);
+            } else {
+                // Default to first available month
+                $firstMonth = $availableMonths->first();
+                $month = $firstMonth['month'];
+                $year = $firstMonth['year'];
+                $currentMonthKey = $firstMonth['key'];
+            }
+            
+            // Find current month index
+            $currentIndex = $availableMonths->search(function($item) use ($currentMonthKey) {
+                return $item['key'] === $currentMonthKey;
+            });
+            
+            // If current month not in available months, use first available
+            if ($currentIndex === false) {
+                $firstMonth = $availableMonths->first();
+                $month = $firstMonth['month'];
+                $year = $firstMonth['year'];
+                $currentMonthKey = $firstMonth['key'];
+                $currentIndex = 0;
+            }
+            
+            // Get previous and next month info
+            $prevMonth = $currentIndex > 0 ? $availableMonths->get($currentIndex - 1) : null;
+            $nextMonth = $currentIndex < $availableMonths->count() - 1 ? $availableMonths->get($currentIndex + 1) : null;
+        }
+        
+        // Get start and end date of the month
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        
         // Get all users as columns
         $gurus = User::all();
 
-        // Get unique dates from all pengeluaran tables
+        // Get unique dates from all pengeluaran tables for the month
         $dates = collect();
 
         // Get dates from cabang pengeluaran
-        $cabangDates = LapPengeluaranCabang::select('tanggal')->distinct()->get();
+        $cabangDates = LapPengeluaranCabang::select('tanggal')
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->distinct()->get();
         foreach ($cabangDates as $d) {
             $dates->push($d->tanggal);
         }
 
         // Get dates from mitra pengeluaran
-        $mitraDates = LapPengeluaranMitra::select('tanggal')->distinct()->get();
+        $mitraDates = LapPengeluaranMitra::select('tanggal')
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->distinct()->get();
         foreach ($mitraDates as $d) {
             $dates->push($d->tanggal);
         }
 
         // Get dates from private pengeluaran
-        $privateDates = LapPengeluaranPrivate::select('tanggal')->distinct()->get();
+        $privateDates = LapPengeluaranPrivate::select('tanggal')
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->distinct()->get();
         foreach ($privateDates as $d) {
             $dates->push($d->tanggal);
         }
@@ -48,8 +137,14 @@ class GajiGuruController extends Controller
         // Remove duplicates and sort
         $uniqueDates = $dates->unique()->sort()->values();
 
-        // Initialize data array
+        // Initialize data array and teacher totals
         $data = [];
+        $teacherTotals = [];
+        
+        foreach ($gurus as $guru) {
+            $teacherTotals[$guru->id] = 0;
+        }
+        
         foreach ($uniqueDates as $date) {
             $data[$date] = [];
             foreach ($gurus as $guru) {
@@ -194,13 +289,46 @@ class GajiGuruController extends Controller
                     'details' => $details,
                     'total' => $total
                 ];
+                
+                // Add to teacher's monthly total
+                $teacherTotals[$guru->id] += $total;
             }
+        }
+        
+        // Prepare monthly data for display - only dates with data
+        $monthlyData = [];
+        
+        foreach ($uniqueDates as $date) {
+            $dateKey = $date;
+            $carbonDate = Carbon::parse($date);
+            
+            $dayData = [
+                'date' => $carbonDate->format('d/m'),
+                'day' => $this->getDayName($dateKey),
+                'full_date' => $dateKey,
+                'teachers' => []
+            ];
+            
+            foreach ($gurus as $guru) {
+                $dayData['teachers'][$guru->id] = [
+                    'total' => $data[$dateKey][$guru->id]['total'] ?? 0,
+                    'details' => $data[$dateKey][$guru->id]['details'] ?? []
+                ];
+            }
+            
+            $monthlyData[] = $dayData;
         }
 
         return Inertia::render('Admin/GajiGuru/Index', [
-            'dates' => $uniqueDates->toArray(),
             'gurus' => $gurus,
-            'data' => $data,
+            'monthlyData' => $monthlyData,
+            'teacherTotals' => $teacherTotals,
+            'currentMonth' => $month,
+            'currentYear' => $year,
+            'monthName' => Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y'),
+            'prevMonth' => $prevMonth,
+            'nextMonth' => $nextMonth,
+            'availableMonths' => $availableMonths->toArray(),
             'filters' => $request->only(['search'])
         ]);
     }
@@ -684,23 +812,39 @@ class GajiGuruController extends Controller
     public function exportMonthlyExcel(Request $request)
     {
         $year = $request->year ?? now()->year;
-        $filters = ['year' => $year, 'type' => 'monthly'];
+        $month = $request->month; // Get specific month parameter
+        
+        $filters = [
+            'year' => $year,
+            'month' => $month, // Pass month to export
+            'type' => 'monthly'
+        ];
 
-        return Excel::download(new GajiGuruMonthlyExport($filters), 'gaji-guru-bulanan-' . $year . '.xlsx');
+        $filename = $month 
+            ? 'gaji-guru-bulanan-' . $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '.xlsx'
+            : 'gaji-guru-bulanan-' . $year . '.xlsx';
+
+        return Excel::download(new GajiGuruMonthlyExport($filters), $filename);
     }
 
     public function exportMonthlyPdf(Request $request)
     {
         $year = $request->year ?? now()->year;
-    $gurus = User::all();
+        $month = $request->month; // Get specific month parameter
+        
+        $gurus = User::all();
         $monthlySummary = [];
-        for ($month = 1; $month <= 12; $month++) {
+        
+        // If month is specified, only process that month. Otherwise process all months.
+        $monthsToProcess = $month ? [$month] : range(1, 12);
+        
+        foreach ($monthsToProcess as $m) {
             $monthName = [
                 1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
                 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-            ][$month];
-            $startDate = date("$year-$month-01");
-            $endDate = date("$year-$month-" . date('t', strtotime("$year-$month-01")));
+            ][$m];
+            $startDate = date("$year-$m-01");
+            $endDate = date("$year-$m-" . date('t', strtotime("$year-$m-01")));
             $data = [];
             $totals = [];
             foreach ($gurus as $guru) {
@@ -763,7 +907,7 @@ class GajiGuruController extends Controller
                 $data[] = $row;
             }
             $monthlySummary[] = [
-                'month' => $month,
+                'month' => $m,
                 'month_name' => $monthName,
                 'data' => $data,
                 'totals' => $totals,
@@ -788,10 +932,14 @@ class GajiGuruController extends Controller
         $bulan = $bulanIndonesia[date('n')];
         $tahunSekarang = date('Y');
         $tanggal = "$hari $bulan $tahunSekarang";
+        
+        $filename = $month 
+            ? 'gaji-guru-bulanan-' . $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '.pdf'
+            : 'gaji-guru-bulanan-' . $year . '.pdf';
 
         $pdf = Pdf::loadView('exports.gaji-guru-monthly-pdf', compact('monthlySummary', 'year', 'tanggal'))
             ->setPaper('a4', 'landscape');
-        return $pdf->stream('gaji-guru-bulanan-' . $year . '.pdf');
+        return $pdf->stream($filename);
     }
 }
 

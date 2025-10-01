@@ -1,29 +1,23 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-import { FaSearch, FaFileExcel, FaFilePdf, FaCalendarAlt, FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaFileExcel, FaFilePdf, FaCalendarAlt, FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FaPrint } from "react-icons/fa";
 
 const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
-    const [search, setSearch] = useState(filters.search || "");
     const [selectedYear, setSelectedYear] = useState(year || 2025);
     const [expandedMonths, setExpandedMonths] = useState({});
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        router.get("/gaji/guru/monthly", { search, year: selectedYear }, { preserveState: true });
-    };
-
     const handleYearChange = () => {
-        router.get("/gaji/guru/monthly", { search, year: selectedYear }, { preserveState: true });
+        router.get("/gaji/guru/monthly", { year: selectedYear }, { preserveState: true });
     };
 
     const handleExportExcel = () => {
-        window.location.href = `/gaji/guru/monthly/export/excel?year=${selectedYear}&search=${search}`;
+        window.location.href = `/gaji/guru/monthly/export/excel?year=${selectedYear}`;
     };
 
     const handleExportPdf = () => {
-        window.location.href = `/gaji/guru/monthly/export/pdf?year=${selectedYear}&search=${search}`;
+        window.location.href = `/gaji/guru/monthly/export/pdf?year=${selectedYear}`;
     };
 
     const handlePrint = () => {
@@ -127,26 +121,6 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Search */}
-                        <form onSubmit={handleSearch} className="flex gap-2">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Cari tanggal, hari, atau nama guru..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full rounded border border-stroke py-2 pl-10 pr-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white"
-                                />
-                                <FaSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-body dark:text-bodydark" />
-                            </div>
-                            <button
-                                type="submit"
-                                className="inline-flex items-center gap-2 rounded bg-primary py-2 px-4 text-white hover:bg-opacity-90 transition duration-300"
-                            >
-                                Cari
-                            </button>
-                        </form>
                     </div>
                 </div>
 

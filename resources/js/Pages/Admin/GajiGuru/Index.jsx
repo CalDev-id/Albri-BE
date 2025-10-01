@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
-import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaSearch, FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaCalendarWeek, FaCalendarAlt, FaEye, FaEyeSlash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
+const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, currentYear, monthName, prevMonth, nextMonth, availableMonths, filters }) => {
     const [search, setSearch] = useState(filters.search || "");
     const [showDetails, setShowDetails] = useState({});
 
@@ -17,15 +17,27 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get("/gaji/guru", { search }, { preserveState: true });
+        router.get("/gaji/guru", { search, month: currentMonth, year: currentYear }, { preserveState: true });
+    };
+
+    const handlePreviousMonth = () => {
+        if (prevMonth) {
+            router.get('/gaji/guru', { month: prevMonth.month, year: prevMonth.year });
+        }
+    };
+
+    const handleNextMonth = () => {
+        if (nextMonth) {
+            router.get('/gaji/guru', { month: nextMonth.month, year: nextMonth.year });
+        }
     };
 
     const handleExportExcel = () => {
-        window.location.href = `/gaji/guru/export-excel?search=${search}`;
+        window.location.href = `/gaji/guru/export-excel?month=${currentMonth}&year=${currentYear}`;
     };
 
     const handleExportPdf = () => {
-        window.location.href = `/gaji/guru/export-pdf?search=${search}`;
+        window.location.href = `/gaji/guru/export-pdf?month=${currentMonth}&year=${currentYear}`;
     };
 
     const formatCurrency = (amount) => {
@@ -38,17 +50,9 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
         }).format(amount);
     };
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        });
-    };
-
-    const renderGajiCell = (date, guru) => {
-        const gajiData = data[date] && data[date][guru.id] ? data[date][guru.id] : { details: [], total: 0 };
-        const key = `${date}-${guru.id}`;
+    const renderGajiCell = (day, guru) => {
+        const gajiData = day.teachers[guru.id] || { details: [], total: 0 };
+        const key = `${day.full_date}-${guru.id}`;
         const isDetailsShown = showDetails[key];
         
         if (gajiData.total === 0) {
@@ -67,7 +71,7 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                     </span>
                     {gajiData.details && gajiData.details.length > 0 && (
                         <button
-                            onClick={() => toggleDetails(date, guru.id)}
+                            onClick={() => toggleDetails(day.full_date, guru.id)}
                             className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                             {isDetailsShown ? <FaEyeSlash size={12} /> : <FaEye size={12} />}
@@ -80,7 +84,7 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                         {gajiData.details.map((detail, index) => (
                             <div key={index} className="flex justify-between items-center">
                                 <span className="text-gray-600 dark:text-gray-300">
-                                    {detail.nama}
+                                    {detail.nama} <span className="text-gray-400">({detail.source})</span>
                                 </span>
                                 <span className="font-medium text-black dark:text-white">
                                     {formatCurrency(detail.gaji)}
@@ -109,13 +113,45 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                 {/* Header */}
                 <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <h3 className="font-semibold text-black dark:text-white text-xl">
-                            Laporan Penggajian Guru
-                        </h3>
+                        <div>
+                            <h3 className="font-semibold text-black dark:text-white text-xl">
+                                Laporan Penggajian Guru
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                {monthName}
+                            </p>
+                        </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Report Buttons */}
+                            {/* Month Navigation */}
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handlePreviousMonth}
+                                    disabled={!prevMonth}
+                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${
+                                        prevMonth 
+                                            ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer' 
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <FaChevronLeft size={14} />
+                                    Bulan Sebelumnya
+                                </button>
+                                <button
+                                    onClick={handleNextMonth}
+                                    disabled={!nextMonth}
+                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${
+                                        nextMonth 
+                                            ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer' 
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                >
+                                    Bulan Berikutnya
+                                    <FaChevronRight size={14} />
+                                </button>
+                            </div>
                             
+                            {/* Report Button */}
                             <Link
                                 href="/gaji/guru/monthly"
                                 className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
@@ -130,39 +166,17 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
                             >
                                 <FaFileExcel size={16} />
-                                Download Excel
+                                Excel
                             </button>
                             <button
                                 onClick={handleExportPdf}
                                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
                             >
                                 <FaFilePdf size={16} />
-                                Download PDF
+                                PDF
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {/* Search */}
-                <div className="p-6.5 border-b border-stroke dark:border-strokedark">
-                    <form onSubmit={handleSearch} className="flex gap-3">
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                placeholder="Cari berdasarkan tanggal, hari, atau nama guru..."
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="bg-primary hover:bg-opacity-90 text-white px-6 py-3 rounded font-medium flex items-center gap-2 transition-all"
-                        >
-                            <FaSearch size={14} />
-                            Cari
-                        </button>
-                    </form>
                 </div>
 
                 {/* Table */}
@@ -172,45 +186,54 @@ const GajiGuruIndex = ({ dates, gurus, data, filters }) => {
                             <thead>
                                 <tr className="bg-gray-2 text-left dark:bg-meta-4">
                                     <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Tanggal</th>
-                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Total</th>
+                                    <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Hari</th>
                                     {gurus && gurus.map((guru) => (
-                                        <th key={guru.id} className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">
+                                        <th key={guru.id} className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white text-center">
                                             {guru.name}
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {dates && dates.length > 0 ? (
-                                    dates.map((date, index) => {
-                                        // Calculate total for this row
-                                        const totalRow = gurus.reduce((sum, guru) => {
-                                            const gajiData = data[date] && data[date][guru.id] ? data[date][guru.id] : { total: 0 };
-                                            return sum + (gajiData.total || 0);
-                                        }, 0);
-                                        return (
+                                {monthlyData && monthlyData.length > 0 ? (
+                                    <>
+                                        {monthlyData.map((day, index) => (
                                             <tr key={index} className="hover:bg-gray-1 dark:hover:bg-meta-4">
                                                 <td className="border border-stroke py-5 px-4 dark:border-strokedark">
                                                     <div className="font-medium text-black dark:text-white">
-                                                        {formatDate(date)}
+                                                        {day.date}
                                                     </div>
                                                 </td>
-                                                <td className="border border-stroke py-5 px-4 text-center dark:border-strokedark font-bold text-primary">
-                                                    {formatCurrency(totalRow)}
+                                                <td className="border border-stroke py-5 px-4 dark:border-strokedark">
+                                                    <div className="text-black dark:text-white">
+                                                        {day.day}
+                                                    </div>
                                                 </td>
                                                 {gurus && gurus.map((guru) => (
                                                     <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
-                                                        {renderGajiCell(date, guru)}
+                                                        {renderGajiCell(day, guru)}
                                                     </td>
                                                 ))}
                                             </tr>
-                                        );
-                                    })
+                                        ))}
+                                        
+                                        {/* Total Row */}
+                                        <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                                            <td colSpan="2" className="border border-stroke py-5 px-4 dark:border-strokedark text-black dark:text-white text-lg">
+                                                TOTAL
+                                            </td>
+                                            {gurus && gurus.map((guru) => (
+                                                <td key={guru.id} className="border border-stroke py-5 px-4 text-center dark:border-strokedark text-primary dark:text-blue-400 text-lg">
+                                                    {formatCurrency(teacherTotals[guru.id] || 0)}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    </>
                                 ) : (
                                     <tr>
-                                        <td colSpan={gurus ? gurus.length + 1 : 1} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
+                                        <td colSpan={gurus ? gurus.length + 2 : 3} className="border border-stroke py-5 px-4 text-center dark:border-strokedark">
                                             <div className="text-gray-500 dark:text-gray-400">
-                                                Tidak ada data gaji guru yang ditemukan
+                                                Tidak ada data gaji guru untuk bulan ini
                                             </div>
                                         </td>
                                     </tr>
