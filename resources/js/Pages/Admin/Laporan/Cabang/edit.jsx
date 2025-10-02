@@ -4,20 +4,30 @@ import DefaultLayout from "@/Layouts/DefaultLayout";
 
 const EditCabang = () => {
     const { cabangs, laporanCabang, pakets } = usePage().props;
-    const { data, setData, put, errors } = useForm({
+    const defaultPakets = pakets.reduce((acc, p) => {
+        acc[p.id] = 0; // default 0
+        return acc;
+    }, {});
+
+    // isi dari laporanCabang
+    const existingPakets = laporanCabang.pakets.reduce((acc, p) => {
+        acc[p.id] = p.pivot.jumlah;
+        return acc;
+    }, {});
+
+    // gabungkan: default + existing
+    const { data, setData, put } = useForm({
         hari: laporanCabang.hari,
         tanggal: laporanCabang.tanggal,
         cabang_id: laporanCabang.cabang_id,
-        pakets: laporanCabang.pakets.reduce((acc, p) => {
-            acc[p.id] = p.pivot.jumlah; // isi jumlah dari pivot
-            return acc;
-        }, {}),
+        pakets: { ...defaultPakets, ...existingPakets },
         daftar: laporanCabang.daftar,
         modul: laporanCabang.modul,
         kaos: laporanCabang.kaos,
         kas: laporanCabang.kas,
         lainlain: laporanCabang.lainlain,
     });
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -101,15 +111,17 @@ const EditCabang = () => {
                                         </label>
                                         <input
                                             type="number"
-                                            value={data.pakets[paket.id] || 0}
+                                            value={data.pakets[paket.id] === 0 ? "" : data.pakets[paket.id]}
+                                            placeholder="0"
                                             onChange={(e) =>
                                                 setData("pakets", {
                                                     ...data.pakets,
-                                                    [paket.id]: parseInt(e.target.value) || 0,
+                                                    [paket.id]: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                                                 })
                                             }
                                             className="w-full rounded border border-stroke px-3 py-2"
                                         />
+
                                     </div>
                                 ))}
                             </div>
@@ -124,7 +136,11 @@ const EditCabang = () => {
                                         <input
                                             type="text"
                                             value={data.daftar}
-                                            onChange={(e) => setData("daftar", e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // biar kosong tetap "" dan angka tanpa leading zero
+                                                setData("daftar", value === "" ? "" : String(parseInt(value, 10)));
+                                            }}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -138,7 +154,11 @@ const EditCabang = () => {
                                         <input
                                             type="text"
                                             value={data.modul}
-                                            onChange={(e) => setData("modul", e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // biar kosong tetap "" dan angka tanpa leading zero
+                                                setData("modul", value === "" ? "" : String(parseInt(value, 10)));
+                                            }}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -157,7 +177,11 @@ const EditCabang = () => {
                                         <input
                                             type="text"
                                             value={data.kaos}
-                                            onChange={(e) => setData("kaos", e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // biar kosong tetap "" dan angka tanpa leading zero
+                                                setData("kaos", value === "" ? "" : String(parseInt(value, 10)));
+                                            }}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -173,7 +197,11 @@ const EditCabang = () => {
                                             type="number"
 
                                             value={data.kas}
-                                            onChange={(e) => setData("kas", e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // biar kosong tetap "" dan angka tanpa leading zero
+                                                setData("kas", value === "" ? "" : String(parseInt(value, 10)));
+                                            }}
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
@@ -189,7 +217,11 @@ const EditCabang = () => {
                                         <input
                                             type="number"
                                             value={data.lainlain}
-                                            onChange={(e) => setData("lainlain", e.target.value)}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // biar kosong tetap "" dan angka tanpa leading zero
+                                                setData("lainlain", value === "" ? "" : String(parseInt(value, 10)));
+                                            }}  
                                             placeholder=""
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />

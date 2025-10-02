@@ -90,7 +90,7 @@ const Laporan = ({
         headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", ""); // Tambah kolom jarak kosong
 
         // Header kolom pengeluaran
-        const headerPengeluaran = ["Pembuat Laporan", "Detail Gaji Mitra", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Laba"];
+        const headerPengeluaran = ["Pembuat Laporan", "Detail Gaji Mitra", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Albri"];
 
         // Gabungkan header
         const headerLengkap = [...headerPemasukan, ...headerPengeluaran];
@@ -371,6 +371,270 @@ const Laporan = ({
         const fileName = `Rekap_Gabungan_Mitra_${judul}.xlsx`;
         XLSX.writeFile(workbook, fileName);
     };
+
+    // Fungsi untuk print laporan mitra
+    const printLaporan = () => {
+        const printWindow = window.open('', '_blank');
+        const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+        const safePaketMitra = paketMitra || [];
+
+        // Generate print content
+        let printContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Laporan Rekap Bulanan Mitra ${bulan.toUpperCase()} ${tahun}</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        margin: 20px; 
+                        font-size: 12px;
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 30px; 
+                    }
+                    .section-title { 
+                        font-size: 16px; 
+                        font-weight: bold; 
+                        margin: 20px 0 10px 0; 
+                        color: #333;
+                        border-bottom: 2px solid #333;
+                        padding-bottom: 5px;
+                    }
+                    table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        margin-bottom: 20px; 
+                    }
+                    th, td { 
+                        border: 1px solid #333; 
+                        padding: 8px; 
+                        text-align: left; 
+                    }
+                    th { 
+                        background-color: #f5f5f5; 
+                        font-weight: bold; 
+                    }
+                    .total-row { 
+                        background-color: #e8f4fd; 
+                        font-weight: bold; 
+                    }
+                    .summary { 
+                        display: flex; 
+                        justify-content: space-around; 
+                        margin: 20px 0; 
+                    }
+                    .summary-item { 
+                        text-align: center; 
+                        padding: 15px; 
+                        border: 2px solid #333; 
+                        border-radius: 8px; 
+                        background-color: #f9f9f9; 
+                    }
+                    .summary-value { 
+                        font-size: 18px; 
+                        font-weight: bold; 
+                        color: #2563eb; 
+                    }
+                    @media print {
+                        body { margin: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>LAPORAN REKAP BULANAN MITRA</h1>
+                    <h2>${bulan.toUpperCase()} ${tahun}</h2>
+                </div>
+
+                <div class="summary">
+                    <div class="summary-item">
+                        <div>Total Laba</div>
+                        <div class="summary-value">Rp ${totalLaba.toLocaleString()}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div>Total Pemasukan</div>
+                        <div class="summary-value">Rp ${totalProfit.toLocaleString()}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div>Total Pengeluaran</div>
+                        <div class="summary-value">Rp ${totalOutcome.toLocaleString()}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div>Total Siswa</div>
+                        <div class="summary-value">${totalStudents}</div>
+                    </div>
+                </div>
+
+                <div class="section-title">LAPORAN PEMASUKAN MITRA</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hari</th>
+                            <th>Tanggal</th>
+                            <th>Pembuat Laporan</th>`;
+
+        // Add paket headers
+        safePaketMitra.forEach(paket => {
+            printContent += `<th>${paket.nama_paket}<br>(Rp ${paket.harga.toLocaleString()})</th>`;
+        });
+
+        printContent += `
+                            <th>Total Biaya</th>
+                            <th>Daftar</th>
+                            <th>Modul</th>
+                            <th>Kaos</th>
+                            <th>Kas</th>
+                            <th>Lain-lain</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+        // Add pemasukan data
+        let totalPemasukanPrint = 0;
+        const totalPaketPrint = {};
+        safePaketMitra.forEach(p => { totalPaketPrint[p.id] = 0; });
+
+        if (laporanMitra && laporanMitra.data) {
+            laporanMitra.data.forEach(laporan => {
+                printContent += `
+                    <tr>
+                        <td>${laporan.hari}</td>
+                        <td>${laporan.tanggal}</td>
+                        <td>${laporan.user?.name || 'N/A'}</td>`;
+
+                safePaketMitra.forEach(paket => {
+                    const jumlah = laporan.pakets?.find(p => p.id === paket.id)?.pivot?.jumlah || 0;
+                    totalPaketPrint[paket.id] += jumlah;
+                    printContent += `<td>${jumlah}</td>`;
+                });
+
+                printContent += `
+                        <td>Rp ${n(laporan.totalbiaya).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.daftar).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.modul).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.kaos).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.kas).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.lainlain).toLocaleString()}</td>
+                        <td>Rp ${n(laporan.totalpemasukan).toLocaleString()}</td>
+                    </tr>`;
+                totalPemasukanPrint += n(laporan.totalpemasukan);
+            });
+        }
+
+        // Add total row for pemasukan
+        printContent += `
+                <tr class="total-row">
+                    <td colspan="3"><strong>TOTAL</strong></td>`;
+
+        safePaketMitra.forEach(paket => {
+            printContent += `<td><strong>${totalPaketPrint[paket.id]}</strong></td>`;
+        });
+
+        const totalTotalBiaya = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.totalbiaya), 0) || 0;
+        const totalDaftar = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.daftar), 0) || 0;
+        const totalModul = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.modul), 0) || 0;
+        const totalKaos = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.kaos), 0) || 0;
+        const totalKas = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.kas), 0) || 0;
+        const totalLainLainPemasukan = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.lainlain), 0) || 0;
+
+        printContent += `
+                    <td><strong>Rp ${totalTotalBiaya.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalDaftar.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalModul.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalKaos.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalKas.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalLainLainPemasukan.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalProfit.toLocaleString()}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="section-title">LAPORAN PENGELUARAN MITRA</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hari</th>
+                    <th>Tanggal</th>
+                    <th>Pembuat Laporan</th>
+                    <th>Detail Gaji Mitra</th>
+                    <th>ATK</th>
+                    <th>Intensif</th>
+                    <th>Lisensi</th>
+                    <th>Lain-lain</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        // Add pengeluaran data
+        if (laporanPengeluaranMitra && laporanPengeluaranMitra.data) {
+            laporanPengeluaranMitra.data.forEach(pengeluaran => {
+                const gajiDetail = pengeluaran.mitras && pengeluaran.mitras.length > 0
+                    ? pengeluaran.mitras.map(mitra => `${mitra.mitra_nama}: Rp ${(mitra.gaji || 0).toLocaleString()}`).join('<br>')
+                    : 'N/A';
+
+                printContent += `
+                    <tr>
+                        <td>${pengeluaran.hari}</td>
+                        <td>${pengeluaran.tanggal}</td>
+                        <td>${pengeluaran.user?.name || 'N/A'}</td>
+                        <td>${gajiDetail}</td>
+                        <td>Rp ${n(pengeluaran.atk).toLocaleString()}</td>
+                        <td>Rp ${n(pengeluaran.intensif).toLocaleString()}</td>
+                        <td>Rp ${n(pengeluaran.lisensi).toLocaleString()}</td>
+                        <td>Rp ${n(pengeluaran.lainlain).toLocaleString()}</td>
+                        <td>Rp ${n(pengeluaran.totalpengeluaran).toLocaleString()}</td>
+                    </tr>`;
+            });
+        }
+
+        // Add total row for pengeluaran
+        let totalGajiSemuaMitra = 0;
+        if (laporanPengeluaranMitra?.data) {
+            laporanPengeluaranMitra.data.forEach(p => {
+                if (p.mitras && p.mitras.length > 0) {
+                    totalGajiSemuaMitra += p.mitras.reduce((sum, mitra) => sum + (mitra.gaji || 0), 0);
+                }
+            });
+        }
+
+        const totalAtk = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.atk), 0) || 0;
+        const totalIntensif = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.intensif), 0) || 0;
+        const totalLisensi = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.lisensi), 0) || 0;
+        const totalLainLainPengeluaran = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.lainlain), 0) || 0;
+
+        printContent += `
+                <tr class="total-row">
+                    <td colspan="3"><strong>TOTAL</strong></td>
+                    <td><strong>Total Gaji: Rp ${totalGajiSemuaMitra.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalAtk.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalIntensif.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalLisensi.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalLainLainPengeluaran.toLocaleString()}</strong></td>
+                    <td><strong>Rp ${totalOutcome.toLocaleString()}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 30px; text-align: center; font-size: 14px;">
+            <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+        </div>
+
+        </body>
+        </html>`;
+
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+        }, 500);
+    };
+
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
@@ -480,16 +744,26 @@ const Laporan = ({
                 </CardDataStats>
             </div>
 
-            {/* Tombol Download Excel Gabungan */}
-            <div className="flex justify-center mb-6">
+            {/* Tombol Download Excel Gabungan dan Print */}
+            <div className="flex justify-center gap-4 mb-6">
                 <button
                     onClick={() => downloadExcelGabungan(laporanMitra, laporanPengeluaranMitra, paketMitra, `${bulan}_${tahun}`)}
-                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded flex items-center"
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded flex items-center"
                 >
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                     Download Excel Gabungan
+                </button>
+
+                <button
+                    onClick={printLaporan}
+                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-6 rounded flex items-center"
+                >
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+                    </svg>
+                    Print Laporan
                 </button>
             </div>
 
