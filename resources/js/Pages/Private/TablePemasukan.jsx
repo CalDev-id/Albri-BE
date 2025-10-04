@@ -146,7 +146,7 @@ const TablePemasukan = () => {
                                 {/* Dynamic paket headers */}
                                 {(paketPrivate || []).map((paket) => (
                                     <th key={paket.id} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                        {paket.nama_paket}
+                                        {paket.nama_paket} ({paket.harga.toLocaleString()})
                                     </th>
                                 ))}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
