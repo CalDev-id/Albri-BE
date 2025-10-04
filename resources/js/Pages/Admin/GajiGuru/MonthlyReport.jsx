@@ -145,9 +145,6 @@ const GajiGuruMonthlyReport = ({ monthlySummary, year, filters }) => {
                                                 <span className="text-sm text-black dark:text-white">
                                                     Total: <span className="font-semibold">{formatCurrency(monthData.totals.total)}</span>
                                                 </span>
-                                                <span className="text-sm text-black dark:text-white">
-                                                    ({monthData.data.length} hari)
-                                                </span>
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
