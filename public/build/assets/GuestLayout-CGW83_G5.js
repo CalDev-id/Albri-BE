@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/GuestLayout-CGW83_G5.js
-import{j as e,a as r}from"./app-DPBPjsud.js";import{A as t}from"./ApplicationLogo-Do6Gg3hY.js";function a({children:s}){return e.jsxs("div",{className:"flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0",children:[e.jsx("div",{children:e.jsx(r,{href:"/",children:e.jsx(t,{className:"h-20 w-20 fill-current text-gray-500"})})}),e.jsx("div",{className:"mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg",children:s})]})}export{a as G};
-========
-import{j as e,a as r}from"./app-CxGSB-fu.js";import{A as t}from"./ApplicationLogo-CtCyONMk.js";function a({children:s}){return e.jsxs("div",{className:"flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0",children:[e.jsx("div",{children:e.jsx(r,{href:"/",children:e.jsx(t,{className:"h-20 w-20 fill-current text-gray-500"})})}),e.jsx("div",{className:"mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg",children:s})]})}export{a as G};
->>>>>>>> 7ba683b29899470a9bcc910837b1637138954cb0:public/build/assets/GuestLayout-CY57msLh.js
