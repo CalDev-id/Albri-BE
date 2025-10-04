@@ -63,7 +63,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             /> */}
                 <img
                     className="w-[32px] h-[32px]"
-                    src="/images/AlbriAssets/AlbriLogo.png"
+                    src="/images/AlbriAssets/albriLogo.png"
                     alt="Logo"
                 />
           </Link>
