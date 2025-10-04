@@ -9,18 +9,19 @@ import { Inertia } from '@inertiajs/inertia';
 
 const Laporan = () => {
     const {
-
-        // laporanMitra,
         laporanMitraFull,
         laporanPengeluaranMitra,
-        // laporanPengeluaranMitraFull,
-        laporanMitra, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+        laporanMitra,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
+        prevWeekOffset,
+        paketMitra
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
         Inertia.get(route('Mitra.index'), { weekOffset });
     };
-    // console.log(laporanMitra.data);
 
     const calculateTotals = (laporanMitraData, laporanPengeluaranMitraData) => {
         // Pastikan data adalah array
@@ -42,16 +43,14 @@ const Laporan = () => {
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
 
-        // Hitung total students (biaya)
-        const totalStudents = laporanMitraData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((Number(laporan.biaya_5000) || 0) +
-                    (Number(laporan.biaya_8000) || 0) +
-                    (Number(laporan.biaya_10000) || 0) +
-                    (Number(laporan.biaya_15000) || 0)),
-            0
-        );
+        // Hitung total students dari dynamic pakets
+        const totalStudents = laporanMitraData.reduce((sum, laporan) => {
+            const pakets = laporan.pakets || [];
+            const totalPaket = pakets.reduce((paketSum, paket) => {
+                return paketSum + (Number(paket.pivot?.jumlah) || 0);
+            }, 0);
+            return sum + totalPaket;
+        }, 0);
 
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
@@ -61,12 +60,6 @@ const Laporan = () => {
         laporanMitra.data,
         laporanPengeluaranMitra.data
     );
-
-    // Debug hasil
-    // console.log("Total Laba:", totalLaba);
-    // console.log("Total Profit:", totalProfit);
-    // console.log("Total Outcome:", totalOutcome);
-    // console.log("Total Students:", totalStudents);
 
     return (
         <DefaultLayout>
@@ -179,8 +172,6 @@ const Laporan = () => {
 
             <TablePemasukan laporanMitra={laporanMitra} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
-            {/* P E N G E L U A R A N */}
-
             <TablePengeluaran
                 laporanPengeluaranMitra={laporanPengeluaranMitra}
                 startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}
@@ -190,5 +181,6 @@ const Laporan = () => {
         </DefaultLayout>
     );
 };
+
 
 export default Laporan;

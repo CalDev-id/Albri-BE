@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LapPemasukanMitra;
 use App\Models\LapPengeluaranMitra;
+use App\Models\PaketMitra;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
@@ -24,17 +25,21 @@ class MitraController extends Controller
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
-            ->with('user')
+            ->with(['user', 'pakets'])
              ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
             ->paginate(500, ['*'], 'laporanMitraPage');
-        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
+        $laporanPengeluaranMitra = LapPengeluaranMitra::with(['user', 'mitras'])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
         $laporanMitraFull = LapPemasukanMitra::all();
         $laporanPengeluaranMitraFull = LapPengeluaranMitra::with('user')->get();
+
+        // Ambil data paket mitra untuk header tabel
+        $paketMitra = PaketMitra::orderBy('nama_paket')->get();
+
         return Inertia::render('Mitra/Index', [
             'laporanMitra' => $laporanMitra,
             'startOfWeek' => $startOfWeek->format('Y-m-d'),
@@ -44,6 +49,7 @@ class MitraController extends Controller
             'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
             'laporanMitraFull' => $laporanMitraFull,
             'laporanPengeluaranMitraFull' => $laporanPengeluaranMitraFull,
+            'paketMitra' => $paketMitra,
         ]);
     }
 
