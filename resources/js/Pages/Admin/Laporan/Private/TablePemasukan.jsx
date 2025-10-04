@@ -14,7 +14,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
     // Calculate total values for each column
     const getTotal = (key) => {
         return laporanPrivate.data.reduce(
-            (sum, laporan) => sum + (laporan[key] || 0),
+            (sum, laporan) => sum + (Number(laporan[key]) || 0),
             0
         );
     };
@@ -23,7 +23,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
     const getPaketTotal = (paketId) => {
         return laporanPrivate.data.reduce(
             (sum, laporan) => {
-                const paketValue = laporan.pakets && laporan.pakets[paketId] ? parseInt(laporan.pakets[paketId]) : 0;
+                const paketValue = laporan.pakets && laporan.pakets[paketId] ? Number(laporan.pakets[paketId]) : 0;
                 return sum + paketValue;
             },
             0
@@ -49,13 +49,13 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
             }
 
             // Tambahkan kolom lainnya
-            row["Total Biaya"] = laporan.totalbiaya || 0;
-            row["Daftar"] = laporan.daftar || 0;
-            row["Modul"] = laporan.modul || 0;
-            row["Kaos"] = laporan.kaos || 0;
-            row["Kas"] = laporan.kas || 0;
-            row["Lain Lain"] = laporan.lainlain || 0;
-            row["Total Pemasukan"] = laporan.totalpemasukan || 0;
+            row["Total Biaya"] = Number(laporan.totalbiaya) || 0;
+            row["Daftar"] = Number(laporan.daftar) || 0;
+            row["Modul"] = Number(laporan.modul) || 0;
+            row["Kaos"] = Number(laporan.kaos) || 0;
+            row["Kas"] = Number(laporan.kas) || 0;
+            row["Lain Lain"] = Number(laporan.lainlain) || 0;
+            row["Total Pemasukan"] = Number(laporan.totalpemasukan) || 0;
 
             return row;
         });
@@ -70,18 +70,18 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
         if (paketPrivate && paketPrivate.length > 0) {
             paketPrivate.forEach((paket) => {
                 const headerName = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
-                totals[headerName] = data.reduce((sum, row) => sum + row[headerName], 0);
+                totals[headerName] = data.reduce((sum, row) => sum + Number(row[headerName]), 0);
             });
         }
 
         // Total untuk kolom lainnya
-        totals["Total Biaya"] = data.reduce((sum, row) => sum + row["Total Biaya"], 0);
-        totals["Daftar"] = data.reduce((sum, row) => sum + row.Daftar, 0);
-        totals["Modul"] = data.reduce((sum, row) => sum + row.Modul, 0);
-        totals["Kaos"] = data.reduce((sum, row) => sum + row.Kaos, 0);
-        totals["Kas"] = data.reduce((sum, row) => sum + row.Kas, 0);
-        totals["Lain Lain"] = data.reduce((sum, row) => sum + row["Lain Lain"], 0);
-        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + row["Total Pemasukan"], 0);
+        totals["Total Biaya"] = data.reduce((sum, row) => sum + Number(row["Total Biaya"]), 0);
+        totals["Daftar"] = data.reduce((sum, row) => sum + Number(row.Daftar), 0);
+        totals["Modul"] = data.reduce((sum, row) => sum + Number(row.Modul), 0);
+        totals["Kaos"] = data.reduce((sum, row) => sum + Number(row.Kaos), 0);
+        totals["Kas"] = data.reduce((sum, row) => sum + Number(row.Kas), 0);
+        totals["Lain Lain"] = data.reduce((sum, row) => sum + Number(row["Lain Lain"]), 0);
+        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + Number(row["Total Pemasukan"]), 0);
 
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
@@ -219,7 +219,7 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                                     {/* Dynamic paket data */}
                                     {paketPrivate && paketPrivate.length > 0 && paketPrivate.map((paket, index) => {
                                         // Get value from JSON pakets field using paket ID
-                                        const paketValue = laporan.pakets && laporan.pakets[paket.id] ? parseInt(laporan.pakets[paket.id]) : 0;
+                                        const paketValue = laporan.pakets && laporan.pakets[paket.id] ? Number(laporan.pakets[paket.id]) : 0;
                                         return (
                                             <td key={index} className="py-4 px-4 text-sm text-black dark:text-white">
                                                 {paketValue.toLocaleString()}
@@ -228,25 +228,25 @@ const TablePemasukan = ({ laporanPrivate, startOfWeek, endOfWeek, nextWeekOffset
                                     })}
 
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya ? laporan.totalbiaya.toLocaleString() : 0}
+                                        {Number(laporan.totalbiaya).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar.toLocaleString()}
+                                        {Number(laporan.daftar).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul.toLocaleString()}
+                                        {Number(laporan.modul).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos.toLocaleString()}
+                                        {Number(laporan.kaos).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas.toLocaleString()}
+                                        {Number(laporan.kas).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain.toLocaleString()}
+                                        {Number(laporan.lainlain).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan.toLocaleString()}
+                                        {Number(laporan.totalpemasukan).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
                                         {/* Action buttons */}

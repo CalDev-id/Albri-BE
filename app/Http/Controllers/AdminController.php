@@ -754,7 +754,6 @@ class AdminController extends Controller
     public function updatelaporanmitra(Request $request, $id): RedirectResponse
     {
 
-        dd($request->all());
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',

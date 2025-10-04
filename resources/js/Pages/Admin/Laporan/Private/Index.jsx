@@ -31,13 +31,13 @@ const Laporan = () => {
 
         // Hitung total pemasukan
         const totalProfit = laporanPrivateData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + (Number(laporan.totalpemasukan) || 0),
             0
         );
 
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranPrivateData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + (Number(pengeluaran.totalpengeluaran) || 0),
             0
         );
 
@@ -50,7 +50,7 @@ const Laporan = () => {
             if (paketPrivate && paketPrivate.length > 0) {
                 paketPrivate.forEach((paket) => {
                     const fieldName = `biaya_${paket.harga}`;
-                    totalBiaya += laporan[fieldName] || 0;
+                    totalBiaya += Number(laporan[fieldName]) || 0;
                 });
             }
             return sum + totalBiaya;

@@ -10,7 +10,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
-        return laporanPengeluaranPrivate.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
+        return laporanPengeluaranPrivate.data.reduce((sum, pengeluaran) => sum + (Number(pengeluaran[field]) || 0), 0);
     };
 
     const downloadExcelPengeluaran = (laporanPengeluaranPrivate, judul) => {
@@ -21,12 +21,12 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
             "Nama Private": pengeluaran.private_bimbles && pengeluaran.private_bimbles.length > 0
                 ? pengeluaran.private_bimbles.map(pb => pb.name).join(', ')
                 : "N/A",
-            Gaji: pengeluaran.gaji || 0,
-            ATK: pengeluaran.atk || 0,
-            Intensif: pengeluaran.intensif || 0,
-            Lisensi: pengeluaran.lisensi || 0,
-            "Lain Lain": pengeluaran.lainlain || 0,
-            Total: pengeluaran.totalpengeluaran || 0,
+            Gaji: Number(pengeluaran.gaji) || 0,
+            ATK: Number(pengeluaran.atk) || 0,
+            Intensif: Number(pengeluaran.intensif) || 0,
+            Lisensi: Number(pengeluaran.lisensi) || 0,
+            "Lain Lain": Number(pengeluaran.lainlain) || 0,
+            Total: Number(pengeluaran.totalpengeluaran) || 0,
         }));
 
         // Hitung total untuk setiap kolom numerik
@@ -35,12 +35,12 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
             Tanggal: "",
             Pembuat: "",
             "Nama Private": "",
-            Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
-            ATK: data.reduce((sum, row) => sum + row.ATK, 0),
-            Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
-            Lisensi: data.reduce((sum, row) => sum + row.Lisensi, 0),
-            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            Total: data.reduce((sum, row) => sum + row.Total, 0),
+            Gaji: data.reduce((sum, row) => sum + Number(row.Gaji), 0),
+            ATK: data.reduce((sum, row) => sum + Number(row.ATK), 0),
+            Intensif: data.reduce((sum, row) => sum + Number(row.Intensif), 0),
+            Lisensi: data.reduce((sum, row) => sum + Number(row.Lisensi), 0),
+            "Lain Lain": data.reduce((sum, row) => sum + Number(row["Lain Lain"]), 0),
+            Total: data.reduce((sum, row) => sum + Number(row.Total), 0),
         };
 
         // Tambahkan total sebagai baris terakhir
@@ -126,16 +126,16 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                                     {pengeluaran.gurus && pengeluaran.gurus.length > 0
                                         ? pengeluaran.gurus.map((guru, index) => (
                                             <div key={index}>
-                                                {guru.guru_id} - Rp {parseInt(guru.gaji).toLocaleString()}
+                                                {guru.guru_id} - Rp {Number(guru.gaji).toLocaleString()}
                                             </div>
                                         ))
-                                        : `Rp ${pengeluaran.gaji ? pengeluaran.gaji.toLocaleString() : 0}`}
+                                        : `Rp ${Number(pengeluaran.gaji).toLocaleString()}`}
                                 </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.atk).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.intensif).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lisensi).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lainlain).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.totalpengeluaran).toLocaleString()}</td>
                                 <td className="py-4 px-4 text-center">
                                     {/* Actions */}
                                     <div className="flex justify-center gap-3">
@@ -171,7 +171,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran').toLocaleString()}</td>
                             <td className="py-4 px-4"></td>
-                            
+
                         </tr>
                     </tfoot>
                 </table>
