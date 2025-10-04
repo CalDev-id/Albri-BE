@@ -12,11 +12,6 @@ use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 use Inertia\Response;
 use App\Models\Paket;
-
-
-
-
-
 class GuruController extends Controller
 {
 

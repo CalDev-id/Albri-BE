@@ -15,8 +15,6 @@ use Inertia\Response;
 
 class MitraController extends Controller
 {
-   
-
     public function index(Request $request): Response
     {
         // Ambil parameter `weekOffset` dari request, default ke 0 (minggu ini), dan pastikan tipe datanya integer
@@ -27,10 +25,12 @@ class MitraController extends Controller
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanMitra = LapPemasukanMitra::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->with('user')
+             ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanMitraPage');
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranMitraPage');
         $laporanMitraFull = LapPemasukanMitra::all();
