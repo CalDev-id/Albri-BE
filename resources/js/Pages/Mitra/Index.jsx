@@ -26,48 +26,48 @@ const Laporan = () => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
         if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanMitraData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + (Number(laporan.totalpemasukan) || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranMitraData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + (Number(pengeluaran.totalpengeluaran) || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
+
         // Hitung total students (biaya)
         const totalStudents = laporanMitraData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_8000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_15000 || 0)),
+                ((Number(laporan.biaya_5000) || 0) +
+                    (Number(laporan.biaya_8000) || 0) +
+                    (Number(laporan.biaya_10000) || 0) +
+                    (Number(laporan.biaya_15000) || 0)),
             0
         );
-    
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanMitra.data,
         laporanPengeluaranMitra.data
     );
-    
+
     // Debug hasil
     // console.log("Total Laba:", totalLaba);
     // console.log("Total Profit:", totalProfit);
     // console.log("Total Outcome:", totalOutcome);
     // console.log("Total Students:", totalStudents);
-    
+
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
@@ -177,7 +177,7 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanMitra={laporanMitra} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}  />
+            <TablePemasukan laporanMitra={laporanMitra} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
             {/* P E N G E L U A R A N */}
 

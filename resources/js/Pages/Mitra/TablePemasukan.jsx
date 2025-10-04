@@ -25,7 +25,7 @@ const TablePemasukan = () => {
     // Calculate total values for each column
     const getTotal = (key) => {
         return laporanMitra.data.reduce(
-            (sum, laporan) => sum + (laporan[key] || 0),
+            (sum, laporan) => sum + (Number(laporan[key]) || 0),
             0
         );
     };
@@ -128,37 +128,37 @@ const TablePemasukan = () => {
                                         {laporan.tanggal}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_5000}
+                                        {Number(laporan.biaya_5000).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_8000}
+                                        {Number(laporan.biaya_8000).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_10000}
+                                        {Number(laporan.biaya_10000).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_15000}
+                                        {Number(laporan.biaya_15000).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya}
+                                        {Number(laporan.totalbiaya).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar}
+                                        {Number(laporan.daftar).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul}
+                                        {Number(laporan.modul).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos}
+                                        {Number(laporan.kaos).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas}
+                                        {Number(laporan.kas).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain}
+                                        {Number(laporan.lainlain).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan}
+                                        {Number(laporan.totalpemasukan).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
                                         {/* Action buttons */}
@@ -199,37 +199,37 @@ const TablePemasukan = () => {
                                     Total
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_5000")}
+                                    {getTotal("biaya_5000").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_8000")}
+                                    {getTotal("biaya_8000").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_10000")}
+                                    {getTotal("biaya_10000").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("biaya_15000")}
+                                    {getTotal("biaya_15000").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalbiaya")}
+                                    {getTotal("totalbiaya").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("daftar")}
+                                    {getTotal("daftar").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("modul")}
+                                    {getTotal("modul").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kaos")}
+                                    {getTotal("kaos").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kas")}
+                                    {getTotal("kas").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("lainlain")}
+                                    {getTotal("lainlain").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalpemasukan")}
+                                    {getTotal("totalpemasukan").toLocaleString()}
                                 </td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
