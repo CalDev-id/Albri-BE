@@ -24,35 +24,35 @@ const Laporan = () => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
         if (!Array.isArray(laporanPengeluaranCabangData)) laporanPengeluaranCabangData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanCabangData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + (Number(laporan.totalpemasukan) || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranCabangData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + (Number(pengeluaran.totalpengeluaran) || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
+
         // Hitung total students (biaya)
         const totalStudents = laporanCabangData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_12000 || 0)),
+                ((Number(laporan.biaya_5000) || 0) +
+                    (Number(laporan.biaya_10000) || 0) +
+                    (Number(laporan.biaya_12000) || 0)),
             0
         );
-    
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanCabang.data,
@@ -168,14 +168,14 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanCabang={laporanCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
-          
+            <TablePemasukan laporanCabang={laporanCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
+
 
 
 
             {/* P E N G E L U A R A N */}
 
-            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang}  startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
+            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
         </DefaultLayout>
     );

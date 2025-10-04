@@ -20,8 +20,9 @@ const TablePengeluaran = () => {
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
-        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => sum + (pengeluaran[field] || 0), 0);
+        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => sum + (Number(pengeluaran[field]) || 0), 0);
     };
+
     const downloadExcelPengeluaran = (laporanPengeluaranCabang, judul) => {
         // Data pengeluaran
         const data = laporanPengeluaranCabang.data.map((pengeluaran) => ({
@@ -29,14 +30,14 @@ const TablePengeluaran = () => {
             Tanggal: pengeluaran.tanggal,
             Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
             "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
-            Gaji: pengeluaran.gaji || 0,
-            ATK: pengeluaran.atk || 0,
-            Sewa: pengeluaran.sewa || 0,
-            Intensif: pengeluaran.intensif || 0,
-            Lisensi: pengeluaran.lisensi || 0,
-            THR: pengeluaran.thr || 0,
-            "Lain Lain": pengeluaran.lainlain || 0,
-            Total: pengeluaran.totalpengeluaran || 0,
+            Gaji: Number(pengeluaran.gaji) || 0,
+            ATK: Number(pengeluaran.atk) || 0,
+            Sewa: Number(pengeluaran.sewa) || 0,
+            Intensif: Number(pengeluaran.intensif) || 0,
+            Lisensi: Number(pengeluaran.lisensi) || 0,
+            THR: Number(pengeluaran.thr) || 0,
+            "Lain Lain": Number(pengeluaran.lainlain) || 0,
+            Total: Number(pengeluaran.totalpengeluaran) || 0,
         }));
 
         // Hitung total untuk setiap kolom numerik
@@ -45,14 +46,14 @@ const TablePengeluaran = () => {
             Tanggal: "",
             Cabang: "",
             "Nama Guru": "",
-            Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
-            ATK: data.reduce((sum, row) => sum + row.ATK, 0),
-            Sewa: data.reduce((sum, row) => sum + row.Sewa, 0),
-            Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
-            Lisensi: data.reduce((sum, row) => sum + row.Lisensi, 0),
-            THR: data.reduce((sum, row) => sum + row.THR, 0),
-            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            Total: data.reduce((sum, row) => sum + row.Total, 0),
+            Gaji: data.reduce((sum, row) => sum + Number(row.Gaji), 0),
+            ATK: data.reduce((sum, row) => sum + Number(row.ATK), 0),
+            Sewa: data.reduce((sum, row) => sum + Number(row.Sewa), 0),
+            Intensif: data.reduce((sum, row) => sum + Number(row.Intensif), 0),
+            Lisensi: data.reduce((sum, row) => sum + Number(row.Lisensi), 0),
+            THR: data.reduce((sum, row) => sum + Number(row.THR), 0),
+            "Lain Lain": data.reduce((sum, row) => sum + Number(row["Lain Lain"]), 0),
+            Total: data.reduce((sum, row) => sum + Number(row.Total), 0),
         };
 
         // Tambahkan total sebagai baris terakhir
@@ -125,20 +126,20 @@ const TablePengeluaran = () => {
                                     {pengeluaran.gurus.length > 0
                                         ? pengeluaran.gurus.map((guru) => (
                                             <div key={guru.id}>
-                                                {guru.guru_nama} - Rp {guru.gaji.toLocaleString()}
+                                                {guru.guru_nama} - Rp {Number(guru.gaji).toLocaleString()}
                                             </div>
                                         ))
                                         : "N/A"}
 
                                 </td>
 
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.thr.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.atk).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.sewa).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.intensif).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lisensi).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.thr).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lainlain).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.totalpengeluaran).toLocaleString()}</td>
                                 <td className="py-4 px-4 text-center">
                                     {/* Actions */}
                                     <div className="flex justify-center gap-3">

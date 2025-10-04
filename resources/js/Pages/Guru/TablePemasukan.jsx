@@ -24,13 +24,13 @@ const TablePemasukan = () => {
 
   // total tetap (bukan paket)
   const getTotal = (key) =>
-    laporanCabang.data.reduce((sum, lap) => sum + n(lap[key]), 0);
+    laporanCabang.data.reduce((sum, lap) => sum + Number(lap[key]), 0);
 
   // ambil jumlah paket per laporan dari pivot
   const getJumlahPaketInRow = (laporan, paketId) => {
     if (!laporan.pakets) return 0;
     const found = laporan.pakets.find((p) => p.id === paketId);
-    return found ? n(found.pivot?.jumlah) : 0;
+    return found ? Number(found.pivot?.jumlah) : 0;
   };
 
   // total jumlah per paket (kolom dinamis)
@@ -84,13 +84,13 @@ const TablePemasukan = () => {
       });
 
       // kolom total
-      row["Total Biaya"] = n(lap.totalbiaya);
-      row["Daftar"] = n(lap.daftar);
-      row["Modul"] = n(lap.modul);
-      row["Kaos"] = n(lap.kaos);
-      row["Kas"] = n(lap.kas);
-      row["Lain Lain"] = n(lap.lainlain);
-      row["Total Pemasukan"] = n(lap.totalpemasukan);
+      row["Total Biaya"] = Number(lap.totalbiaya);
+      row["Daftar"] = Number(lap.daftar);
+      row["Modul"] = Number(lap.modul);
+      row["Kaos"] = Number(lap.kaos);
+      row["Kas"] = Number(lap.kas);
+      row["Lain Lain"] = Number(lap.lainlain);
+      row["Total Pemasukan"] = Number(lap.totalpemasukan);
 
       return row;
     });
@@ -198,13 +198,13 @@ const TablePemasukan = () => {
                     </td>
                   ))}
 
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.totalbiaya)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.daftar)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.modul)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.kaos)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.kas)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.lainlain)}</td>
-                  <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(laporan.totalpemasukan)}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.totalbiaya).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.daftar).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.modul).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.kaos).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.kas).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.lainlain).toLocaleString()}</td>
+                  <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(laporan.totalpemasukan).toLocaleString()}</td>
 
                   <td className="py-4 px-4 text-center">
                     <div className="flex justify-center gap-3">
@@ -239,13 +239,13 @@ const TablePemasukan = () => {
                   </td>
                 ))}
 
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("totalbiaya"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("daftar"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("modul"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("kaos"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("kas"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("lainlain"))}</td>
-                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{fmt(getTotal("totalpemasukan"))}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("totalbiaya")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("daftar")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("modul")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("kaos")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("kas")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("lainlain")).toLocaleString()}</td>
+                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{Number(getTotal("totalpemasukan")).toLocaleString()}</td>
                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
               </tr>
             </tfoot>
