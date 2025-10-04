@@ -63,66 +63,66 @@ const AdminDashboard = () => {
     const { totalLaba, totalProfit, totalOutcome, totalStudents } =
         calculateTotals(laporanCabang.data, laporanPengeluaranCabang.data);
 
-        const calculateTotalsM = (laporanMitraData, laporanPengeluaranMitraData) => {
-          // Pastikan data adalah array
-          if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
-          if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
-      
-          // Hitung total pemasukan
-          const totalProfitM = laporanMitraData.reduce(
-              (sum, laporan) => sum + (laporan.totalpemasukan || 0),
-              0
-          );
-      
-          // Hitung total pengeluaran
-          const totalOutcomeM = laporanPengeluaranMitraData.reduce(
-              (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
-              0
-          );
-      
-          // Hitung total laba
-          const totalLabaM = totalProfitM - totalOutcomeM;
-      
-          // Hitung total students (biaya)
-          const totalStudentsM = laporanMitraData.reduce(
-              (sum, laporan) =>
-                  sum +
-                  ((laporan.biaya_5000 || 0) +
-                      (laporan.biaya_8000 || 0) +
-                      (laporan.biaya_10000 || 0) +
-                      (laporan.biaya_15000 || 0)),
-              0
-          );
-      
-          return { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM };
-      };
-      
-      // Memastikan .data digunakan saat memanggil fungsi
-      const { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM } = calculateTotalsM(
-          laporanMitra.data,
-          laporanPengeluaranMitra.data
-      );
+    const calculateTotalsM = (laporanMitraData, laporanPengeluaranMitraData) => {
+        // Pastikan data adalah array
+        if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
+        if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
 
-      const calculateTotalsP = (laporanPrivateData, laporanPengeluaranPrivateData) => {
+        // Hitung total pemasukan
+        const totalProfitM = laporanMitraData.reduce(
+            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            0
+        );
+
+        // Hitung total pengeluaran
+        const totalOutcomeM = laporanPengeluaranMitraData.reduce(
+            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            0
+        );
+
+        // Hitung total laba
+        const totalLabaM = totalProfitM - totalOutcomeM;
+
+        // Hitung total students (biaya)
+        const totalStudentsM = laporanMitraData.reduce(
+            (sum, laporan) =>
+                sum +
+                ((laporan.biaya_5000 || 0) +
+                    (laporan.biaya_8000 || 0) +
+                    (laporan.biaya_10000 || 0) +
+                    (laporan.biaya_15000 || 0)),
+            0
+        );
+
+        return { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM };
+    };
+
+    // Memastikan .data digunakan saat memanggil fungsi
+    const { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM } = calculateTotalsM(
+        laporanMitra.data,
+        laporanPengeluaranMitra.data
+    );
+
+    const calculateTotalsP = (laporanPrivateData, laporanPengeluaranPrivateData) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanPrivateData)) laporanPrivateData = [];
         if (!Array.isArray(laporanPengeluaranPrivateData)) laporanPengeluaranPrivateData = [];
-    
+
         // Hitung total pemasukan
         const totalProfitP = laporanPrivateData.reduce(
             (sum, laporan) => sum + (laporan.totalpemasukan || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcomeP = laporanPengeluaranPrivateData.reduce(
             (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLabaP = totalProfitP - totalOutcomeP;
-    
+
         // Hitung total students (biaya)
         const totalStudentsP = laporanPrivateData.reduce(
             (sum, laporan) =>
@@ -133,10 +133,10 @@ const AdminDashboard = () => {
                     (laporan.biaya_45 || 0)),
             0
         );
-    
+
         return { totalLabaP, totalProfitP, totalOutcomeP, totalStudentsP };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLabaP, totalProfitP, totalOutcomeP, totalStudentsP } = calculateTotalsP(
         laporanPrivate.data,
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total={`Rp ${(totalLaba+totalLabaM+totalLabaP).toLocaleString()}`}
+                    total={`Rp ${(totalLaba + totalLabaM + totalLabaP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pemasukan"
-                    total={`Rp ${(totalProfit+totalProfitM+totalProfitP).toLocaleString()}`}
+                    total={`Rp ${(totalProfit + totalProfitM + totalProfitP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -200,7 +200,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pengeluaran"
-                    total={`Rp ${(totalOutcome+totalOutcomeM+totalOutcomeP).toLocaleString()}`}
+                    total={`Rp ${(totalOutcome + totalOutcomeM + totalOutcomeP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -224,7 +224,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Students"
-                    total={(totalStudents+totalStudentsM+totalStudentsP).toLocaleString()}
+                    total={(totalStudents + totalStudentsM + totalStudentsP).toLocaleString()}
                     rate=""
                     levelUp
                 >
