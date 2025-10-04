@@ -27,7 +27,7 @@ class MitraController extends Controller
             ->with('user')
              ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
-            ->paginate(50, ['*'], 'laporanMitraPage');
+            ->paginate(500, ['*'], 'laporanMitraPage');
         $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->where('created_by', Auth::id()) // 🔒 hanya data user login

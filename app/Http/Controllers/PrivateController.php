@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\LapPemasukanPrivate;
 use App\Models\LapPengeluaranPrivate;
@@ -23,13 +24,15 @@ class PrivateController extends Controller
         // Filter data berdasarkan tanggal dalam minggu yang diinginkan
         $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->with('user')
+             ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
-            ->paginate(50, ['*'], 'laporanPrivatePage');
+            ->paginate(500, ['*'], 'laporanPrivatePage');
 
         $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->where('created_by', Auth::id()) // 🔒 hanya data user login
             ->orderBy('tanggal', 'desc')
-            ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
+            ->paginate(500, ['*'], 'laporanPengeluaranPrivatePage');
 
         $laporanPrivateFull = LapPemasukanPrivate::all();
         $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
