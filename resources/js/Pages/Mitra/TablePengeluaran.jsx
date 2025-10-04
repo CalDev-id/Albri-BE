@@ -61,52 +61,47 @@ const TablePengeluaran = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {laporanPengeluaranMitra.data.map((pengeluaran, key) => {
-                            // Get mitras data - could be array or single item
-                            const mitras = pengeluaran.mitras || [];
-                            const mitrasDisplay = mitras.length > 0
-                                ? mitras.map(mitra => mitra.mitra_nama).join(', ')
-                                : (pengeluaran.user ? pengeluaran.user.name : "N/A");
-
-                            // Calculate total gaji for this row
-                            const totalGajiRow = mitras.length > 0
-                                ? mitras.reduce((sum, mitra) => sum + (Number(mitra.gaji) || 0), 0)
-                                : 0;
-
-                            return (
-                                <tr key={key} className="border-b border-stroke dark:border-strokedark">
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{mitrasDisplay}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(totalGajiRow).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.atk).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.intensif).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lisensi).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lainlain).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.totalpengeluaran).toLocaleString()}</td>
-                                    <td className="py-4 px-4 text-center">
-                                        <div className="flex justify-center gap-3">
-                                            <Link href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}/edit`}>
-                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                            </Link>
-                                            <Link
-                                                href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: pengeluaran.id }}
-                                                onClick={(e) => {
-                                                    if (!confirm("Are you sure you want to delete this item?")) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
-                                            >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                        {laporanPengeluaranMitra.data.map((pengeluaran, key) => (
+                            <tr key={key} className="border-b border-stroke dark:border-strokedark">
+                                <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                    {pengeluaran.mitras && pengeluaran.mitras.length > 0
+                                        ? pengeluaran.mitras.map((mitra) => (
+                                            <div key={mitra.id}>
+                                                {mitra.mitra_nama} - Rp {Number(mitra.gaji).toLocaleString()}
+                                            </div>
+                                        ))
+                                        : "N/A"}
+                                </td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.atk).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.intensif).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lisensi).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.lainlain).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{Number(pengeluaran.totalpengeluaran).toLocaleString()}</td>
+                                <td className="py-4 px-4 text-center">
+                                    <div className="flex justify-center gap-3">
+                                        <Link href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}/edit`}>
+                                            <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
+                                        </Link>
+                                        <Link
+                                            href={`/admin/laporan/pengeluaranmitra/${pengeluaran.id}`}
+                                            method="delete"
+                                            as="button"
+                                            data={{ id: pengeluaran.id }}
+                                            onClick={(e) => {
+                                                if (!confirm("Are you sure you want to delete this item?")) {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                        >
+                                            <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
+                                        </Link>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
