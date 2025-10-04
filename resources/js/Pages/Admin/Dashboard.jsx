@@ -33,13 +33,13 @@ const AdminDashboard = () => {
 
         // Hitung total pemasukan
         const totalProfit = laporanCabangData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + parseInt(laporan.totalpemasukan || 0),
             0
         );
 
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranCabangData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + parseInt(pengeluaran.totalpengeluaran || 0),
             0
         );
 
@@ -50,9 +50,9 @@ const AdminDashboard = () => {
         const totalStudents = laporanCabangData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_12000 || 0)),
+                (parseInt(laporan.biaya_5000 || 0) +
+                    parseInt(laporan.biaya_10000 || 0) +
+                    parseInt(laporan.biaya_12000 || 0)),
             0
         );
 
@@ -70,13 +70,13 @@ const AdminDashboard = () => {
 
         // Hitung total pemasukan
         const totalProfitM = laporanMitraData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + parseInt(laporan.totalpemasukan || 0),
             0
         );
 
         // Hitung total pengeluaran
         const totalOutcomeM = laporanPengeluaranMitraData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + parseInt(pengeluaran.totalpengeluaran || 0),
             0
         );
 
@@ -87,10 +87,10 @@ const AdminDashboard = () => {
         const totalStudentsM = laporanMitraData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_8000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_15000 || 0)),
+                (parseInt(laporan.biaya_5000 || 0) +
+                    parseInt(laporan.biaya_8000 || 0) +
+                    parseInt(laporan.biaya_10000 || 0) +
+                    parseInt(laporan.biaya_15000 || 0)),
             0
         );
 
@@ -110,13 +110,13 @@ const AdminDashboard = () => {
 
         // Hitung total pemasukan
         const totalProfitP = laporanPrivateData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + parseInt(laporan.totalpemasukan || 0),
             0
         );
 
         // Hitung total pengeluaran
         const totalOutcomeP = laporanPengeluaranPrivateData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + parseInt(pengeluaran.totalpengeluaran || 0),
             0
         );
 
@@ -127,10 +127,10 @@ const AdminDashboard = () => {
         const totalStudentsP = laporanPrivateData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_30 || 0) +
-                    (laporan.biaya_35 || 0) +
-                    (laporan.biaya_40 || 0) +
-                    (laporan.biaya_45 || 0)),
+                (parseInt(laporan.biaya_30 || 0) +
+                    parseInt(laporan.biaya_35 || 0) +
+                    parseInt(laporan.biaya_40 || 0) +
+                    parseInt(laporan.biaya_45 || 0)),
             0
         );
 
