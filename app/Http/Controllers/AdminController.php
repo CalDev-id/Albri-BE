@@ -13,7 +13,7 @@ use Inertia\Response;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Cabangalbri;
+use App\Models\CabangAlbri;
 use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 use App\Models\LaporanPengeluaranGuru;
@@ -53,7 +53,7 @@ class AdminController extends Controller
             ->latest()
             ->paginate(5, ['*'], 'guruPage');
 
-        $cabangs = Cabangalbri::all();
+        $cabangs = CabangAlbri::all();
 
 
 
@@ -532,7 +532,7 @@ class AdminController extends Controller
     {
 
         $laporanCabang = LapPengeluaranCabang::with(['cabang', 'user', 'gurus'])->findOrFail($id);  // Mengambil semua data laporan pengeluaran cabang
-        $cabangs = Cabangalbri::all(); // Mengambil semua data cabang
+        $cabangs = CabangAlbri::all(); // Mengambil semua data cabang
         $users = User::role('Guru')->get(); // Mengambil semua data user dengan role Admin
 
         return Inertia::render('Admin/Laporan/Cabang/Pengeluaran/EditPengeluaran', [

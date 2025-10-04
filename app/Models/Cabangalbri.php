@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 
-class Cabangalbri extends Model
+class CabangAlbri extends Model
 {
     use HasFactory;
 

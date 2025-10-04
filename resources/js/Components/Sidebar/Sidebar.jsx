@@ -713,7 +713,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                         <img
                             className="w-[50px] h-[50px]"
-                            src="/images/albriLogo.png"
+                            src="/images/AlbriAssets/AlbriLogo.png"
                             alt="Logo"
                         />
                         <h1 className="font-bold text-4xl text-white ml-3">

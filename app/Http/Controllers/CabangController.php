@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cabangalbri;
+use App\Models\CabangAlbri;
 use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 use Illuminate\Http\Request;
