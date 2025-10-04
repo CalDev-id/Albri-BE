@@ -33,13 +33,13 @@ const Laporan = ({
 
         // Hitung total pemasukan
         const totalProfit = laporanPrivateData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + (Number(laporan.totalpemasukan) || 0),
             0
         );
 
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranPrivateData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + (Number(pengeluaran.totalpengeluaran) || 0),
             0
         );
 
@@ -51,7 +51,7 @@ const Laporan = ({
             if (!paketPrivate || !laporan.pakets) return sum;
             let studentCount = 0;
             paketPrivate.forEach(paket => {
-                const paketValue = laporan.pakets[paket.id] ? parseInt(laporan.pakets[paket.id]) : 0;
+                const paketValue = laporan.pakets[paket.id] ? Number(laporan.pakets[paket.id]) : 0;
                 studentCount += paketValue;
             });
             return sum + studentCount;
@@ -162,13 +162,13 @@ const Laporan = ({
                 });
 
                 // Akumulasi data pemasukan private lainnya
-                dayData.pemasukan.totalbiaya += n(lap.totalbiaya);
-                dayData.pemasukan.daftar += n(lap.daftar);
-                dayData.pemasukan.modul += n(lap.modul);
-                dayData.pemasukan.kaos += n(lap.kaos);
-                dayData.pemasukan.kas += n(lap.kas);
-                dayData.pemasukan.lainlain += n(lap.lainlain);
-                dayData.pemasukan.total += n(lap.totalpemasukan);
+                dayData.pemasukan.totalbiaya += Number(lap.totalbiaya) || 0;
+                dayData.pemasukan.daftar += Number(lap.daftar) || 0;
+                dayData.pemasukan.modul += Number(lap.modul) || 0;
+                dayData.pemasukan.kaos += Number(lap.kaos) || 0;
+                dayData.pemasukan.kas += Number(lap.kas) || 0;
+                dayData.pemasukan.lainlain += Number(lap.lainlain) || 0;
+                dayData.pemasukan.total += Number(lap.totalpemasukan) || 0;
             });
         }
 
@@ -261,13 +261,13 @@ const Laporan = ({
                 }
 
                 // Akumulasi data pengeluaran
-                dayData.pengeluaran.atk += n(pengeluaran.atk);
-                dayData.pengeluaran.sewa += n(pengeluaran.sewa);
-                dayData.pengeluaran.intensif += n(pengeluaran.intensif);
-                dayData.pengeluaran.lisensi += n(pengeluaran.lisensi);
-                dayData.pengeluaran.thr += n(pengeluaran.thr);
-                dayData.pengeluaran.lainlain += n(pengeluaran.lainlain);
-                dayData.pengeluaran.total += n(pengeluaran.totalpengeluaran);
+                dayData.pengeluaran.atk += Number(pengeluaran.atk) || 0;
+                dayData.pengeluaran.sewa += Number(pengeluaran.sewa) || 0;
+                dayData.pengeluaran.intensif += Number(pengeluaran.intensif) || 0;
+                dayData.pengeluaran.lisensi += Number(pengeluaran.lisensi) || 0;
+                dayData.pengeluaran.thr += Number(pengeluaran.thr) || 0;
+                dayData.pengeluaran.lainlain += Number(pengeluaran.lainlain) || 0;
+                dayData.pengeluaran.total += Number(pengeluaran.totalpengeluaran) || 0;
             });
         }
 
@@ -340,22 +340,22 @@ const Laporan = ({
             dataGabungan.push(row);
 
             // Update total bulanan pemasukan
-            totalPemasukanBulan += dayData.pemasukan.total || 0;
-            totalTotalBiayaBulan += dayData.pemasukan.totalbiaya || 0;
-            totalDaftarBulan += dayData.pemasukan.daftar || 0;
-            totalModulBulan += dayData.pemasukan.modul || 0;
-            totalKaosBulan += dayData.pemasukan.kaos || 0;
-            totalKasBulan += dayData.pemasukan.kas || 0;
-            totalLainLainPemasukanBulan += dayData.pemasukan.lainlain || 0;
+            totalPemasukanBulan += Number(dayData.pemasukan.total) || 0;
+            totalTotalBiayaBulan += Number(dayData.pemasukan.totalbiaya) || 0;
+            totalDaftarBulan += Number(dayData.pemasukan.daftar) || 0;
+            totalModulBulan += Number(dayData.pemasukan.modul) || 0;
+            totalKaosBulan += Number(dayData.pemasukan.kaos) || 0;
+            totalKasBulan += Number(dayData.pemasukan.kas) || 0;
+            totalLainLainPemasukanBulan += Number(dayData.pemasukan.lainlain) || 0;
 
             // Update total bulanan pengeluaran
-            totalPengeluaranBulan += dayData.pengeluaran.total || 0;
-            totalAtkBulan += dayData.pengeluaran.atk || 0;
-            totalSewaBulan += dayData.pengeluaran.sewa || 0;
-            totalIntensifBulan += dayData.pengeluaran.intensif || 0;
-            totalLisensiBulan += dayData.pengeluaran.lisensi || 0;
-            totalThrBulan += dayData.pengeluaran.thr || 0;
-            totalLainLainPengeluaranBulan += dayData.pengeluaran.lainlain || 0;
+            totalPengeluaranBulan += Number(dayData.pengeluaran.total) || 0;
+            totalAtkBulan += Number(dayData.pengeluaran.atk) || 0;
+            totalSewaBulan += Number(dayData.pengeluaran.sewa) || 0;
+            totalIntensifBulan += Number(dayData.pengeluaran.intensif) || 0;
+            totalLisensiBulan += Number(dayData.pengeluaran.lisensi) || 0;
+            totalThrBulan += Number(dayData.pengeluaran.thr) || 0;
+            totalLainLainPengeluaranBulan += Number(dayData.pengeluaran.lainlain) || 0;
 
             // Kumpulkan detail gaji untuk total (hindari duplikasi)
             dayData.pengeluaran.gajiDetail.forEach(gaji => {
@@ -372,7 +372,7 @@ const Laporan = ({
                     // Ekstrak nilai gaji dari string untuk dijumlahkan
                     const gajiMatch = gaji.match(/Rp ([\d,]+)/);
                     if (gajiMatch) {
-                        const gajiValue = parseInt(gajiMatch[1].replace(/,/g, ''));
+                        const gajiValue = Number(gajiMatch[1].replace(/,/g, ''));
                         totalGajiBulan += gajiValue;
                     }
                 }
@@ -659,13 +659,13 @@ const Laporan = ({
                 });
 
                 printContent += `
-                        <td>Rp ${n(laporan.totalbiaya).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.daftar).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.modul).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.kaos).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.kas).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.lainlain).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.totalpemasukan).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.totalbiaya).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.daftar).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.modul).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.kaos).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.kas).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.lainlain).toLocaleString()}</td>
+                        <td>Rp ${Number(laporan.totalpemasukan).toLocaleString()}</td>
                     </tr>`;
                 totalPemasukanPrint += n(laporan.totalpemasukan);
             });
@@ -680,12 +680,12 @@ const Laporan = ({
             printContent += `<td><strong>${totalPaketPrint[paket.id]}</strong></td>`;
         });
 
-        const totalTotalBiaya = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.totalbiaya), 0) || 0;
-        const totalDaftar = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.daftar), 0) || 0;
-        const totalModul = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.modul), 0) || 0;
-        const totalKaos = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.kaos), 0) || 0;
-        const totalKas = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.kas), 0) || 0;
-        const totalLainLainPemasukan = laporanPrivate?.data?.reduce((sum, lap) => sum + n(lap.lainlain), 0) || 0;
+        const totalTotalBiaya = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.totalbiaya), 0) || 0;
+        const totalDaftar = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.daftar), 0) || 0;
+        const totalModul = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.modul), 0) || 0;
+        const totalKaos = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.kaos), 0) || 0;
+        const totalKas = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.kas), 0) || 0;
+        const totalLainLainPemasukan = laporanPrivate?.data?.reduce((sum, lap) => sum + Number(lap.lainlain), 0) || 0;
 
         printContent += `
                     <td><strong>Rp ${totalTotalBiaya.toLocaleString()}</strong></td>
@@ -737,13 +737,13 @@ const Laporan = ({
                         <td>${pengeluaran.tanggal}</td>
                         <td>${pengeluaran.user?.name || 'N/A'}</td>
                         <td>${gajiDetail}</td>
-                        <td>Rp ${n(pengeluaran.atk).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.sewa).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.intensif).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.lisensi).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.thr).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.lainlain).toLocaleString()}</td>
-                        <td>Rp ${n(pengeluaran.totalpengeluaran).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.atk).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.sewa).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.intensif).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.lisensi).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.thr).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.lainlain).toLocaleString()}</td>
+                        <td>Rp ${Number(pengeluaran.totalpengeluaran).toLocaleString()}</td>
                     </tr>`;
             });
         }
@@ -753,19 +753,19 @@ const Laporan = ({
         if (laporanPengeluaranPrivate?.data) {
             laporanPengeluaranPrivate.data.forEach(p => {
                 if (p.gurus && Array.isArray(p.gurus) && p.gurus.length > 0) {
-                    totalGajiSemuaPrivate += p.gurus.reduce((sum, guru) => sum + (guru.gaji || 0), 0);
+                    totalGajiSemuaPrivate += p.gurus.reduce((sum, guru) => sum + Number(guru.gaji), 0);
                 } else if (p.gaji) {
-                    totalGajiSemuaPrivate += n(p.gaji);
+                    totalGajiSemuaPrivate += Number(p.gaji);
                 }
             });
         }
 
-        const totalAtk = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.atk), 0) || 0;
-        const totalSewa = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.sewa), 0) || 0;
-        const totalIntensif = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.intensif), 0) || 0;
-        const totalLisensi = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.lisensi), 0) || 0;
-        const totalThr = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.thr), 0) || 0;
-        const totalLainLainPengeluaran = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + n(p.lainlain), 0) || 0;
+        const totalAtk = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.atk), 0) || 0;
+        const totalSewa = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.sewa), 0) || 0;
+        const totalIntensif = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.intensif), 0) || 0;
+        const totalLisensi = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.lisensi), 0) || 0;
+        const totalThr = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.thr), 0) || 0;
+        const totalLainLainPengeluaran = laporanPengeluaranPrivate?.data?.reduce((sum, p) => sum + Number(p.lainlain), 0) || 0;
 
         printContent += `
                 <tr class="total-row">
