@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,31 +28,41 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
- * Handle an incoming authentication request.
- */
-public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
+     * Handle an incoming authentication request.
+     */
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        try {
+            $request->authenticate();
 
-    $request->session()->regenerate();
+            $request->session()->regenerate();
 
-    $user = Auth::user();
+            $user = Auth::user();
 
-    // Cek role user dan arahkan ke dashboard yang sesuai
-    if ($user->hasRole('Admin')) {
-        return redirect()->route('admin.dashboard');
-    } elseif ($user->hasRole('Guru')) {
-        return redirect()->route('guru.dashboard');
-    } elseif ($user->hasRole('Private')) {
-        return redirect()->route('private.dashboard');
-    } elseif ($user->hasRole('Mitra')) {
-        return redirect()->route('mitra.dashboard');
+            Log::info('User logged in successfully: ' . $user->email);
+
+            // Cek role user dan arahkan ke dashboard yang sesuai
+            if ($user->hasRole('Admin')) {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->hasRole('Guru')) {
+                return redirect()->route('guru.dashboard');
+            } elseif ($user->hasRole('Private')) {
+                return redirect()->route('private.dashboard');
+            } elseif ($user->hasRole('Mitra')) {
+                return redirect()->route('mitra.dashboard');
+            }
+
+            // Jika user tidak punya role khusus, arahkan ke dashboard umum
+            return redirect()->route('dashboard');
+
+        } catch (ValidationException $e) {
+            Log::warning('Login attempt failed: ' . $request->email);
+            
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
+        }
     }
-
-    // Jika user tidak punya role khusus, arahkan ke dashboard umum
-    return redirect()->route('dashboard');
-}
-
 
     /**
      * Destroy an authenticated session.

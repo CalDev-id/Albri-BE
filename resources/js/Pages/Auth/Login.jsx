@@ -5,6 +5,8 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
+import Swal from 'sweetalert2';
+import { useEffect } from 'react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -13,10 +15,52 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
+    // Show success message if status exists
+    useEffect(() => {
+        if (status) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: status,
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    }, [status]);
+
+    // Show error message if login fails
+    useEffect(() => {
+        if (errors.email || errors.password) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed!',
+                text: errors.email || errors.password || 'Invalid credentials. Please try again.',
+                confirmButtonColor: '#3056D3'
+            });
+        }
+    }, [errors]);
+
     const submit = (e) => {
         e.preventDefault();
 
         post(route("login"), {
+            onSuccess: () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Successful!',
+                    text: 'Welcome back! Redirecting to dashboard...',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            },
+            onError: (errors) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Failed!',
+                    text: errors.email || errors.password || 'Invalid credentials. Please try again.',
+                    confirmButtonColor: '#3056D3'
+                });
+            },
             onFinish: () => reset("password"),
         });
     };
@@ -35,7 +79,7 @@ export default function Login({ status, canResetPassword }) {
                                 >
                                     <img
                                         className="w-[50px] h-[50px]"
-                                        src="images/AlbriAssets/AlbriLogo.png"
+                                        src="images/AlbriAssets/albriLogo.png"
                                         alt="Logo"
                                     />
 
