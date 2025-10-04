@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
 import * as XLSX from "xlsx";
@@ -18,73 +18,82 @@ const TablePengeluaran = () => {
         Inertia.get(route("admin.laporan.cabang"), { weekOffset });
     };
 
+    // Utility functions similar to TablePemasukan
+    const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+    const fmt = (v) => n(v).toLocaleString();
+
     // Function to calculate totals for the columns
-const calculateTotal = (field) => {
-    return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => {
-        if (field === "gaji") {
-            // kalau ada array guru, jumlahkan semua gaji guru
-            if (pengeluaran.gurus && pengeluaran.gurus.length > 0) {
-                return sum + pengeluaran.gurus.reduce((gSum, g) => gSum + (g.gaji || 0), 0);
+    const calculateTotal = (field) => {
+        return laporanPengeluaranCabang.data.reduce((sum, pengeluaran) => {
+            if (field === "gaji") {
+                // Handle gurus array with proper null checks
+                if (pengeluaran.gurus && Array.isArray(pengeluaran.gurus) && pengeluaran.gurus.length > 0) {
+                    return sum + pengeluaran.gurus.reduce((gSum, g) => gSum + n(g.gaji), 0);
+                }
+                // fallback ke gaji langsung
+                return sum + n(pengeluaran.gaji);
             }
-            // fallback ke gaji langsung
-            return sum + (pengeluaran.gaji || 0);
-        }
 
-        // field normal (atk, sewa, dll)
-        return sum + (pengeluaran[field] || 0);
-    }, 0);
-};
-
+            // field normal (atk, sewa, dll) with null check
+            return sum + n(pengeluaran[field]);
+        }, 0);
+    };
 
     const downloadExcelPengeluaran = (laporanPengeluaranCabang, judul) => {
-        // Data pengeluaran
-        const data = laporanPengeluaranCabang.data.map((pengeluaran) => ({
-            Hari: pengeluaran.hari,
-            Tanggal: pengeluaran.tanggal,
-            Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
-            "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
-            Gaji: pengeluaran.gaji || 0,
-            ATK: pengeluaran.atk || 0,
-            Sewa: pengeluaran.sewa || 0,
-            Intensif: pengeluaran.intensif || 0,
-            Lisensi: pengeluaran.lisensi || 0,
-            THR: pengeluaran.thr || 0,
-            "Lain Lain": pengeluaran.lainlain || 0,
-            Total: pengeluaran.totalpengeluaran || 0,
-        }));
+        // Data pengeluaran with proper null handling
+        const data = laporanPengeluaranCabang.data.map((pengeluaran) => {
+            // Calculate gaji total for this row
+            let gajiTotal = 0;
+            if (pengeluaran.gurus && Array.isArray(pengeluaran.gurus) && pengeluaran.gurus.length > 0) {
+                gajiTotal = pengeluaran.gurus.reduce((sum, g) => sum + n(g.gaji), 0);
+            } else {
+                gajiTotal = n(pengeluaran.gaji);
+            }
 
-        // Hitung total untuk setiap kolom numerik
+            return {
+                Hari: pengeluaran.hari || "",
+                Tanggal: pengeluaran.tanggal || "",
+                Cabang: pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A",
+                "Nama Guru": pengeluaran.user ? pengeluaran.user.name : "N/A",
+                Gaji: gajiTotal,
+                ATK: n(pengeluaran.atk),
+                Sewa: n(pengeluaran.sewa),
+                Intensif: n(pengeluaran.intensif),
+                Lisensi: n(pengeluaran.lisensi),
+                THR: n(pengeluaran.thr),
+                "Lain Lain": n(pengeluaran.lainlain),
+                Total: n(pengeluaran.totalpengeluaran),
+            };
+        });
+
+        // Calculate totals using the same function
         const totals = {
-            Hari: "Total", // Label di kolom pertama
+            Hari: "Total",
             Tanggal: "",
             Cabang: "",
             "Nama Guru": "",
-            Gaji: data.reduce((sum, row) => sum + row.Gaji, 0),
-            ATK: data.reduce((sum, row) => sum + row.ATK, 0),
-            Sewa: data.reduce((sum, row) => sum + row.Sewa, 0),
-            Intensif: data.reduce((sum, row) => sum + row.Intensif, 0),
-            Lisensi: data.reduce((sum, row) => sum + row.Lisensi, 0),
-            THR: data.reduce((sum, row) => sum + row.THR, 0),
-            "Lain Lain": data.reduce((sum, row) => sum + row["Lain Lain"], 0),
-            Total: data.reduce((sum, row) => sum + row.Total, 0),
+            Gaji: calculateTotal('gaji'),
+            ATK: calculateTotal('atk'),
+            Sewa: calculateTotal('sewa'),
+            Intensif: calculateTotal('intensif'),
+            Lisensi: calculateTotal('lisensi'),
+            THR: calculateTotal('thr'),
+            "Lain Lain": calculateTotal('lainlain'),
+            Total: calculateTotal('totalpengeluaran'),
         };
 
-        // Tambahkan total sebagai baris terakhir
+        // Add totals row
         data.push(totals);
 
-        // Buat worksheet dan workbook
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran");
+        // Create worksheet and workbook
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Pengeluaran");
 
-        // Tentukan nama file
+        // Generate filename
         const fileName = `Laporan_Pengeluaran_cabang_${judul}.xlsx`;
-
-        // Simpan file
-        XLSX.writeFile(workbook, fileName);
-        
+        XLSX.writeFile(wb, fileName);
     };
-
 
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
@@ -137,23 +146,22 @@ const calculateTotal = (field) => {
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {pengeluaran.gurus.length > 0
+                                    {pengeluaran.gurus && Array.isArray(pengeluaran.gurus) && pengeluaran.gurus.length > 0
                                         ? pengeluaran.gurus.map((guru) => (
                                             <div key={guru.id}>
-                                                {guru.guru_nama} - Rp {guru.gaji.toLocaleString()}
+                                                {guru.guru_nama} - Rp {n(guru.gaji).toLocaleString()}
                                             </div>
                                         ))
                                         : "N/A"}
-
                                 </td>
 
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.sewa.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.thr.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.atk)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.sewa)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.intensif)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.lisensi)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.thr)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.lainlain)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.totalpengeluaran)}</td>
                                 <td className="py-4 px-4 text-center">
                                     {/* Actions */}
                                     <div className="flex justify-center gap-3">
@@ -182,14 +190,14 @@ const calculateTotal = (field) => {
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                             <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('sewa').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('thr').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran').toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('gaji'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('atk'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('sewa'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('intensif'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('lisensi'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('thr'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('lainlain'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('totalpengeluaran'))}</td>
                             <td className="py-4 px-4"></td>
                         </tr>
                     </tfoot>
