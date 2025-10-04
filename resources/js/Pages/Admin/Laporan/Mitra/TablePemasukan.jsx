@@ -26,7 +26,7 @@ const TablePemasukan = () => {
     // Calculate total values for each column
     const getTotal = (key) => {
         return laporanMitra.data.reduce(
-            (sum, laporan) => sum + (laporan[key] || 0),
+            (sum, laporan) => sum + (Number(laporan[key]) || 0),
             0
         );
     };
@@ -35,7 +35,7 @@ const TablePemasukan = () => {
     const getPaketTotal = (paketId) => {
         return laporanMitra.data.reduce((sum, laporan) => {
             const paketData = laporan.pakets?.find(p => p.id === paketId);
-            return sum + (paketData?.pivot?.jumlah || 0);
+            return sum + (Number(paketData?.pivot?.jumlah) || 0);
         }, 0);
     };
 
@@ -53,13 +53,13 @@ const TablePemasukan = () => {
             });
 
             // Static columns
-            excelRow["Total Biaya"] = laporan.totalbiaya || 0;
-            excelRow["Daftar"] = laporan.daftar || 0;
-            excelRow["Modul"] = laporan.modul || 0;
-            excelRow["Kaos"] = laporan.kaos || 0;
-            excelRow["Kas"] = laporan.kas || 0;
-            excelRow["Lain Lain"] = laporan.lainlain || 0;
-            excelRow["Total Pemasukan"] = laporan.totalpemasukan || 0;
+            excelRow["Total Biaya"] = Number(laporan.totalbiaya) || 0;
+            excelRow["Daftar"] = Number(laporan.daftar) || 0;
+            excelRow["Modul"] = Number(laporan.modul) || 0;
+            excelRow["Kaos"] = Number(laporan.kaos) || 0;
+            excelRow["Kas"] = Number(laporan.kas) || 0;
+            excelRow["Lain Lain"] = Number(laporan.lainlain) || 0;
+            excelRow["Total Pemasukan"] = Number(laporan.totalpemasukan) || 0;
 
             return excelRow;
         });
@@ -73,17 +73,17 @@ const TablePemasukan = () => {
         // Add dynamic paket totals
         paketMitra?.forEach((paket) => {
             const headerKey = `${paket.nama_paket} (${paket.harga.toLocaleString()})`;
-            totals[headerKey] = data.reduce((sum, row) => sum + (row[headerKey] || 0), 0);
+            totals[headerKey] = data.reduce((sum, row) => sum + (Number(row[headerKey]) || 0), 0);
         });
 
         // Add static column totals
-        totals["Total Biaya"] = data.reduce((sum, row) => sum + (row["Total Biaya"] || 0), 0);
-        totals["Daftar"] = data.reduce((sum, row) => sum + (row["Daftar"] || 0), 0);
-        totals["Modul"] = data.reduce((sum, row) => sum + (row["Modul"] || 0), 0);
-        totals["Kaos"] = data.reduce((sum, row) => sum + (row["Kaos"] || 0), 0);
-        totals["Kas"] = data.reduce((sum, row) => sum + (row["Kas"] || 0), 0);
-        totals["Lain Lain"] = data.reduce((sum, row) => sum + (row["Lain Lain"] || 0), 0);
-        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + (row["Total Pemasukan"] || 0), 0);
+        totals["Total Biaya"] = data.reduce((sum, row) => sum + (Number(row["Total Biaya"]) || 0), 0);
+        totals["Daftar"] = data.reduce((sum, row) => sum + (Number(row["Daftar"]) || 0), 0);
+        totals["Modul"] = data.reduce((sum, row) => sum + (Number(row["Modul"]) || 0), 0);
+        totals["Kaos"] = data.reduce((sum, row) => sum + (Number(row["Kaos"]) || 0), 0);
+        totals["Kas"] = data.reduce((sum, row) => sum + (Number(row["Kas"]) || 0), 0);
+        totals["Lain Lain"] = data.reduce((sum, row) => sum + (Number(row["Lain Lain"]) || 0), 0);
+        totals["Total Pemasukan"] = data.reduce((sum, row) => sum + (Number(row["Total Pemasukan"]) || 0), 0);
 
         // Tambahkan total sebagai baris terakhir
         data.push(totals);
@@ -215,25 +215,25 @@ const TablePemasukan = () => {
                                     })}
 
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya.toLocaleString()}
+                                        {Number(laporan.totalbiaya).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar.toLocaleString()}
+                                        {Number(laporan.daftar).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul.toLocaleString()}
+                                        {Number(laporan.modul).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos.toLocaleString()}
+                                        {Number(laporan.kaos).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas.toLocaleString()}
+                                        {Number(laporan.kas).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain.toLocaleString()}
+                                        {Number(laporan.lainlain).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan.toLocaleString()}
+                                        {Number(laporan.totalpemasukan).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
                                         {/* Action buttons */}
