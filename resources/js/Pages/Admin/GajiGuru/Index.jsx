@@ -54,7 +54,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
         const gajiData = day.teachers[guru.id] || { details: [], total: 0 };
         const key = `${day.full_date}-${guru.id}`;
         const isDetailsShown = showDetails[key];
-        
+
         if (gajiData.total === 0) {
             return (
                 <span className="text-gray-400 dark:text-gray-500">
@@ -62,11 +62,11 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                 </span>
             );
         }
-        
+
         return (
-            <div className="space-y-1">
+            <div className="space-y-1 border">
                 <div className="flex items-center justify-between">
-                    <span className="font-medium text-black dark:text-white">
+                    <span className="text-center font-medium text-black dark:text-white">
                         {formatCurrency(gajiData.total)}
                     </span>
                     {gajiData.details && gajiData.details.length > 0 && (
@@ -78,7 +78,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                         </button>
                     )}
                 </div>
-                
+
                 {isDetailsShown && gajiData.details && gajiData.details.length > 0 && (
                     <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs space-y-1">
                         {gajiData.details.map((detail, index) => (
@@ -86,7 +86,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                                 <span className="text-gray-600 dark:text-gray-300">
                                     {detail.nama} <span className="text-gray-400">({detail.source})</span>
                                 </span>
-                                <span className="font-medium text-black dark:text-white">
+                                <span className="font-medium text-center text-black dark:text-white">
                                     {formatCurrency(detail.gaji)}
                                 </span>
                             </div>
@@ -94,7 +94,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                         <div className="border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
                             <div className="flex justify-between items-center font-medium">
                                 <span className="text-gray-800 dark:text-gray-200">Total:</span>
-                                <span className="text-black dark:text-white">
+                                <span className="text-center text-black dark:text-white">
                                     {formatCurrency(gajiData.total)}
                                 </span>
                             </div>
@@ -108,7 +108,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
     return (
         <DefaultLayout>
             <Head title="Laporan Penggajian Guru" />
-            
+
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 {/* Header */}
                 <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
@@ -121,18 +121,17 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                                 {monthName}
                             </p>
                         </div>
-                        
+
                         <div className="flex flex-col sm:flex-row gap-3">
                             {/* Month Navigation */}
                             <div className="flex gap-2">
                                 <button
                                     onClick={handlePreviousMonth}
                                     disabled={!prevMonth}
-                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${
-                                        prevMonth 
-                                            ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer' 
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
+                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${prevMonth
+                                        ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
                                 >
                                     <FaChevronLeft size={14} />
                                     Bulan Sebelumnya
@@ -140,17 +139,16 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                                 <button
                                     onClick={handleNextMonth}
                                     disabled={!nextMonth}
-                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${
-                                        nextMonth 
-                                            ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer' 
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
+                                    className={`px-3 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors ${nextMonth
+                                        ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
                                 >
                                     Bulan Berikutnya
                                     <FaChevronRight size={14} />
                                 </button>
                             </div>
-                            
+
                             {/* Report Button */}
                             <Link
                                 href="/gaji/guru/monthly"
@@ -159,7 +157,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                                 <FaCalendarAlt size={16} />
                                 Laporan Bulanan
                             </Link>
-                            
+
                             {/* Export Buttons */}
                             <button
                                 onClick={handleExportExcel}
@@ -182,7 +180,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                 {/* Table */}
                 <div className="p-6.5">
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto border-collapse">
+                        <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gray-2 text-left dark:bg-meta-4">
                                     <th className="border border-stroke py-4 px-4 font-medium text-black dark:border-strokedark dark:text-white">Tanggal</th>
@@ -216,7 +214,7 @@ const GajiGuruIndex = ({ gurus, monthlyData, teacherTotals, currentMonth, curren
                                                 ))}
                                             </tr>
                                         ))}
-                                        
+
                                         {/* Total Row */}
                                         <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
                                             <td colSpan="2" className="border border-stroke py-5 px-4 dark:border-strokedark text-black dark:text-white text-lg">
