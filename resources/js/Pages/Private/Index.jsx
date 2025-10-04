@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
 import CardDataStats from "@/components/Tables/CardDataStats";
+import { Inertia } from '@inertiajs/inertia';
 
 import "flowbite/dist/flowbite.min.js";
 
@@ -12,52 +13,58 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
 
 const Laporan = () => {
-    // const {  laporanPrivate, laporanPrivateFull, laporanPengeluaranPrivate, laporanPengeluaranPrivateFull } = usePage().props;
-
     const {
-        laporanPrivate, laporanPengeluaranPrivate,
-        startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+        laporanPrivate,
+        laporanPengeluaranPrivate,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
+        prevWeekOffset,
+        paketPrivate
     } = usePage().props;
+
+    const goToWeek = (weekOffset) => {
+        Inertia.get(route('Private.index'), { weekOffset });
+    };
 
     const calculateTotals = (laporanPrivateData, laporanPengeluaranPrivateData) => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanPrivateData)) laporanPrivateData = [];
         if (!Array.isArray(laporanPengeluaranPrivateData)) laporanPengeluaranPrivateData = [];
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanPrivateData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + (Number(laporan.totalpemasukan) || 0),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranPrivateData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + (Number(pengeluaran.totalpengeluaran) || 0),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
-        // Hitung total students (biaya)
-        const totalStudents = laporanPrivateData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_30 || 0) +
-                    (laporan.biaya_35 || 0) +
-                    (laporan.biaya_40 || 0) +
-                    (laporan.biaya_45 || 0)),
-            0
-        );
-    
+
+        // Hitung total students dari dynamic pakets
+        const totalStudents = laporanPrivateData.reduce((sum, laporan) => {
+            const pakets = laporan.pakets || {};
+            const totalPaket = Object.values(pakets).reduce((paketSum, jumlah) => {
+                return paketSum + (Number(jumlah) || 0);
+            }, 0);
+            return sum + totalPaket;
+        }, 0);
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanPrivate.data,
         laporanPengeluaranPrivate.data
     );
+
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
@@ -166,16 +173,11 @@ const Laporan = () => {
                     </svg>
                 </CardDataStats>
             </div>
-        
-        <TablePemasukan laporanPrivate={laporanPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
-          
 
+            <TablePemasukan laporanPrivate={laporanPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
+            <TablePengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
-          {/* P E N G E L U A R A N */}
-
-          <TablePengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate}                 startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
-           
         </DefaultLayout>
     );
 };

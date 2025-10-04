@@ -10,22 +10,101 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
 const TablePemasukan = () => {
-    // const { current_page, last_page, data } = laporanPrivate;
     const {
         laporanPrivate,
         startOfWeek,
         endOfWeek,
         nextWeekOffset,
         prevWeekOffset,
+        paketPrivate,
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route("admin.laporan.private"), { weekOffset });
+        Inertia.get(route("Private.index"), { weekOffset });
     };
 
     // Calculate total values for each column
     const getTotal = (key) => {
-        return laporanPrivate.data.reduce((sum, laporan) => sum + (laporan[key] || 0), 0);
+        return laporanPrivate.data.reduce((sum, laporan) => sum + (Number(laporan[key]) || 0), 0);
+    };
+
+    // Calculate total for dynamic paket
+    const getTotalPaket = (paketId) => {
+        return laporanPrivate.data.reduce((sum, laporan) => {
+            const pakets = laporan.pakets || {};
+            return sum + (Number(pakets[paketId]) || 0);
+        }, 0);
+    };
+
+    // Calculate total biaya for dynamic pakets
+    const getTotalBiayaPaket = (paketId) => {
+        return laporanPrivate.data.reduce((sum, laporan) => {
+            const pakets = laporan.pakets || {};
+            const jumlah = Number(pakets[paketId]) || 0;
+            const paket = (paketPrivate || []).find(p => p.id === paketId);
+            const harga = paket ? paket.harga : 0;
+            return sum + (jumlah * harga);
+        }, 0);
+    };
+
+    const downloadExcel2 = () => {
+        // Create workbook and worksheet for Pemasukan
+        const wb = XLSX.utils.book_new();
+
+        // Prepare pemasukan data
+        const pemasukanHeaders = [
+            'Hari', 'Nama', 'Tanggal',
+            ...(paketPrivate || []).map(paket => paket.nama_paket),
+            'Total Biaya', 'Daftar', 'Modul', 'Kaos', 'Kas', 'Lain Lain', 'Total'
+        ];
+
+        const pemasukanData = laporanPrivate.data.map(laporan => {
+            const row = [
+                laporan.hari,
+                laporan.user ? laporan.user.name : "N/A",
+                laporan.tanggal
+            ];
+
+            // Add dynamic paket columns
+            (paketPrivate || []).forEach(paket => {
+                const pakets = laporan.pakets || {};
+                row.push(Number(pakets[paket.id]) || 0);
+            });
+
+            row.push(
+                Number(laporan.totalbiaya),
+                Number(laporan.daftar),
+                Number(laporan.modul),
+                Number(laporan.kaos),
+                Number(laporan.kas),
+                Number(laporan.lainlain),
+                Number(laporan.totalpemasukan)
+            );
+
+            return row;
+        });
+
+        // Add totals row
+        const totalsRow = ['Total', '', ''];
+        (paketPrivate || []).forEach(paket => {
+            totalsRow.push(getTotalPaket(paket.id));
+        });
+        totalsRow.push(
+            getTotal('totalbiaya'),
+            getTotal('daftar'),
+            getTotal('modul'),
+            getTotal('kaos'),
+            getTotal('kas'),
+            getTotal('lainlain'),
+            getTotal('totalpemasukan')
+        );
+
+        const wsDataPemasukan = [pemasukanHeaders, ...pemasukanData, totalsRow];
+        const wsPemasukan = XLSX.utils.aoa_to_sheet(wsDataPemasukan);
+        XLSX.utils.book_append_sheet(wb, wsPemasukan, 'Pemasukan Private');
+
+        // Download the file
+        XLSX.writeFile(wb, `Laporan_Private_${startOfWeek}_to_${endOfWeek}.xlsx`);
     };
 
     return (
@@ -34,7 +113,7 @@ const TablePemasukan = () => {
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
                         Laporan Pemasukan Private ( {startOfWeek} sampai{" "}
-                            {endOfWeek} )
+                        {endOfWeek} )
                     </h4>
                     <div>
                         <Link href="/admin/laporan/private/create">
@@ -43,13 +122,7 @@ const TablePemasukan = () => {
                             </button>
                         </Link>
                         <button
-                            // onClick={downloadExcel}
-                            onClick={() =>
-                                downloadExcel2(
-                                    // laporanCabang,
-                                    // laporanPengeluaranCabang
-                                )
-                            }
+                            onClick={() => downloadExcel2()}
                             className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
                         >
                             Download Excel
@@ -61,7 +134,6 @@ const TablePemasukan = () => {
                     <table className="w-full table-auto">
                         <thead>
                             <tr className="bg-gray-2 dark:bg-meta-4">
-                                {/* Header cells */}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Hari
                                 </th>
@@ -71,19 +143,12 @@ const TablePemasukan = () => {
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Tanggal
                                 </th>
-                          
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    30.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    35.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    40.000
-                                </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                    45.000
-                                </th>
+                                {/* Dynamic paket headers */}
+                                {(paketPrivate || []).map((paket) => (
+                                    <th key={paket.id} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
+                                        {paket.nama_paket}
+                                    </th>
+                                ))}
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Total Biaya
                                 </th>
@@ -116,7 +181,6 @@ const TablePemasukan = () => {
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"
                                 >
-                                    {/* Table rows with data */}
                                     <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
                                         {laporan.hari}
                                     </td>
@@ -126,41 +190,38 @@ const TablePemasukan = () => {
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.tanggal}
                                     </td>
+                                    {/* Dynamic paket columns */}
+                                    {(paketPrivate || []).map((paket) => {
+                                        const pakets = laporan.pakets || {};
+                                        const jumlah = Number(pakets[paket.id]) || 0;
+                                        return (
+                                            <td key={paket.id} className="py-4 px-4 text-sm text-black dark:text-white">
+                                                {jumlah.toLocaleString()}
+                                            </td>
+                                        );
+                                    })}
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_30}
+                                        {Number(laporan.totalbiaya).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_35}
+                                        {Number(laporan.daftar).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_40}
+                                        {Number(laporan.modul).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.biaya_45}
+                                        {Number(laporan.kaos).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya}
+                                        {Number(laporan.kas).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar}
+                                        {Number(laporan.lainlain).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain}
-                                    </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan}
+                                        {Number(laporan.totalpemasukan).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
-                                        {/* Action buttons */}
                                         <div className="flex justify-center gap-3">
                                             <Link
                                                 href={`/admin/laporan/private/${laporan.id}/edit`}
@@ -192,17 +253,19 @@ const TablePemasukan = () => {
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                                 <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_30")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_35")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_40")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("biaya_45")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalbiaya")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("daftar")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("modul")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kaos")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kas")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("lainlain")}</td>
-                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalpemasukan")}</td>
+                                {/* Dynamic paket totals */}
+                                {(paketPrivate || []).map((paket) => (
+                                    <td key={paket.id} className="py-4 px-4 text-sm font-bold text-black dark:text-white">
+                                        {getTotalPaket(paket.id).toLocaleString()}
+                                    </td>
+                                ))}
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalbiaya").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("daftar").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("modul").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kaos").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("kas").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("lainlain").toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">{getTotal("totalpemasukan").toLocaleString()}</td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
                         </tfoot>
@@ -211,30 +274,13 @@ const TablePemasukan = () => {
                     <div className="flex justify-center gap-3 mt-4">
                         <button
                             onClick={() => goToWeek(prevWeekOffset)}
-                            // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Sebelumnya
                         </button>
 
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={`py-2 px-4 rounded ${
-                                    current_page === index + 1
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                } hover:bg-blue-400`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))} */}
-
                         <button
                             onClick={() => goToWeek(nextWeekOffset)}
-                            // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Selanjutnya
@@ -246,4 +292,4 @@ const TablePemasukan = () => {
     );
 };
 
-export default TablePemasukan;  
+export default TablePemasukan;

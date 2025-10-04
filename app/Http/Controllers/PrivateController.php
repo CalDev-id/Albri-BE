@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\LapPemasukanPrivate;
 use App\Models\LapPengeluaranPrivate;
+use App\Models\PaketPrivate;
 use Inertia\Response;
 
 
@@ -37,25 +38,24 @@ class PrivateController extends Controller
         $laporanPrivateFull = LapPemasukanPrivate::all();
         $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
 
-
-
-        // $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
-        // $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        // ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
-
-        // $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
-        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        // ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
-        // $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
-
-
-
+        // Ambil data paket private untuk header tabel
+        $paketPrivate = PaketPrivate::orderBy('nama_paket')->get();
 
         return Inertia::render(
             'Private/Index',
             [
-                // 'laporanPrivate' => $laporanPrivate,
-                // 'laporanPrivateFull' => $laporanPrivateFull,
+                'laporanPrivate' => $laporanPrivate,
+                'startOfWeek' => $startOfWeek->format('Y-m-d'),
+                'endOfWeek' => $endOfWeek->format('Y-m-d'),
+                'nextWeekOffset' => $weekOffset + 1,
+                'prevWeekOffset' => $weekOffset - 1,
+                'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+                'paketPrivate' => $paketPrivate,
+            ]
+        );
+    }
+
+}
                 // 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
                 // 'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
 
