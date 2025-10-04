@@ -56,17 +56,4 @@ class PrivateController extends Controller
     }
 
 }
-                // 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-                // 'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
-
-                'laporanPrivate' => $laporanPrivate,
-                'startOfWeek' => $startOfWeek->format('Y-m-d'),
-                'endOfWeek' => $endOfWeek->format('Y-m-d'),
-                'nextWeekOffset' => $weekOffset + 1,
-                'prevWeekOffset' => $weekOffset - 1,
-                'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-            ]
-        );
-    }
-
-}
+         
