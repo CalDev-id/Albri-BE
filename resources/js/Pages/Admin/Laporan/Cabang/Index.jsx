@@ -25,15 +25,24 @@ const Laporan = () => {
         if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
         if (!Array.isArray(laporanPengeluaranCabangData)) laporanPengeluaranCabangData = [];
     
+        // Helper function untuk konversi ke number yang aman
+        const toNumber = (value) => {
+            if (value === null || value === undefined) return 0;
+            const num = Number(value);
+            // Cek jika hasil konversi valid
+            if (isNaN(num) || !isFinite(num)) return 0;
+            return num;
+        };
+    
         // Hitung total pemasukan
         const totalProfit = laporanCabangData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+            (sum, laporan) => sum + toNumber(laporan.totalpemasukan),
             0
         );
     
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranCabangData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+            (sum, pengeluaran) => sum + toNumber(pengeluaran.totalpengeluaran),
             0
         );
     
@@ -44,9 +53,9 @@ const Laporan = () => {
         const totalStudents = laporanCabangData.reduce(
             (sum, laporan) =>
                 sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_12000 || 0)),
+                (toNumber(laporan.biaya_5000) +
+                    toNumber(laporan.biaya_10000) +
+                    toNumber(laporan.biaya_12000)),
             0
         );
     
