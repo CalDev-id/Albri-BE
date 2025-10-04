@@ -7,6 +7,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\Models\LapPemasukanPrivate;
 use App\Models\LapPengeluaranPrivate;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 
 
@@ -20,48 +21,39 @@ class PrivateController extends Controller
         $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
 
-        // Filter data berdasarkan tanggal dalam minggu yang diinginkan
+        // Get authenticated user
+        $userId = Auth::id();
+
+        // Filter data berdasarkan tanggal dalam minggu yang diinginkan DAN user yang login
         $laporanPrivate = LapPemasukanPrivate::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->where('user_id', $userId) // Filter berdasarkan user yang login
             ->with('user')
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
 
         $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->where('user_id', $userId) // Filter berdasarkan user yang login
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
 
-        $laporanPrivateFull = LapPemasukanPrivate::all();
-        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get();
-
-
-
-        // $laporanPrivateFull = LapPemasukanPrivate::all(); // Mengambil semua data laporan pemasukan private
-        // $laporanPrivate = LapPemasukanPrivate::orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        // ->paginate(2, ['*'], 'laporanPrivatePage');  // Menggunakan paginasi
-
-        // $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
-        // ->orderBy('tanggal', 'desc')  // Urutkan berdasarkan kolom 'tanggal' (dari terbaru)
-        // ->paginate(2, ['*'], 'laporanPrivatePagePengeluaran');  // Menggunakan paginasi
-        // $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')->get(); // Mengambil semua data laporan pengeluaran private
-
-
-
+        // Full data juga harus difilter berdasarkan user
+        $laporanPrivateFull = LapPemasukanPrivate::where('user_id', $userId)->get();
+        $laporanPengeluaranPrivateFull = LapPengeluaranPrivate::with('user')
+            ->where('user_id', $userId)
+            ->get();
 
         return Inertia::render(
             'Private/Index',
             [
-                // 'laporanPrivate' => $laporanPrivate,
-                // 'laporanPrivateFull' => $laporanPrivateFull,
-                // 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-                // 'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
-
                 'laporanPrivate' => $laporanPrivate,
                 'startOfWeek' => $startOfWeek->format('Y-m-d'),
                 'endOfWeek' => $endOfWeek->format('Y-m-d'),
                 'nextWeekOffset' => $weekOffset + 1,
                 'prevWeekOffset' => $weekOffset - 1,
                 'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
+                'laporanPrivateFull' => $laporanPrivateFull,
+                'laporanPengeluaranPrivateFull' => $laporanPengeluaranPrivateFull,
             ]
         );
     }
