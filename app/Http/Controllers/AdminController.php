@@ -1480,7 +1480,7 @@ class AdminController extends Controller
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->orderBy('tanggal', 'desc')
-                ->paginate(10);
+                ->paginate(1000);
 
             $laporanPengeluaranCabang = LapPengeluaranCabang::with([
                 'cabang',
@@ -1490,7 +1490,7 @@ class AdminController extends Controller
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->orderBy('tanggal', 'desc')
-                ->paginate(10);
+                ->paginate(1000);
 
         } catch (\Exception $e) {
             // Log the error for debugging
@@ -1534,12 +1534,12 @@ class AdminController extends Controller
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
+            ->paginate(1000, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
         $laporanPengeluaranMitra = LapPengeluaranMitra::with(['user', 'mitras'])
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanMitraPage');
+            ->paginate(1000, ['*'], 'laporanMitraPage');
 
         // Ambil data paket mitra untuk header tabel
         $paketMitra = PaketMitra::orderBy('nama_paket')->get();
@@ -1572,7 +1572,7 @@ class AdminController extends Controller
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
+            ->paginate(1000, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
 
         $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user'])
             ->whereMonth('tanggal', $bulan)
@@ -1614,7 +1614,7 @@ class AdminController extends Controller
         // Convert back to paginated format for frontend compatibility
         $laporanPengeluaranPrivateFlat = $laporanPengeluaranPrivate->flatten();
         $currentPage = 1;
-        $perPage = 50; // Show more items per page for better Excel generation
+        $perPage = 1000; // Show more items per page for better Excel generation
         $currentItems = $laporanPengeluaranPrivateFlat->slice(($currentPage - 1) * $perPage, $perPage);
         $laporanPengeluaranPrivate = new \Illuminate\Pagination\LengthAwarePaginator(
             $currentItems,
