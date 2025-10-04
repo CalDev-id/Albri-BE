@@ -3,6 +3,7 @@ import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
+import * as XLSX from "xlsx";
 
 const TablePengeluaran = () => {
     const {
@@ -31,17 +32,99 @@ const TablePengeluaran = () => {
         }, 0);
     };
 
+    // Function to get total gaji from mitras for a single report
+    const getTotalGajiMitra = (pengeluaran) => {
+        if (!pengeluaran.mitras || pengeluaran.mitras.length === 0) return 0;
+        return pengeluaran.mitras.reduce((sum, mitra) => sum + (Number(mitra.gaji) || 0), 0);
+    };
+
+    // Function to get names of all mitras for a single report
+    const getMitraNames = (pengeluaran) => {
+        if (!pengeluaran.mitras || pengeluaran.mitras.length === 0) return "N/A";
+        return pengeluaran.mitras.map(mitra => mitra.mitra_nama).join(", ");
+    };
+
+    const downloadExcelPengeluaran = () => {
+        const data = laporanPengeluaranMitra.data.map((pengeluaran) => ({
+            Hari: pengeluaran.hari,
+            Tanggal: pengeluaran.tanggal,
+            Pembuat: pengeluaran.user ? pengeluaran.user.name : "N/A",
+            "Nama Mitra": getMitraNames(pengeluaran),
+            Gaji: getTotalGajiMitra(pengeluaran),
+            ATK: Number(pengeluaran.atk) || 0,
+            Intensif: Number(pengeluaran.intensif) || 0,
+            Lisensi: Number(pengeluaran.lisensi) || 0,
+            "Lain Lain": Number(pengeluaran.lainlain) || 0,
+            Total: Number(pengeluaran.totalpengeluaran) || 0,
+        }));
+
+        // Hitung total untuk setiap kolom numerik
+        const totals = {
+            Hari: "Total",
+            Tanggal: "",
+            Pembuat: "",
+            "Nama Mitra": "",
+            Gaji: data.reduce((sum, row) => sum + Number(row.Gaji), 0),
+            ATK: data.reduce((sum, row) => sum + Number(row.ATK), 0),
+            Intensif: data.reduce((sum, row) => sum + Number(row.Intensif), 0),
+            Lisensi: data.reduce((sum, row) => sum + Number(row.Lisensi), 0),
+            "Lain Lain": data.reduce((sum, row) => sum + Number(row["Lain Lain"]), 0),
+            Total: data.reduce((sum, row) => sum + Number(row.Total), 0),
+        };
+
+        // Tambahkan total sebagai baris terakhir
+        data.push(totals);
+
+        // Urutan kolom yang diinginkan
+        const headers = [
+            "Hari",
+            "Tanggal",
+            "Pembuat",
+            "Nama Mitra",
+            "Gaji",
+            "ATK",
+            "Intensif",
+            "Lisensi",
+            "Lain Lain",
+            "Total",
+        ];
+
+        // Membuat worksheet dengan header khusus
+        const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+
+        // Menambahkan header secara eksplisit (jika perlu)
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
+
+        // Membuat workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Pengeluaran Mitra");
+
+        // Tentukan nama file
+        const fileName = `Laporan_Pengeluaran_Mitra_${startOfWeek}_to_${endOfWeek}.xlsx`;
+
+        // Simpan file
+        XLSX.writeFile(workbook, fileName);
+    };
+
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
             <div className="flex justify-between px-7.5 mb-6">
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Laporan Pengeluaran Mitra
                 </h4>
-                <Link href="/admin/laporan/pengeluaranmitra/create">
-                    <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                        Tambah Pengeluaran
+                <div>
+                    <Link href="/admin/laporan/pengeluaranmitra/create">
+                        <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                            Tambah Pengeluaran
+                        </button>
+                    </Link>
+                    <button
+                        onClick={() => downloadExcelPengeluaran()}
+                        className="bg-green-500 text-white px-4 py-2 rounded ml-2 hover:bg-green-600"
+                    >
+                        Download Excel
                     </button>
-                </Link>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
