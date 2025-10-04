@@ -3,11 +3,9 @@ import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
 import Swal from 'sweetalert2';
-
 import "flowbite/dist/flowbite.min.js";
 import { usePage } from "@inertiajs/react";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { Inertia } from "@inertiajs/inertia";
 
 const TablePengeluaran = () => {
@@ -25,70 +23,91 @@ const TablePengeluaran = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
 
+    // Utility functions similar to working TablePemasukan
+    const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+    const fmt = (v) => n(v).toLocaleString();
+
     const goToMonth = (month, year) => {
         Inertia.get(route("admin.rekap.mitra"), {
             bulan: month,
             tahun: year,
         });
     };
-    // console.log(laporanPengeluaranMitra.data);
 
-    // Function to calculate totals for the columns
+    // Function to calculate totals for the columns with proper null handling
     const calculateTotal = (field) => {
         return (laporanPengeluaranMitra?.data || []).reduce((sum, pengeluaran) => {
             if (field === "gaji") {
-                // kalau ada mitras, jumlahkan semua gaji dari mitras
-                if (pengeluaran.mitras && pengeluaran.mitras.length > 0) {
-                    return sum + pengeluaran.mitras.reduce((mSum, m) => mSum + (m.gaji || 0), 0);
+                // Handle mitras array with proper null checks
+                if (pengeluaran.mitras && Array.isArray(pengeluaran.mitras) && pengeluaran.mitras.length > 0) {
+                    return sum + pengeluaran.mitras.reduce((mSum, m) => mSum + n(m.gaji), 0);
                 }
-                // kalau tidak ada mitras, pakai gaji langsung
-                return sum + (pengeluaran.gaji || 0);
+                // Fallback to direct gaji field
+                return sum + n(pengeluaran.gaji);
             }
-            return sum + (pengeluaran[field] || 0);
+            return sum + n(pengeluaran[field]);
         }, 0);
     };
-
 
     const downloadExcelPengeluaran = (laporanPengeluaranMitra, judul) => {
         const data = laporanPengeluaranMitra?.data || [];
 
         if (data.length === 0) {
-            alert("Tidak ada data untuk di-download");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tidak ada data',
+                text: 'Tidak ada data untuk di-download',
+                confirmButtonColor: '#3085d6'
+            });
             return;
         }
 
-        const headers = [
-            "No",
-            "Hari",
-            "Tanggal",
-            "Nama",
-            "ATK",
-            "Intensif",
-            "Lisensi",
-            "Lain-lain",
-            "Total Pengeluaran"
-        ];
+        // Process data with proper null handling
+        const processedData = data.map((item, index) => {
+            // Calculate gaji total for this row
+            let gajiTotal = 0;
+            if (item.mitras && Array.isArray(item.mitras) && item.mitras.length > 0) {
+                gajiTotal = item.mitras.reduce((sum, m) => sum + n(m.gaji), 0);
+            } else {
+                gajiTotal = n(item.gaji);
+            }
 
-        const worksheetData = [
-            headers,
-            ...data.map((item, index) => [
-                index + 1,
-                item.hari,
-                item.tanggal,
-                item.user?.name || "N/A",
-                item.atk || 0,
-                item.intensif || 0,
-                item.lisensi || 0,
-                item.lainlain || 0,
-                item.totalpengeluaran || 0
-            ])
-        ];
+            return {
+                No: index + 1,
+                Hari: item.hari || "",
+                Tanggal: item.tanggal || "",
+                Nama: item.user?.name || "N/A",
+                Gaji: gajiTotal,
+                ATK: n(item.atk),
+                Intensif: n(item.intensif),
+                Lisensi: n(item.lisensi),
+                "Lain-lain": n(item.lainlain),
+                "Total Pengeluaran": n(item.totalpengeluaran)
+            };
+        });
 
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Pengeluaran");
+        // Add totals row
+        const totals = {
+            No: "",
+            Hari: "Total",
+            Tanggal: "",
+            Nama: "",
+            Gaji: calculateTotal('gaji'),
+            ATK: calculateTotal('atk'),
+            Intensif: calculateTotal('intensif'),
+            Lisensi: calculateTotal('lisensi'),
+            "Lain-lain": calculateTotal('lainlain'),
+            "Total Pengeluaran": calculateTotal('totalpengeluaran')
+        };
 
-        XLSX.writeFile(workbook, `${judul}.xlsx`);
+        processedData.push(totals);
+
+        const headers = ["No", "Hari", "Tanggal", "Nama", "Gaji", "ATK", "Intensif", "Lisensi", "Lain-lain", "Total Pengeluaran"];
+        const ws = XLSX.utils.json_to_sheet(processedData, { header: headers });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Laporan Pengeluaran");
+
+        XLSX.writeFile(wb, `${judul}.xlsx`);
     };
 
     // Fungsi untuk mengelola checkbox individual
@@ -167,8 +186,10 @@ const TablePengeluaran = () => {
 
     // Update selectAll status berdasarkan selectedItems
     React.useEffect(() => {
-        setSelectAll(selectedItems.length === laporanPengeluaranMitra.data.length && laporanPengeluaranMitra.data.length > 0);
-    }, [selectedItems, laporanPengeluaranMitra.data]);
+        const dataLength = laporanPengeluaranMitra?.data?.length || 0;
+        setSelectAll(selectedItems.length === dataLength && dataLength > 0);
+    }, [selectedItems, laporanPengeluaranMitra?.data]);
+
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
             <div className="flex justify-between px-7.5 mb-6">
@@ -241,19 +262,19 @@ const TablePengeluaran = () => {
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                    {pengeluaran.mitras && pengeluaran.mitras.length > 0
+                                    {pengeluaran.mitras && Array.isArray(pengeluaran.mitras) && pengeluaran.mitras.length > 0
                                         ? pengeluaran.mitras.map((mitra) => (
                                             <div key={mitra.id}>
-                                                {mitra.mitra_nama} - Rp {(mitra.gaji || 0).toLocaleString()}
+                                                {mitra.mitra_nama} - Rp {n(mitra.gaji).toLocaleString()}
                                             </div>
                                         ))
-                                        : `Rp ${(pengeluaran.gaji || 0).toLocaleString()}`}
+                                        : `Rp ${n(pengeluaran.gaji).toLocaleString()}`}
                                 </td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.atk.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.intensif.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lisensi.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.lainlain.toLocaleString()}</td>
-                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.totalpengeluaran.toLocaleString()}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.atk)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.intensif)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.lisensi)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.lainlain)}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(pengeluaran.totalpengeluaran)}</td>
 
                                 <td className="py-4 px-4">
                                     <div className="flex flex-row items-center justify-center gap-3 h-full">
@@ -281,12 +302,12 @@ const TablePengeluaran = () => {
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
                             <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lainlain').toLocaleString()}</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('totalpengeluaran').toLocaleString()}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('gaji'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('atk'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('intensif'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('lisensi'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('lainlain'))}</td>
+                            <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('totalpengeluaran'))}</td>
                             <td className="py-4 px-4"></td>
                         </tr>
                     </tfoot>

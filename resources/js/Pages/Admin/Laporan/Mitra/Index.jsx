@@ -13,69 +13,70 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
 const Laporan = () => {
     const {
-        // laporanMitra,
         laporanMitraFull,
         laporanPengeluaranMitra,
-        // laporanPengeluaranMitraFull,
-        laporanMitra, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+        laporanMitra,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
+        prevWeekOffset
     } = usePage().props;
+
+    // Utility functions for safe calculations
+    const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+    const fmt = (v) => n(v).toLocaleString();
 
     const goToWeek = (weekOffset) => {
         Inertia.get(route('admin.laporan.mitra'), { weekOffset });
     };
-    // console.log(laporanMitra.data);
 
     const calculateTotals = (laporanMitraData, laporanPengeluaranMitraData) => {
-        // Pastikan data adalah array
-        if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
-        if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
+        // Ensure data is array with proper null checks
+        const safeDataPemasukan = laporanMitraData && Array.isArray(laporanMitraData) ? laporanMitraData : [];
+        const safeDataPengeluaran = laporanPengeluaranMitraData && Array.isArray(laporanPengeluaranMitraData) ? laporanPengeluaranMitraData : [];
 
-        // Hitung total pemasukan
-        const totalProfit = laporanMitraData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+        // Calculate total pemasukan
+        const totalProfit = safeDataPemasukan.reduce(
+            (sum, laporan) => sum + n(laporan?.totalpemasukan),
             0
         );
 
-        // Hitung total pengeluaran
-        const totalOutcome = laporanPengeluaranMitraData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+        // Calculate total pengeluaran
+        const totalOutcome = safeDataPengeluaran.reduce(
+            (sum, pengeluaran) => sum + n(pengeluaran?.totalpengeluaran),
             0
         );
 
-        // Hitung total laba
+        // Calculate total laba
         const totalLaba = totalProfit - totalOutcome;
 
-        // Hitung total students (dari pivot table paket)
-        const totalStudents = laporanMitraData.reduce((sum, laporan) => {
-            if (laporan.pakets && Array.isArray(laporan.pakets)) {
-                return sum + laporan.pakets.reduce((paketSum, paket) => {
-                    return paketSum + (paket.pivot?.jumlah || 0);
-                }, 0);
-            }
-            return sum;
+        // Calculate total students (dari pivot table paket) with null checks
+        const totalStudents = safeDataPemasukan.reduce((sum, laporan) => {
+            if (!laporan || !laporan.pakets || !Array.isArray(laporan.pakets)) return sum;
+
+            return sum + laporan.pakets.reduce((paketSum, paket) => {
+                return paketSum + n(paket?.pivot?.jumlah);
+            }, 0);
         }, 0);
 
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
 
-    // Memastikan .data digunakan saat memanggil fungsi
-    const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
-        laporanMitra.data,
-        laporanPengeluaranMitra.data
-    );
+    // Safely get data with null checks
+    const safeLaporanMitra = laporanMitra?.data || [];
+    const safeLaporanPengeluaranMitra = laporanPengeluaranMitra?.data || [];
 
-    // Debug hasil
-    // console.log("Total Laba:", totalLaba);
-    // console.log("Total Profit:", totalProfit);
-    // console.log("Total Outcome:", totalOutcome);
-    // console.log("Total Students:", totalStudents);
+    const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
+        safeLaporanMitra,
+        safeLaporanPengeluaranMitra
+    );
 
     return (
         <DefaultLayout>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total={`Rp ${totalLaba.toLocaleString()}`}
+                    total={`Rp ${fmt(totalLaba)}`}
                     rate=""
                     levelUp
                 >
@@ -99,7 +100,7 @@ const Laporan = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Profit"
-                    total={`Rp ${totalProfit.toLocaleString()}`}
+                    total={`Rp ${fmt(totalProfit)}`}
                     rate=""
                     levelUp
                 >
@@ -127,7 +128,7 @@ const Laporan = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Outcome"
-                    total={`Rp ${totalOutcome.toLocaleString()}`}
+                    total={`Rp ${fmt(totalOutcome)}`}
                     rate=""
                     levelUp
                 >
@@ -181,11 +182,12 @@ const Laporan = () => {
 
             <TablePemasukan laporanMitra={laporanMitra} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
-            {/* P E N G E L U A R A N */}
-
             <TablePengeluaran
                 laporanPengeluaranMitra={laporanPengeluaranMitra}
-                startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}
+                startOfWeek={startOfWeek}
+                endOfWeek={endOfWeek}
+                nextWeekOffset={nextWeekOffset}
+                prevWeekOffset={prevWeekOffset}
             />
 
 

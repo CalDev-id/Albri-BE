@@ -18,231 +18,244 @@ const Laporan = ({
     prevYear,
     paketMitra,
 }) => {
+    // Utility functions for safe calculations
+    const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+    const fmt = (v) => n(v).toLocaleString();
+
     const calculateTotals = (laporanMitraData, laporanPengeluaranMitraData) => {
-        // Pastikan data adalah array
-        if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
-        if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
+        // Ensure data is array with proper null checks
+        const safeDataPemasukan = laporanMitraData && Array.isArray(laporanMitraData) ? laporanMitraData : [];
+        const safeDataPengeluaran = laporanPengeluaranMitraData && Array.isArray(laporanPengeluaranMitraData) ? laporanPengeluaranMitraData : [];
 
-        // Hitung total pemasukan
-        const totalProfit = laporanMitraData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
+        // Calculate total pemasukan
+        const totalProfit = safeDataPemasukan.reduce(
+            (sum, laporan) => sum + n(laporan?.totalpemasukan),
             0
         );
 
-        // Hitung total pengeluaran
-        const totalOutcome = laporanPengeluaranMitraData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
+        // Calculate total pengeluaran
+        const totalOutcome = safeDataPengeluaran.reduce(
+            (sum, pengeluaran) => sum + n(pengeluaran?.totalpengeluaran),
             0
         );
 
-        // Hitung total laba
+        // Calculate total laba
         const totalLaba = totalProfit - totalOutcome;
 
-        // Hitung total students (biaya)
-        const totalStudents = laporanMitraData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_8000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_15000 || 0)),
-            0
-        );
+        // Calculate total students (from pivot table paket) with proper null checks
+        const totalStudents = safeDataPemasukan.reduce((sum, laporan) => {
+            if (!laporan || !laporan.pakets || !Array.isArray(laporan.pakets)) return sum;
+
+            return sum + laporan.pakets.reduce((paketSum, paket) => {
+                return paketSum + n(paket?.pivot?.jumlah);
+            }, 0);
+        }, 0);
 
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
 
-    // Memastikan .data digunakan saat memanggil fungsi
+    // Safely get data with null checks
+    const safeLaporanMitra = laporanMitra?.data || [];
+    const safeLaporanPengeluaranMitra = laporanPengeluaranMitra?.data || [];
+
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
-        laporanMitra?.data || [],
-        laporanPengeluaranMitra?.data || []
+        safeLaporanMitra,
+        safeLaporanPengeluaranMitra
     );
 
-    // Fungsi untuk download Excel gabungan dalam 1 halaman untuk Mitra
+    // Fungsi untuk download Excel gabungan dalam 1 halaman untuk Mitra dengan proper null handling
     const downloadExcelGabungan = (laporanMitra, laporanPengeluaranMitra, paketMitra, judul) => {
-        const workbook = XLSX.utils.book_new();
-        const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
-        const safePaketMitra = paketMitra || [];
+        const wb = XLSX.utils.book_new();
+        const safePaketMitra = paketMitra && Array.isArray(paketMitra) ? paketMitra : [];
+        const safeDataPemasukan = laporanMitra?.data || [];
+        const safeDataPengeluaran = laporanPengeluaranMitra?.data || [];
 
         // Data gabungan dalam satu sheet
         const dataGabungan = [];
 
-        // Hitung posisi header pengeluaran berdasarkan jumlah kolom pemasukan
-        // Kolom pemasukan: Hari, Tanggal, Nama + jumlah paket + 7 kolom lainnya (Total Biaya, Daftar, Modul, Kaos, Kas, Lain Lain, Jumlah) + 1 kolom jarak
-        const jumlahKolomPemasukan = 3 + safePaketMitra.length + 7 + 1; // 3 kolom awal + paket dinamis + 7 kolom akhir + 1 jarak
+        // Calculate header positions with null checks
+        const jumlahKolomPemasukan = 3 + safePaketMitra.length + 7 + 1;
 
-        // Buat array header utama dengan posisi yang tepat
-        const headerUtama = [`LAPORAN PEMASUKAN BULAN ${bulan.toUpperCase()} ${tahun}`];
-        // Isi kolom kosong sampai posisi pembuat laporan (kolom pertama pengeluaran)
+        // Build headers safely
+        const headerUtama = [`LAPORAN PEMASUKAN BULAN ${(bulan || '').toString().toUpperCase()} ${tahun || ''}`];
         for (let i = 1; i < jumlahKolomPemasukan; i++) {
             headerUtama.push("");
         }
-        // Tambahkan header pengeluaran di posisi yang tepat
-        headerUtama.push(`LAPORAN PENGELUARAN BULAN ${bulan.toUpperCase()}`);
+        headerUtama.push(`LAPORAN PENGELUARAN BULAN ${(bulan || '').toString().toUpperCase()}`);
 
         dataGabungan.push(headerUtama);
 
-        // Header kolom pemasukan
+        // Header kolom pemasukan with null checks
         const headerPemasukan = ["Hari", "Tanggal", "Nama"];
         safePaketMitra.forEach(p => {
-            headerPemasukan.push(`${p.nama_paket} (${p.harga.toLocaleString()})`);
+            const harga = p && p.harga ? n(p.harga).toLocaleString() : '0';
+            headerPemasukan.push(`${p?.nama_paket || 'N/A'} (${harga})`);
         });
-        headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", ""); // Tambah kolom jarak kosong
+        headerPemasukan.push("Total Biaya", "Daftar", "Modul", "Kaos", "Kas", "Lain Lain", "Jumlah", "");
 
         // Header kolom pengeluaran
         const headerPengeluaran = ["Pembuat Laporan", "Detail Gaji Mitra", "ATK", "Sewa", "Intensif", "Lisensi", "THR", "Lain Lain", "Jumlah", "Albri"];
 
-        // Gabungkan header
         const headerLengkap = [...headerPemasukan, ...headerPengeluaran];
         dataGabungan.push(headerLengkap);
 
-        // Helper functions untuk pemasukan mitra
+        // Helper functions untuk pemasukan mitra with null checks
         const getJumlahPaketInRow = (laporan, paketId) => {
-            if (!laporan.pakets) return 0;
-            const found = laporan.pakets.find((p) => p.id === paketId);
+            if (!laporan || !laporan.pakets || !Array.isArray(laporan.pakets)) return 0;
+            const found = laporan.pakets.find((p) => p && p.id === paketId);
             return found ? n(found.pivot?.jumlah) : 0;
         };
 
-        // Buat map untuk data harian
+        // Process data safely
         const hariMap = new Map();
 
-        // Kumpulkan data pemasukan mitra
-        if (laporanMitra && laporanMitra.data) {
-            laporanMitra.data.forEach(lap => {
-                const key = lap.tanggal;
-                if (!hariMap.has(key)) {
-                    hariMap.set(key, {
-                        hari: lap.hari,
-                        tanggal: lap.tanggal,
-                        pemasukan: {
-                            nama: [],
-                            pakets: {},
-                            totalbiaya: 0,
-                            daftar: 0,
-                            modul: 0,
-                            kaos: 0,
-                            kas: 0,
-                            lainlain: 0,
-                            total: 0
-                        },
-                        pengeluaran: {
-                            pembuat: [],
-                            gajiDetail: [],
-                            atk: 0,
-                            sewa: 0,
-                            intensif: 0,
-                            lisensi: 0,
-                            thr: 0,
-                            lainlain: 0,
-                            total: 0
-                        }
-                    });
-                }
+        // Kumpulkan data pemasukan mitra with null checks
+        safeDataPemasukan.forEach(lap => {
+            if (!lap || !lap.tanggal) return;
 
-                const dayData = hariMap.get(key);
-
-                // Kumpulkan nama pembuat pemasukan
-                if (lap.user && lap.user.name) {
-                    if (!dayData.pemasukan.nama.includes(lap.user.name)) {
-                        dayData.pemasukan.nama.push(lap.user.name);
+            const key = lap.tanggal;
+            if (!hariMap.has(key)) {
+                hariMap.set(key, {
+                    hari: lap.hari || '',
+                    tanggal: lap.tanggal || '',
+                    pemasukan: {
+                        nama: [],
+                        pakets: {},
+                        totalbiaya: 0,
+                        daftar: 0,
+                        modul: 0,
+                        kaos: 0,
+                        kas: 0,
+                        lainlain: 0,
+                        total: 0
+                    },
+                    pengeluaran: {
+                        pembuat: [],
+                        gajiDetail: [],
+                        atk: 0,
+                        sewa: 0,
+                        intensif: 0,
+                        lisensi: 0,
+                        thr: 0,
+                        lainlain: 0,
+                        total: 0
                     }
-                }
+                });
+            }
 
-                // Akumulasi data pemasukan mitra
-                safePaketMitra.forEach(p => {
+            const dayData = hariMap.get(key);
+
+            // Kumpulkan nama pembuat pemasukan
+            if (lap.user && lap.user.name) {
+                if (!dayData.pemasukan.nama.includes(lap.user.name)) {
+                    dayData.pemasukan.nama.push(lap.user.name);
+                }
+            }
+
+            // Akumulasi data pemasukan mitra
+            safePaketMitra.forEach(p => {
+                if (p && p.id) {
                     if (!dayData.pemasukan.pakets[p.id]) dayData.pemasukan.pakets[p.id] = 0;
                     dayData.pemasukan.pakets[p.id] += getJumlahPaketInRow(lap, p.id);
-                });
-
-                dayData.pemasukan.totalbiaya += n(lap.totalbiaya);
-                dayData.pemasukan.daftar += n(lap.daftar);
-                dayData.pemasukan.modul += n(lap.modul);
-                dayData.pemasukan.kaos += n(lap.kaos);
-                dayData.pemasukan.kas += n(lap.kas);
-                dayData.pemasukan.lainlain += n(lap.lainlain);
-                dayData.pemasukan.total += n(lap.totalpemasukan);
+                }
             });
-        }
 
-        // Kumpulkan data pengeluaran mitra
-        if (laporanPengeluaranMitra && laporanPengeluaranMitra.data) {
-            laporanPengeluaranMitra.data.forEach(pengeluaran => {
-                const key = pengeluaran.tanggal;
-                if (!hariMap.has(key)) {
-                    hariMap.set(key, {
-                        hari: pengeluaran.hari,
-                        tanggal: pengeluaran.tanggal,
-                        pemasukan: {
-                            nama: [],
-                            pakets: {},
-                            totalbiaya: 0,
-                            daftar: 0,
-                            modul: 0,
-                            kaos: 0,
-                            kas: 0,
-                            lainlain: 0,
-                            total: 0
-                        },
-                        pengeluaran: {
-                            pembuat: [],
-                            gajiDetail: [],
-                            atk: 0,
-                            sewa: 0,
-                            intensif: 0,
-                            lisensi: 0,
-                            thr: 0,
-                            lainlain: 0,
-                            total: 0
-                        }
-                    });
-                }
+            dayData.pemasukan.totalbiaya += n(lap.totalbiaya);
+            dayData.pemasukan.daftar += n(lap.daftar);
+            dayData.pemasukan.modul += n(lap.modul);
+            dayData.pemasukan.kaos += n(lap.kaos);
+            dayData.pemasukan.kas += n(lap.kas);
+            dayData.pemasukan.lainlain += n(lap.lainlain);
+            dayData.pemasukan.total += n(lap.totalpemasukan);
+        });
 
-                const dayData = hariMap.get(key);
+        // Kumpulkan data pengeluaran mitra with null checks
+        safeDataPengeluaran.forEach(pengeluaran => {
+            if (!pengeluaran || !pengeluaran.tanggal) return;
 
-                // Kumpulkan nama pembuat pengeluaran
-                if (pengeluaran.user && pengeluaran.user.name) {
-                    if (!dayData.pengeluaran.pembuat.includes(pengeluaran.user.name)) {
-                        dayData.pengeluaran.pembuat.push(pengeluaran.user.name);
+            const key = pengeluaran.tanggal;
+            if (!hariMap.has(key)) {
+                hariMap.set(key, {
+                    hari: pengeluaran.hari || '',
+                    tanggal: pengeluaran.tanggal || '',
+                    pemasukan: {
+                        nama: [],
+                        pakets: {},
+                        totalbiaya: 0,
+                        daftar: 0,
+                        modul: 0,
+                        kaos: 0,
+                        kas: 0,
+                        lainlain: 0,
+                        total: 0
+                    },
+                    pengeluaran: {
+                        pembuat: [],
+                        gajiDetail: [],
+                        atk: 0,
+                        sewa: 0,
+                        intensif: 0,
+                        lisensi: 0,
+                        thr: 0,
+                        lainlain: 0,
+                        total: 0
                     }
-                }
+                });
+            }
 
-                // Kumpulkan detail gaji guru (sistem dinamis) - memperbaiki untuk struktur data mitra
-                if (pengeluaran.mitras && pengeluaran.mitras.length > 0) {
-                    pengeluaran.mitras.forEach(mitra => {
-                        const gajiInfo = `${mitra.mitra_nama}: Rp ${(mitra.gaji || 0).toLocaleString()}`;
+            const dayData = hariMap.get(key);
+
+            // Kumpulkan nama pembuat pengeluaran
+            if (pengeluaran.user && pengeluaran.user.name) {
+                if (!dayData.pengeluaran.pembuat.includes(pengeluaran.user.name)) {
+                    dayData.pengeluaran.pembuat.push(pengeluaran.user.name);
+                }
+            }
+
+            // Kumpulkan detail gaji mitra dengan null checks
+            if (pengeluaran.mitras && Array.isArray(pengeluaran.mitras) && pengeluaran.mitras.length > 0) {
+                pengeluaran.mitras.forEach(mitra => {
+                    if (mitra && mitra.mitra_nama) {
+                        const gajiInfo = `${mitra.mitra_nama}: Rp ${n(mitra.gaji).toLocaleString()}`;
                         if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
                             dayData.pengeluaran.gajiDetail.push(gajiInfo);
                         }
-                    });
-                } else if (pengeluaran.gaji && pengeluaran.gaji > 0) {
-                    // Fallback jika tidak ada array mitras tapi ada field gaji langsung
-                    const gajiInfo = `Gaji Mitra: Rp ${n(pengeluaran.gaji).toLocaleString()}`;
-                    if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
-                        dayData.pengeluaran.gajiDetail.push(gajiInfo);
                     }
+                });
+            } else if (pengeluaran.gaji && n(pengeluaran.gaji) > 0) {
+                // Fallback jika tidak ada array mitras tapi ada field gaji langsung
+                const gajiInfo = `Gaji Mitra: Rp ${n(pengeluaran.gaji).toLocaleString()}`;
+                if (!dayData.pengeluaran.gajiDetail.includes(gajiInfo)) {
+                    dayData.pengeluaran.gajiDetail.push(gajiInfo);
                 }
+            }
 
-                // Akumulasi data pengeluaran
-                dayData.pengeluaran.atk += n(pengeluaran.atk);
-                dayData.pengeluaran.sewa += n(pengeluaran.sewa);
-                dayData.pengeluaran.intensif += n(pengeluaran.intensif);
-                dayData.pengeluaran.lisensi += n(pengeluaran.lisensi);
-                dayData.pengeluaran.thr += n(pengeluaran.thr);
-                dayData.pengeluaran.lainlain += n(pengeluaran.lainlain);
-                dayData.pengeluaran.total += n(pengeluaran.totalpengeluaran);
-            });
-        }
+            // Akumulasi data pengeluaran
+            dayData.pengeluaran.atk += n(pengeluaran.atk);
+            dayData.pengeluaran.sewa += n(pengeluaran.sewa);
+            dayData.pengeluaran.intensif += n(pengeluaran.intensif);
+            dayData.pengeluaran.lisensi += n(pengeluaran.lisensi);
+            dayData.pengeluaran.thr += n(pengeluaran.thr);
+            dayData.pengeluaran.lainlain += n(pengeluaran.lainlain);
+            dayData.pengeluaran.total += n(pengeluaran.totalpengeluaran);
+        });
 
-        // Convert map to array dan sort by date
-        const sortedData = Array.from(hariMap.values()).sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        // Convert map to array and sort by date
+        const sortedData = Array.from(hariMap.values()).sort((a, b) => {
+            const dateA = new Date(a.tanggal);
+            const dateB = new Date(b.tanggal);
+            return dateA - dateB;
+        });
 
-        // Buat baris data
+        // Build data rows
         let totalPemasukanBulan = 0;
         let totalPengeluaranBulan = 0;
         const totalPaketBulan = {};
 
         safePaketMitra.forEach(p => {
-            totalPaketBulan[p.id] = 0;
+            if (p && p.id) {
+                totalPaketBulan[p.id] = 0;
+            }
         });
 
         sortedData.forEach(dayData => {
@@ -251,13 +264,15 @@ const Laporan = ({
             // Kolom pemasukan
             row.push(dayData.hari);
             row.push(dayData.tanggal);
-            row.push(dayData.pemasukan.nama.join(", ") || "N/A"); // Nama pembuat pemasukan
+            row.push(dayData.pemasukan.nama.join(", ") || "N/A");
 
             // Kolom paket
             safePaketMitra.forEach(p => {
-                const jumlahPaket = dayData.pemasukan.pakets[p.id] || 0;
-                row.push(jumlahPaket);
-                totalPaketBulan[p.id] += jumlahPaket;
+                if (p && p.id) {
+                    const jumlahPaket = dayData.pemasukan.pakets[p.id] || 0;
+                    row.push(jumlahPaket);
+                    totalPaketBulan[p.id] += jumlahPaket;
+                }
             });
 
             row.push(dayData.pemasukan.totalbiaya);
@@ -267,12 +282,12 @@ const Laporan = ({
             row.push(dayData.pemasukan.kas);
             row.push(dayData.pemasukan.lainlain);
             row.push(dayData.pemasukan.total);
-            row.push(""); // Kolom jarak kosong
+            row.push("");
             totalPemasukanBulan += dayData.pemasukan.total;
 
             // Kolom pengeluaran
-            row.push(dayData.pengeluaran.pembuat.join(", ") || "N/A"); // Nama pembuat pengeluaran
-            row.push(dayData.pengeluaran.gajiDetail.join("; ") || "N/A"); // Detail gaji guru dinamis
+            row.push(dayData.pengeluaran.pembuat.join(", ") || "N/A");
+            row.push(dayData.pengeluaran.gajiDetail.join("; ") || "N/A");
             row.push(dayData.pengeluaran.atk);
             row.push(dayData.pengeluaran.sewa);
             row.push(dayData.pengeluaran.intensif);
@@ -280,30 +295,32 @@ const Laporan = ({
             row.push(dayData.pengeluaran.thr);
             row.push(dayData.pengeluaran.lainlain);
             row.push(dayData.pengeluaran.total);
-            row.push(dayData.pemasukan.total - dayData.pengeluaran.total); // Laba harian
+            row.push(dayData.pemasukan.total - dayData.pengeluaran.total);
             totalPengeluaranBulan += dayData.pengeluaran.total;
 
             dataGabungan.push(row);
         });
 
-        // Baris total
+        // Build total row
         const totalRow = [];
         totalRow.push("TOTAL");
         totalRow.push("");
-        totalRow.push(""); // Kolom nama
+        totalRow.push("");
 
         // Total paket
         safePaketMitra.forEach(p => {
-            totalRow.push(totalPaketBulan[p.id]);
+            if (p && p.id) {
+                totalRow.push(totalPaketBulan[p.id] || 0);
+            }
         });
 
-        // Total pemasukan lainnya (hitung dari data asli)
-        const totalTotalBiaya = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.totalbiaya), 0) || 0;
-        const totalDaftar = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.daftar), 0) || 0;
-        const totalModul = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.modul), 0) || 0;
-        const totalKaos = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.kaos), 0) || 0;
-        const totalKas = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.kas), 0) || 0;
-        const totalLainLainPemasukan = laporanMitra?.data?.reduce((sum, lap) => sum + n(lap.lainlain), 0) || 0;
+        // Calculate totals safely
+        const totalTotalBiaya = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.totalbiaya), 0);
+        const totalDaftar = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.daftar), 0);
+        const totalModul = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.modul), 0);
+        const totalKaos = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.kaos), 0);
+        const totalKas = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.kas), 0);
+        const totalLainLainPemasukan = safeDataPemasukan.reduce((sum, lap) => sum + n(lap?.lainlain), 0);
 
         totalRow.push(totalTotalBiaya);
         totalRow.push(totalDaftar);
@@ -312,30 +329,27 @@ const Laporan = ({
         totalRow.push(totalKas);
         totalRow.push(totalLainLainPemasukan);
         totalRow.push(totalProfit);
-        totalRow.push(""); // Kolom jarak kosong
+        totalRow.push("");
 
-        // Total pengeluaran
-        totalRow.push(""); // Kolom pembuat laporan
+        totalRow.push("");
 
-        // Total gaji dari semua mitra (sistem dinamis)
+        // Total gaji dari semua mitra with safe calculation
         let totalGajiSemuaMitra = 0;
-        if (laporanPengeluaranMitra?.data) {
-            laporanPengeluaranMitra.data.forEach(p => {
-                if (p.mitras && p.mitras.length > 0) {
-                    totalGajiSemuaMitra += p.mitras.reduce((sum, mitra) => sum + (mitra.gaji || 0), 0);
-                } else {
-                    totalGajiSemuaMitra += n(p.gaji);
-                }
-            });
-        }
-        totalRow.push(`Total Gaji: Rp ${totalGajiSemuaMitra.toLocaleString()}`); // Detail total gaji
+        safeDataPengeluaran.forEach(p => {
+            if (p && p.mitras && Array.isArray(p.mitras) && p.mitras.length > 0) {
+                totalGajiSemuaMitra += p.mitras.reduce((sum, mitra) => sum + n(mitra?.gaji), 0);
+            } else {
+                totalGajiSemuaMitra += n(p?.gaji);
+            }
+        });
+        totalRow.push(`Total Gaji: Rp ${totalGajiSemuaMitra.toLocaleString()}`);
 
-        const totalAtk = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.atk), 0) || 0;
-        const totalSewa = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.sewa), 0) || 0;
-        const totalIntensif = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.intensif), 0) || 0;
-        const totalLisensi = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.lisensi), 0) || 0;
-        const totalThr = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.thr), 0) || 0;
-        const totalLainLainPengeluaran = laporanPengeluaranMitra?.data?.reduce((sum, p) => sum + n(p.lainlain), 0) || 0;
+        const totalAtk = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.atk), 0);
+        const totalSewa = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.sewa), 0);
+        const totalIntensif = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.intensif), 0);
+        const totalLisensi = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.lisensi), 0);
+        const totalThr = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.thr), 0);
+        const totalLainLainPengeluaran = safeDataPengeluaran.reduce((sum, p) => sum + n(p?.lainlain), 0);
 
         totalRow.push(totalAtk);
         totalRow.push(totalSewa);
@@ -344,46 +358,44 @@ const Laporan = ({
         totalRow.push(totalThr);
         totalRow.push(totalLainLainPengeluaran);
         totalRow.push(totalOutcome);
-        totalRow.push(totalLaba); // Total Laba
+        totalRow.push(totalLaba);
 
         dataGabungan.push(totalRow);
 
-        // Buat worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet(dataGabungan);
-
-        // Set column widths
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet(dataGabungan);
         const wscols = headerLengkap.map(() => ({ width: 15 }));
-        worksheet['!cols'] = wscols;
+        ws['!cols'] = wscols;
 
-        // Apply bold formatting untuk baris total (baris terakhir)
+        // Apply formatting
         const totalRowIndex = dataGabungan.length - 1;
         for (let col = 0; col < headerLengkap.length; col++) {
             const cellRef = XLSX.utils.encode_cell({ r: totalRowIndex, c: col });
-            if (!worksheet[cellRef]) worksheet[cellRef] = {};
-            worksheet[cellRef].s = {
+            if (!ws[cellRef]) ws[cellRef] = {};
+            ws[cellRef].s = {
                 font: { bold: true }
             };
         }
 
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Gabungan Mitra");
+        XLSX.utils.book_append_sheet(wb, ws, "Rekap Gabungan Mitra");
 
-        // Download file
         const fileName = `Rekap_Gabungan_Mitra_${judul}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
+        XLSX.writeFile(wb, fileName);
     };
 
-    // Fungsi untuk print laporan mitra
+    // Print function with safe data handling
     const printLaporan = () => {
         const printWindow = window.open('', '_blank');
-        const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
-        const safePaketMitra = paketMitra || [];
+        const safePaketMitra = paketMitra && Array.isArray(paketMitra) ? paketMitra : [];
+        const safeDataPemasukan = laporanMitra?.data || [];
+        const safeDataPengeluaran = laporanPengeluaranMitra?.data || [];
 
-        // Generate print content
+        // Generate print content with safe operations
         let printContent = `
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Laporan Rekap Bulanan Mitra ${bulan.toUpperCase()} ${tahun}</title>
+                <title>Laporan Rekap Bulanan Mitra ${(bulan || '').toString().toUpperCase()} ${tahun || ''}</title>
                 <style>
                     body { 
                         font-family: Arial, sans-serif; 
@@ -446,21 +458,21 @@ const Laporan = ({
             <body>
                 <div class="header">
                     <h1>LAPORAN REKAP BULANAN MITRA</h1>
-                    <h2>${bulan.toUpperCase()} ${tahun}</h2>
+                    <h2>${(bulan || '').toString().toUpperCase()} ${tahun || ''}</h2>
                 </div>
 
                 <div class="summary">
                     <div class="summary-item">
                         <div>Total Laba</div>
-                        <div class="summary-value">Rp ${totalLaba.toLocaleString()}</div>
+                        <div class="summary-value">Rp ${fmt(totalLaba)}</div>
                     </div>
                     <div class="summary-item">
                         <div>Total Pemasukan</div>
-                        <div class="summary-value">Rp ${totalProfit.toLocaleString()}</div>
+                        <div class="summary-value">Rp ${fmt(totalProfit)}</div>
                     </div>
                     <div class="summary-item">
                         <div>Total Pengeluaran</div>
-                        <div class="summary-value">Rp ${totalOutcome.toLocaleString()}</div>
+                        <div class="summary-value">Rp ${fmt(totalOutcome)}</div>
                     </div>
                     <div class="summary-item">
                         <div>Total Siswa</div>
@@ -476,9 +488,10 @@ const Laporan = ({
                             <th>Tanggal</th>
                             <th>Pembuat Laporan</th>`;
 
-        // Add paket headers
+        // Add paket headers safely
         safePaketMitra.forEach(paket => {
-            printContent += `<th>${paket.nama_paket}<br>(Rp ${paket.harga.toLocaleString()})</th>`;
+            const harga = paket && paket.harga ? n(paket.harga).toLocaleString() : '0';
+            printContent += `<th>${paket?.nama_paket || 'N/A'}<br>(Rp ${harga})</th>`;
         });
 
         printContent += `
@@ -493,37 +506,41 @@ const Laporan = ({
                     </thead>
                     <tbody>`;
 
-        // Add pemasukan data
-        let totalPemasukanPrint = 0;
+        // Process data safely for print
         const totalPaketPrint = {};
-        safePaketMitra.forEach(p => { totalPaketPrint[p.id] = 0; });
+        safePaketMitra.forEach(p => {
+            if (p && p.id) {
+                totalPaketPrint[p.id] = 0;
+            }
+        });
 
-        if (laporanMitra && laporanMitra.data) {
-            laporanMitra.data.forEach(laporan => {
-                printContent += `
-                    <tr>
-                        <td>${laporan.hari}</td>
-                        <td>${laporan.tanggal}</td>
-                        <td>${laporan.user?.name || 'N/A'}</td>`;
+        safeDataPemasukan.forEach(laporan => {
+            if (!laporan) return;
 
-                safePaketMitra.forEach(paket => {
-                    const jumlah = laporan.pakets?.find(p => p.id === paket.id)?.pivot?.jumlah || 0;
-                    totalPaketPrint[paket.id] += jumlah;
+            printContent += `
+                <tr>
+                    <td>${laporan.hari || ''}</td>
+                    <td>${laporan.tanggal || ''}</td>
+                    <td>${laporan.user?.name || 'N/A'}</td>`;
+
+            safePaketMitra.forEach(paket => {
+                if (paket && paket.id) {
+                    const jumlah = laporan.pakets?.find(p => p && p.id === paket.id)?.pivot?.jumlah || 0;
+                    totalPaketPrint[paket.id] += n(jumlah);
                     printContent += `<td>${jumlah}</td>`;
-                });
-
-                printContent += `
-                        <td>Rp ${n(laporan.totalbiaya).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.daftar).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.modul).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.kaos).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.kas).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.lainlain).toLocaleString()}</td>
-                        <td>Rp ${n(laporan.totalpemasukan).toLocaleString()}</td>
-                    </tr>`;
-                totalPemasukanPrint += n(laporan.totalpemasukan);
+                }
             });
-        }
+
+            printContent += `
+                    <td>Rp ${fmt(laporan.totalbiaya)}</td>
+                    <td>Rp ${fmt(laporan.daftar)}</td>
+                    <td>Rp ${fmt(laporan.modul)}</td>
+                    <td>Rp ${fmt(laporan.kaos)}</td>
+                    <td>Rp ${fmt(laporan.kas)}</td>
+                    <td>Rp ${fmt(laporan.lainlain)}</td>
+                    <td>Rp ${fmt(laporan.totalpemasukan)}</td>
+                </tr>`;
+        });
 
         // Add total row for pemasukan
         printContent += `
@@ -640,7 +657,7 @@ const Laporan = ({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total={`Rp ${totalLaba.toLocaleString()}`}
+                    total={`Rp ${fmt(totalLaba)}`}
                     rate=""
                     levelUp
                 >
@@ -664,7 +681,7 @@ const Laporan = ({
                 </CardDataStats>
                 <CardDataStats
                     title="Total Profit"
-                    total={`Rp ${totalProfit.toLocaleString()}`}
+                    total={`Rp ${fmt(totalProfit)}`}
                     rate=""
                     levelUp
                 >
@@ -692,7 +709,7 @@ const Laporan = ({
                 </CardDataStats>
                 <CardDataStats
                     title="Total Outcome"
-                    total={`Rp ${totalOutcome.toLocaleString()}`}
+                    total={`Rp ${fmt(totalOutcome)}`}
                     rate=""
                     levelUp
                 >

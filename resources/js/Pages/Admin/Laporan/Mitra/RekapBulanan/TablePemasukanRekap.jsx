@@ -3,11 +3,9 @@ import { Link } from "@inertiajs/react";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
 import Swal from 'sweetalert2';
-
 import "flowbite/dist/flowbite.min.js";
 import { usePage } from "@inertiajs/react";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { Inertia } from "@inertiajs/inertia";
 
 const TablePemasukanRekap = ({
@@ -25,47 +23,59 @@ const TablePemasukanRekap = ({
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
 
+    // Utility functions similar to working TablePemasukan
+    const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
+    const fmt = (v) => n(v).toLocaleString();
+
     const goToMonth = (month, year) => {
         Inertia.get(route("admin.rekap.mitra"), {
             bulan: month,
             tahun: year,
         });
     };
+
     const getTotal = (key) => {
         return (laporanMitra?.data || []).reduce(
-            (sum, laporan) => sum + (laporan[key] || 0),
+            (sum, laporan) => sum + n(laporan[key]),
             0
         );
     };
 
-    // Calculate total for dynamic paket from relationship
+    // Calculate total for dynamic paket from relationship with proper null checks
     const getPaketTotal = (paketId) => {
         return (laporanMitra?.data || []).reduce(
             (sum, laporan) => {
-                const paketData = laporan.pakets?.find(p => p.id === paketId);
+                if (!laporan || !laporan.pakets || !Array.isArray(laporan.pakets)) return sum;
+                const paketData = laporan.pakets.find(p => p && p.id === paketId);
                 const jumlah = paketData?.pivot?.jumlah || 0;
-                return sum + parseInt(jumlah);
+                return sum + n(jumlah);
             },
             0
         );
     };
 
     const downloadExcel = (laporanMitra, judul) => {
-        // Ambil semua data
+        // Safe data handling
         const data = laporanMitra?.data || [];
+        const safePaketMitra = paketMitra || [];
 
         if (data.length === 0) {
-            alert("Tidak ada data untuk di-download");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tidak ada data',
+                text: 'Tidak ada data untuk di-download',
+                confirmButtonColor: '#3085d6'
+            });
             return;
         }
 
-        // Buat worksheet dengan header dinamis
+        // Build headers dynamically with null checks
         const headers = [
             "No",
             "Hari",
             "Tanggal",
-            // Kolom paket dinamis
-            ...paketMitra.map(p => p.nama_paket),
+            // Dynamic paket columns
+            ...safePaketMitra.map(p => p?.nama_paket || 'N/A'),
             "Daftar",
             "Modul",
             "Kaos",
@@ -74,31 +84,59 @@ const TablePemasukanRekap = ({
             "Total Pemasukan"
         ];
 
-        const worksheetData = [
-            headers,
-            ...data.map((item, index) => [
-                index + 1,
-                item.hari,
-                item.tanggal,
-                // Kolom paket dinamis  
-                ...paketMitra.map(p => {
-                    const paketData = item.pakets?.find(pk => pk.id === p.id);
-                    return parseInt(paketData?.pivot?.jumlah || 0);
-                }),
-                item.daftar || 0,
-                item.modul || 0,
-                item.kaos || 0,
-                item.kas || 0,
-                item.lainlain || 0,
-                item.totalpemasukan || 0
-            ])
-        ];
+        const processedData = data.map((item, index) => {
+            const row = {
+                No: index + 1,
+                Hari: item.hari || "",
+                Tanggal: item.tanggal || "",
+            };
 
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+            // Add dynamic paket columns with null checks
+            safePaketMitra.forEach(p => {
+                if (p && p.nama_paket) {
+                    const paketData = item.pakets?.find(pk => pk && pk.id === p.id);
+                    row[p.nama_paket] = n(paketData?.pivot?.jumlah);
+                }
+            });
 
-        XLSX.writeFile(workbook, `${judul}.xlsx`);
+            // Add static columns
+            row["Daftar"] = n(item.daftar);
+            row["Modul"] = n(item.modul);
+            row["Kaos"] = n(item.kaos);
+            row["Kas"] = n(item.kas);
+            row["Lain-lain"] = n(item.lainlain);
+            row["Total Pemasukan"] = n(item.totalpemasukan);
+
+            return row;
+        });
+
+        // Add totals row
+        const totals = {
+            No: "",
+            Hari: "Total",
+            Tanggal: "",
+        };
+
+        safePaketMitra.forEach(p => {
+            if (p && p.nama_paket) {
+                totals[p.nama_paket] = getPaketTotal(p.id);
+            }
+        });
+
+        totals["Daftar"] = getTotal("daftar");
+        totals["Modul"] = getTotal("modul");
+        totals["Kaos"] = getTotal("kaos");
+        totals["Kas"] = getTotal("kas");
+        totals["Lain-lain"] = getTotal("lainlain");
+        totals["Total Pemasukan"] = getTotal("totalpemasukan");
+
+        processedData.push(totals);
+
+        const ws = XLSX.utils.json_to_sheet(processedData, { header: headers });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+
+        XLSX.writeFile(wb, `${judul}.xlsx`);
     };
 
     // Fungsi untuk mengelola checkbox individual
@@ -177,9 +215,9 @@ const TablePemasukanRekap = ({
 
     // Update selectAll status berdasarkan selectedItems
     React.useEffect(() => {
-        setSelectAll(selectedItems.length === laporanMitra.data.length && laporanMitra.data.length > 0);
-    }, [selectedItems, laporanMitra.data]);
-
+        const dataLength = laporanMitra?.data?.length || 0;
+        setSelectAll(selectedItems.length === dataLength && dataLength > 0);
+    }, [selectedItems, laporanMitra?.data]);
 
     return (
         <div>
@@ -239,9 +277,9 @@ const TablePemasukanRekap = ({
 
 
                                 {/* Dynamic paket headers */}
-                                {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => (
+                                {paketMitra && Array.isArray(paketMitra) && paketMitra.length > 0 && paketMitra.map((paket, index) => (
                                     <th key={index} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
-                                        {paket.nama_paket} ({paket.harga.toLocaleString()})
+                                        {paket?.nama_paket || 'N/A'} ({paket?.harga ? n(paket.harga).toLocaleString() : '0'})
                                     </th>
                                 ))}
 
@@ -300,37 +338,39 @@ const TablePemasukanRekap = ({
 
 
                                     {/* Dynamic paket data */}
-                                    {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => {
+                                    {paketMitra && Array.isArray(paketMitra) && paketMitra.length > 0 && paketMitra.map((paket, index) => {
                                         // Find paket data from relationship with pivot table
-                                        const paketData = laporan.pakets?.find(p => p.id === paket.id);
+                                        if (!paket || !paket.id) return <td key={index} className="py-4 px-4 text-sm text-black dark:text-white">0</td>;
+
+                                        const paketData = laporan.pakets?.find(p => p && p.id === paket.id);
                                         const jumlah = paketData?.pivot?.jumlah || 0;
                                         return (
                                             <td key={index} className="py-4 px-4 text-sm text-black dark:text-white">
-                                                {parseInt(jumlah).toLocaleString()}
+                                                {n(jumlah).toLocaleString()}
                                             </td>
                                         );
                                     })}
 
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalbiaya ? laporan.totalbiaya.toLocaleString() : 0}
+                                        {fmt(laporan.totalbiaya)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.daftar.toLocaleString()}
+                                        {fmt(laporan.daftar)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.modul.toLocaleString()}
+                                        {fmt(laporan.modul)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kaos.toLocaleString()}
+                                        {fmt(laporan.kaos)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.kas.toLocaleString()}
+                                        {fmt(laporan.kas)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.lainlain.toLocaleString()}
+                                        {fmt(laporan.lainlain)}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                        {laporan.totalpemasukan.toLocaleString()}
+                                        {fmt(laporan.totalpemasukan)}
                                     </td>
                                     <td className="py-4 px-4 text-center">
                                         {/* Action buttons */}
@@ -364,42 +404,40 @@ const TablePemasukanRekap = ({
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                                <td
-                                    colSpan="4"
-                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
-                                >
+                                <td className="py-4 px-4"></td>
+                                <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
                                     Total
                                 </td>
 
-                                {/* Dynamic paket totals */}
-                                {paketMitra && paketMitra.length > 0 && paketMitra.map((paket, index) => {
+                                {/* Dynamic paket totals with null checks */}
+                                {paketMitra && Array.isArray(paketMitra) && paketMitra.length > 0 && paketMitra.map((paket, index) => {
                                     return (
                                         <td key={index} className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                            {getPaketTotal(paket.id).toLocaleString()}
+                                            {paket && paket.id ? fmt(getPaketTotal(paket.id)) : '0'}
                                         </td>
                                     );
                                 })}
 
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalbiaya").toLocaleString()}
+                                    {fmt(getTotal("totalbiaya"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("daftar").toLocaleString()}
+                                    {fmt(getTotal("daftar"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("modul").toLocaleString()}
+                                    {fmt(getTotal("modul"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kaos").toLocaleString()}
+                                    {fmt(getTotal("kaos"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("kas").toLocaleString()}
+                                    {fmt(getTotal("kas"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("lainlain").toLocaleString()}
+                                    {fmt(getTotal("lainlain"))}
                                 </td>
                                 <td className="py-4 px-4 text-sm font-bold text-black dark:text-white">
-                                    {getTotal("totalpemasukan").toLocaleString()}
+                                    {fmt(getTotal("totalpemasukan"))}
                                 </td>
                                 <td className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white"></td>
                             </tr>
@@ -425,7 +463,7 @@ const TablePemasukanRekap = ({
                 </div>
             </div>
         </div>
-    )
+    );
 };
 
 export default TablePemasukanRekap;
