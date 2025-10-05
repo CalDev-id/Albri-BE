@@ -25,9 +25,11 @@ const TablePengeluaranRekap = ({
     const fmt = (v) => n(v).toLocaleString();
 
     const goToMonth = (month, year) => {
+        const { selectedCabangId } = usePage().props;
         Inertia.get(route("admin.rekap.cabang"), {
             bulan: month,
             tahun: year,
+            cabang_id: selectedCabangId || null
         });
     };
 

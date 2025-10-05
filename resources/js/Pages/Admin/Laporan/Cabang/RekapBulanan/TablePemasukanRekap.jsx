@@ -18,9 +18,11 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
 
     // console.log(laporanCabang.data);
     const goToMonth = (month, year) => {
+        const { selectedCabangId } = usePage().props;
         Inertia.get(route("admin.rekap.cabang"), {
             bulan: month,
             tahun: year,
+            cabang_id: selectedCabangId || null
         });
     };
 

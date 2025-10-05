@@ -2,31 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Inertia\Response;
 use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Auth;
 use App\Models\CabangAlbri;
-use App\Models\LapPemasukanCabang;
-use App\Models\LapPengeluaranCabang;
-use App\Models\LaporanPengeluaranGuru;
-use App\Models\LapPemasukanMitra;
-use App\Models\LapPengeluaranMitra;
 use App\Models\LaporanPengeluaranMitraDet;
-use App\Models\Mitra;
+use App\Models\LapPemasukanCabang;
+use App\Models\LapPemasukanMitra;
 use App\Models\LapPemasukanPrivate;
+use App\Models\LapPengeluaranCabang;
+use App\Models\LapPengeluaranMitra;
 use App\Models\LapPengeluaranPrivate;
+use App\Models\Mitra;
 use App\Models\Paket;
 use App\Models\PaketMitra;
 use App\Models\PaketPrivate;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
+use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
@@ -48,14 +45,12 @@ class AdminController extends Controller
             ->with([
                 'roles' => function ($query) {
                     $query->where('name', 'Guru');
-                }
+                },
             ])
             ->latest()
             ->paginate(5, ['*'], 'guruPage');
 
         $cabangs = CabangAlbri::all();
-
-
 
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
@@ -106,7 +101,6 @@ class AdminController extends Controller
             'laporanPrivate' => $laporanPrivate,
             'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
 
-
         ]);
     }
 
@@ -115,10 +109,10 @@ class AdminController extends Controller
         $mitraData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Mitra');
         })->with([
-                    'roles' => function ($query) {
-                        $query->where('name', 'Mitra');
-                    }
-                ])
+            'roles' => function ($query) {
+                $query->where('name', 'Mitra');
+            },
+        ])
             ->latest()
             ->paginate(5, ['*'], 'mitraPage'); // pagination untuk mitra
 
@@ -132,12 +126,13 @@ class AdminController extends Controller
         $privateData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Private');
         })->with([
-                    'roles' => function ($query) {
-                        $query->where('name', 'Private');
-                    }
-                ])
+            'roles' => function ($query) {
+                $query->where('name', 'Private');
+            },
+        ])
             ->latest()
             ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
+
         return Inertia::render('Admin/Privat', [
             'privateData' => $privateData,
         ]);
@@ -148,17 +143,17 @@ class AdminController extends Controller
         $privateData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Guru');
         })->with([
-                    'roles' => function ($query) {
-                        $query->where('name', 'Guru');
-                    }
-                ])
+            'roles' => function ($query) {
+                $query->where('name', 'Guru');
+            },
+        ])
             ->latest()
             ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
+
         return Inertia::render('Admin/Guru', [
             'privateData' => $privateData,
         ]);
     }
-
 
     public function settings(Request $request): Response
     {
@@ -180,24 +175,20 @@ class AdminController extends Controller
 
         if ($request->user()->hasRole('Private')) {
             return Redirect::route('private.settings')->with('success', 'Profil berhasil diperbarui.');
-        } else if ($request->user()->hasRole('Admin')) {
+        } elseif ($request->user()->hasRole('Admin')) {
             return Redirect::route('admin.settings')->with('success', 'Profil berhasil diperbarui.');
-        } else if ($request->user()->hasRole('Guru')) {
+        } elseif ($request->user()->hasRole('Guru')) {
             return Redirect::route('guru.settings')->with('success', 'Profil berhasil diperbarui.');
-        } else if ($request->user()->hasRole('Mitra')) {
+        } elseif ($request->user()->hasRole('Mitra')) {
             return Redirect::route('mitra.settings')->with('success', 'Profil berhasil diperbarui.');
         }
 
         return Redirect::route('admin.settings');
     }
 
-
-
-
     /* -----------------------------------------
             Laporan Controller Cabang
     -------------------------------------------- */
-
 
     public function cabanglaporan(Request $request): Response
     {
@@ -219,12 +210,12 @@ class AdminController extends Controller
             'pakets:id,nama_paket,harga',
         ])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
-        
+
         // Apply cabang filter if selected
         if ($cabangId) {
             $laporanCabangQuery->where('cabang_id', $cabangId);
         }
-        
+
         $laporanCabang = $laporanCabangQuery
             ->orderBy('tanggal', 'desc')
             ->paginate(5000, ['*'], 'laporanCabangPage');
@@ -233,15 +224,15 @@ class AdminController extends Controller
         $laporanPengeluaranCabangQuery = LapPengeluaranCabang::with([
             'user',
             'cabang',
-            'gurus'
+            'gurus',
         ])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
-        
+
         // Apply cabang filter if selected
         if ($cabangId) {
             $laporanPengeluaranCabangQuery->where('cabang_id', $cabangId);
         }
-        
+
         $laporanPengeluaranCabang = $laporanPengeluaranCabangQuery
             ->orderBy('tanggal', 'desc')
             ->paginate(5000, ['*'], 'laporanPengeluaranCabangPage');
@@ -333,18 +324,15 @@ class AdminController extends Controller
 
         if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
             return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
             return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
             return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
         } else {
 
             return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
         }
     }
-
-
-
 
     public function editlaporancabang($id): Response
     {
@@ -419,9 +407,9 @@ class AdminController extends Controller
 
         if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
             return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
             return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
             return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
         } else {
 
@@ -429,11 +417,19 @@ class AdminController extends Controller
         }
     }
 
-
     public function destroylaporancabang($id)
     {
         LapPemasukanCabang::find($id)->delete();
-        return redirect()->route('admin.laporan.cabang');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
+            return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
+        }
     }
 
     public function bulkDestroyCabang(Request $request)
@@ -446,10 +442,8 @@ class AdminController extends Controller
 
         LapPemasukanCabang::whereIn('id', $ids)->delete();
 
-        return back()->with('success', count($ids) . ' item berhasil dihapus');
+        return back()->with('success', count($ids).' item berhasil dihapus');
     }
-
-
 
     /* -----------------------------------------
             Laporan Pengeluaran Cabang Admin
@@ -532,22 +526,18 @@ class AdminController extends Controller
             ]);
         }
 
-
-
-
         // $laporan->gurus()->sync($syncData);
         if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
             return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
             return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
             return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
         } else {
 
             return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
         }
     }
-
 
     public function editpengeluarancabang($id): Response
     {
@@ -618,9 +608,9 @@ class AdminController extends Controller
 
         if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
             return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
             return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
-        } else if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
             return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
         } else {
 
@@ -631,7 +621,16 @@ class AdminController extends Controller
     public function destroypengeluarancabang($id)
     {
         LapPengeluaranCabang::find($id)->delete();
-        return redirect()->route('admin.laporan.cabang');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Guru')) {
+            return Redirect::route('guru.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } elseif (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan berhasil ditambahkan.');
+        } else {
+
+            return Redirect::route('admin.laporan.cabang')->with('success', 'Laporan pemasukan cabang berhasil ditambahkan.');
+        }
     }
 
     public function bulkDestroyPengeluaranCabang(Request $request)
@@ -644,10 +643,8 @@ class AdminController extends Controller
 
         LapPengeluaranCabang::whereIn('id', $ids)->delete();
 
-        return back()->with('success', count($ids) . ' item berhasil dihapus');
+        return back()->with('success', count($ids).' item berhasil dihapus');
     }
-
-
 
     /* -----------------------------------------
             Laporan Mitra
@@ -687,12 +684,13 @@ class AdminController extends Controller
             'paketMitra' => $paketMitra,
         ]);
     }
+
     public function createmitralaporan(): Response
     {
         $paketMitra = PaketMitra::all();
 
         return Inertia::render('Admin/Laporan/Mitra/Create', [
-            'paketMitra' => $paketMitra
+            'paketMitra' => $paketMitra,
         ]);
     }
 
@@ -768,7 +766,7 @@ class AdminController extends Controller
 
         return Inertia::render('Admin/Laporan/Mitra/edit', [
             'laporanMitra' => $laporanMitra,
-            'paketMitra' => $paketMitra
+            'paketMitra' => $paketMitra,
         ]);
     }
 
@@ -836,7 +834,11 @@ class AdminController extends Controller
     public function destroylaporanmitra($id)
     {
         LapPemasukanMitra::find($id)->delete();
-        return redirect()->route('admin.laporan.mitra');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil diperbarui.');
+        } else {
+            return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pemasukan mitra berhasil diperbarui.');
+        }
     }
 
     public function bulkDestroyMitra(Request $request)
@@ -849,7 +851,7 @@ class AdminController extends Controller
 
         LapPemasukanMitra::whereIn('id', $ids)->delete();
 
-        return back()->with('success', count($ids) . ' item berhasil dihapus');
+        return back()->with('success', count($ids).' item berhasil dihapus');
     }
 
     // Laporan Pengeluaran Mitra Admin
@@ -983,7 +985,11 @@ class AdminController extends Controller
     public function destroypengeluaranmitra($id)
     {
         LapPengeluaranMitra::find($id)->delete();
-        return redirect()->route('admin.laporan.mitra');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Mitra')) {
+            return Redirect::route('mitra.dashboard')->with('success', 'Laporan pemasukan mitra berhasil diperbarui.');
+        } else {
+            return Redirect::route('admin.laporan.mitra')->with('success', 'Laporan pemasukan mitra berhasil diperbarui.');
+        }
     }
 
     public function bulkDestroyPengeluaranMitra(Request $request)
@@ -996,7 +1002,7 @@ class AdminController extends Controller
 
         LapPengeluaranMitra::whereIn('id', $ids)->delete();
 
-        return back()->with('success', count($ids) . ' item berhasil dihapus');
+        return back()->with('success', count($ids).' item berhasil dihapus');
     }
 
     /* -----------------------------------------
@@ -1075,7 +1081,7 @@ class AdminController extends Controller
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPrivatePage');
 
-        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user', 'privateBimbles',])
+        $laporanPengeluaranPrivate = LapPengeluaranPrivate::with(['user', 'privateBimbles'])
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->orderBy('tanggal', 'desc')
             ->paginate(50, ['*'], 'laporanPengeluaranPrivatePage');
@@ -1100,10 +1106,10 @@ class AdminController extends Controller
         );
     }
 
-
     public function createprivate(): Response
     {
         $paketPrivates = PaketPrivate::all();
+
         return Inertia::render('Admin/Laporan/Private/Create', ['paketPrivates' => $paketPrivates]);
     }
 
@@ -1190,7 +1196,6 @@ class AdminController extends Controller
         }
     }
 
-
     public function editlaporanprivate($id): Response
     {
         $laporanprivate = LapPemasukanPrivate::findOrFail($id); // Mengambil data laporan pemasukan private berdasarkan id
@@ -1198,14 +1203,13 @@ class AdminController extends Controller
 
         return Inertia::render('Admin/Laporan/Private/edit', [
             'laporanprivate' => $laporanprivate,
-            'paketPrivates' => $paketPrivates
+            'paketPrivates' => $paketPrivates,
         ]);
     }
 
     public function updatelaporanprivate(Request $request, $id): RedirectResponse
     {
 
-        
         $validatedData = $request->validate([
             'hari' => 'required|string',
             'tanggal' => 'required|date',
@@ -1288,9 +1292,12 @@ class AdminController extends Controller
     public function destroylaporanprivate($id)
     {
         LapPemasukanPrivate::find($id)->delete();
-        return redirect()->route('admin.laporan.private');
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        }
     }
-
 
     // Laporan Pengeluaran Private Admin
     public function createpengeluaranprivatelaporan(): Response
@@ -1342,7 +1349,7 @@ class AdminController extends Controller
         // Convert guru_id to actual user ID if it's a valid user ID
         if ($mainGuruId && is_numeric($mainGuruId)) {
             $user = User::find($mainGuruId);
-            if (!$user) {
+            if (! $user) {
                 $mainGuruId = null; // Invalid user ID, set to null
             }
         } else {
@@ -1378,8 +1385,6 @@ class AdminController extends Controller
     {
         $pengeluaranprivate = LapPengeluaranPrivate::findOrFail($id);
         $users = User::role('Private')->get(); // Mengambil semua data user dengan role Admin
-
-
 
         return Inertia::render('Admin/Laporan/Private/Pengeluaran/EditPengeluaran', ['pengeluaranprivate' => $pengeluaranprivate, 'users' => $users]);
     }
@@ -1420,7 +1425,7 @@ class AdminController extends Controller
         // Convert guru_id to actual user ID if it's a valid user ID
         if ($mainGuruId && is_numeric($mainGuruId)) {
             $user = User::find($mainGuruId);
-            if (!$user) {
+            if (! $user) {
                 $mainGuruId = null; // Invalid user ID, set to null
             }
         } else {
@@ -1454,17 +1459,23 @@ class AdminController extends Controller
     public function destroypengeluaranprivate($id)
     {
         LapPengeluaranPrivate::find($id)->delete();
-        return redirect()->route('admin.laporan.private');
+
+        if (User::where('id', Auth::user()->id)->first()->hasRole('Private')) {
+            return Redirect::route('private.dashboard')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        } else {
+            return Redirect::route('admin.laporan.private')->with('success', 'Laporan pemasukan private berhasil ditambahkan.');
+        }
     }
 
     public function bulkDestroyPrivate(Request $request)
     {
         $request->validate([
             'ids' => 'nullable|array',
-            'ids.*' => 'exists:lap_pemasukan_private,id'
+            'ids.*' => 'exists:lap_pemasukan_private,id',
         ]);
 
         LapPemasukanPrivate::whereIn('id', $request->ids)->delete();
+
         return back()->with('success', 'Data berhasil dihapus');
     }
 
@@ -1472,14 +1483,13 @@ class AdminController extends Controller
     {
         $request->validate([
             'ids' => 'nullable|array',
-            'ids.*' => 'exists:lap_pengeluaran_private,id'
+            'ids.*' => 'exists:lap_pengeluaran_private,id',
         ]);
 
         LapPengeluaranPrivate::whereIn('id', $request->ids)->delete();
+
         return back()->with('success', 'Data berhasil dihapus');
     }
-
-
 
     /* -----------------------------------------
             Rekap Bulanan Cabang
@@ -1490,32 +1500,53 @@ class AdminController extends Controller
         // Ambil bulan dan tahun dari request, atau gunakan bulan dan tahun saat ini sebagai default
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
+        $cabangId = $request->input('cabang_id'); // Get selected cabang filter
+
+        // Get all cabang for filter dropdown
+        $allCabang = CabangAlbri::select('id', 'nama')
+            ->orderBy('nama')
+            ->get();
 
         try {
-            // Filter data berdasarkan bulan dan tahun
-            $laporanCabang = LapPemasukanCabang::with([
+            // Build query for pemasukan with optional cabang filter
+            $laporanCabangQuery = LapPemasukanCabang::with([
                 'cabang',
                 'user',
                 'pakets:id,nama_paket,harga',
             ])
                 ->whereMonth('tanggal', $bulan)
-                ->whereYear('tanggal', $tahun)
+                ->whereYear('tanggal', $tahun);
+
+            // Apply cabang filter if selected
+            if ($cabangId) {
+                $laporanCabangQuery->where('cabang_id', $cabangId);
+            }
+
+            $laporanCabang = $laporanCabangQuery
                 ->orderBy('tanggal', 'desc')
                 ->paginate(1000);
 
-            $laporanPengeluaranCabang = LapPengeluaranCabang::with([
+            // Build query for pengeluaran with optional cabang filter
+            $laporanPengeluaranCabangQuery = LapPengeluaranCabang::with([
                 'cabang',
                 'user',
-                'gurus'
+                'gurus',
             ])
                 ->whereMonth('tanggal', $bulan)
-                ->whereYear('tanggal', $tahun)
+                ->whereYear('tanggal', $tahun);
+
+            // Apply cabang filter if selected
+            if ($cabangId) {
+                $laporanPengeluaranCabangQuery->where('cabang_id', $cabangId);
+            }
+
+            $laporanPengeluaranCabang = $laporanPengeluaranCabangQuery
                 ->orderBy('tanggal', 'desc')
                 ->paginate(1000);
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Rekap Cabang Error: ' . $e->getMessage());
+            \Log::error('Rekap Cabang Error: '.$e->getMessage());
 
             // Return empty pagination for both if there's an error
             $laporanCabang = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
@@ -1530,6 +1561,8 @@ class AdminController extends Controller
             'laporanCabang' => $laporanCabang,
             'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
             'pakets' => $pakets,
+            'allCabang' => $allCabang,
+            'selectedCabangId' => $cabangId,
             'bulan' => $bulan,
             'tahun' => $tahun,
             'nextMonth' => $bulan < 12 ? $bulan + 1 : 1,
@@ -1538,6 +1571,7 @@ class AdminController extends Controller
             'prevYear' => $bulan > 1 ? $tahun : $tahun - 1,
         ]);
     }
+
     /* -----------------------------------------
             Rekap Bulanan Mitra
         -------------------------------------------- */
@@ -1618,8 +1652,8 @@ class AdminController extends Controller
                     $pengeluaran->gurus = [
                         [
                             'guru_id' => $guruName,
-                            'gaji' => $pengeluaran->gaji
-                        ]
+                            'gaji' => $pengeluaran->gaji,
+                        ],
                     ];
                 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
@@ -14,6 +14,8 @@ const Laporan = () => {
         laporanCabang,
         laporanPengeluaranCabang,
         pakets,
+        allCabang,
+        selectedCabangId,
         bulan,
         tahun,
         nextMonth,
@@ -21,6 +23,23 @@ const Laporan = () => {
         prevMonth,
         prevYear,
     } = usePage().props;
+
+    const [selectedCabang, setSelectedCabang] = useState(selectedCabangId || '');
+
+    const handleCabangChange = (e) => {
+        const cabangId = e.target.value;
+        setSelectedCabang(cabangId);
+
+        // Auto-reload page with filter
+        router.get(route('admin.rekap.cabang'), {
+            cabang_id: cabangId || null,
+            bulan: bulan,
+            tahun: tahun
+        }, {
+            preserveState: false,
+            preserveScroll: true
+        });
+    };
 
     // Utility functions for safe calculations
     const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
@@ -687,6 +706,37 @@ const Laporan = () => {
 
     return (
         <DefaultLayout>
+            {/* Filter Cabang - Simple and Clear for Elderly Users */}
+            <div className="mb-6 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+                    <h3 className="font-semibold text-black dark:text-white text-xl">
+                        Filter Laporan
+                    </h3>
+                </div>
+                <div className="p-6.5">
+                    <div className="mb-4.5">
+                        <label className="mb-3 block text-lg font-medium text-black dark:text-white">
+                            Pilih Cabang:
+                        </label>
+                        <select
+                            value={selectedCabang}
+                            onChange={handleCabangChange}
+                            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-4 px-5 text-lg font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                        >
+                            <option value="">Semua Cabang</option>
+                            {allCabang && allCabang.map((cabang) => (
+                                <option key={cabang.id} value={cabang.id}>
+                                    {cabang.nama}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Pilih cabang untuk melihat rekap khusus cabang tersebut, atau pilih "Semua Cabang" untuk melihat semua data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
