@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import CardDataStats from "@/components/Tables/CardDataStats";
 import * as XLSX from "xlsx";
@@ -8,16 +8,39 @@ import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
 
 const Laporan = () => {
-    // const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
     const {
         laporanMitraFull,
         laporanPengeluaranCabang,
-        laporanCabang, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset
+        laporanCabang, 
+        startOfWeek, 
+        endOfWeek, 
+        nextWeekOffset, 
+        prevWeekOffset,
+        allCabang,
+        selectedCabangId
     } = usePage().props;
-    // console.log(laporanCabang);
-    // console.log(laporanPengeluaranCabang);
+    
+    const [selectedCabang, setSelectedCabang] = useState(selectedCabangId || '');
+
+    const handleCabangChange = (e) => {
+        const cabangId = e.target.value;
+        setSelectedCabang(cabangId);
+        
+        // Auto-reload page with filter
+        router.get(route('admin.laporan.cabang'), {
+            cabang_id: cabangId || null,
+            weekOffset: 0 // Reset to current week when changing filter
+        }, {
+            preserveState: false,
+            preserveScroll: true
+        });
+    };
+
     const goToWeek = (weekOffset) => {
-        Inertia.get(route('admin.laporan.cabang'), { weekOffset });
+        router.get(route('admin.laporan.cabang'), { 
+            weekOffset,
+            cabang_id: selectedCabang || null 
+        });
     };
     //---------------------------------------------------------------------------------
     const calculateTotals = (laporanCabangData, laporanPengeluaranCabangData) => {
@@ -70,6 +93,37 @@ const Laporan = () => {
 
     return (
         <DefaultLayout>
+            {/* Filter Cabang - Simple and Clear for Elderly Users */}
+            <div className="mb-6 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+                    <h3 className="font-semibold text-black dark:text-white text-xl">
+                        Filter Laporan
+                    </h3>
+                </div>
+                <div className="p-6.5">
+                    <div className="mb-4.5">
+                        <label className="mb-3 block text-lg font-medium text-black dark:text-white">
+                            Pilih Cabang:
+                        </label>
+                        <select
+                            value={selectedCabang}
+                            onChange={handleCabangChange}
+                            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-4 px-5 text-lg font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                        >
+                            <option value="">Semua Cabang</option>
+                            {allCabang && allCabang.map((cabang) => (
+                                <option key={cabang.id} value={cabang.id}>
+                                    {cabang.nama}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Pilih cabang untuk melihat laporan khusus cabang tersebut, atau pilih "Semua Cabang" untuk melihat semua data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"

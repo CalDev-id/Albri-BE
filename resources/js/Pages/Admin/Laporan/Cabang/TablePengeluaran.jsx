@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
 import * as XLSX from "xlsx";
+import Swal from 'sweetalert2';
 
 const TablePengeluaran = () => {
     const {
@@ -13,6 +14,10 @@ const TablePengeluaran = () => {
         nextWeekOffset,
         prevWeekOffset,
     } = usePage().props;
+
+    // State untuk mengelola checkbox
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
 
     const goToWeek = (weekOffset) => {
         Inertia.get(route("admin.laporan.cabang"), { weekOffset });
@@ -95,13 +100,96 @@ const TablePengeluaran = () => {
         XLSX.writeFile(wb, fileName);
     };
 
+    // Fungsi untuk mengelola checkbox individual
+    const handleItemSelect = (id) => {
+        setSelectedItems(prev => {
+            if (prev.includes(id)) {
+                return prev.filter(item => item !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
+    };
+
+    // Fungsi untuk select all checkbox
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(laporanPengeluaranCabang.data.map(item => item.id));
+        }
+        setSelectAll(!selectAll);
+    };
+
+    // Fungsi untuk bulk delete
+    const handleBulkDelete = () => {
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Data',
+                text: 'Pilih item yang ingin dihapus terlebih dahulu',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: `Yakin ingin menghapus ${selectedItems.length} item yang dipilih?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const itemCount = selectedItems.length;
+                Inertia.post('/admin/laporan/pengeluaran/cabang/bulk-delete', {
+                    ids: selectedItems
+                }, {
+                    preserveScroll: true,
+                    onStart: () => {
+                        setSelectedItems([]);
+                        setSelectAll(false);
+                    },
+                    onSuccess: () => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: `${itemCount} item berhasil dihapus`,
+                            confirmButtonColor: '#3085d6',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghapus data',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                });
+            }
+        });
+    };
+
+    // Update selectAll status berdasarkan selectedItems
+    React.useEffect(() => {
+        if (laporanPengeluaranCabang.data.length > 0) {
+            setSelectAll(selectedItems.length === laporanPengeluaranCabang.data.length);
+        }
+    }, [selectedItems, laporanPengeluaranCabang.data]);
+
     return (
         <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark mt-20">
             <div className="flex justify-between px-7.5 mb-6">
                 <h4 className="text-xl font-semibold text-black dark:text-white">
                     Laporan Pengeluaran Cabang
                 </h4>
-                <div>
+                <div className="flex gap-2">
                     <Link href="/admin/laporan/pengeluaran/create">
                         <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                             Tambah Pengeluaran
@@ -114,6 +202,14 @@ const TablePengeluaran = () => {
                     >
                         Download Excel
                     </button>
+                    {selectedItems.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                            Hapus Terpilih ({selectedItems.length})
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -122,6 +218,14 @@ const TablePengeluaran = () => {
                     <thead>
                         <tr className="bg-gray-2 dark:bg-meta-4">
                             {/* Table Headers */}
+                            <th className="py-4 px-4 text-center">
+                                <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                    className="checkbox checkbox-sm"
+                                />
+                            </th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Cabang</th>
@@ -141,6 +245,14 @@ const TablePengeluaran = () => {
                         {laporanPengeluaranCabang.data.map((pengeluaran, key) => (
                             <tr key={key} className="border-b border-stroke dark:border-strokedark">
                                 {/* Data Rows */}
+                                <td className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedItems.includes(pengeluaran.id)}
+                                        onChange={() => handleItemSelect(pengeluaran.id)}
+                                        className="checkbox checkbox-sm"
+                                    />
+                                </td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.cabang ? pengeluaran.cabang.nama : "N/A"}</td>
@@ -189,6 +301,7 @@ const TablePengeluaran = () => {
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                            <td className="py-4 px-4 text-center"></td>
                             <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('gaji'))}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{fmt(calculateTotal('atk'))}</td>
