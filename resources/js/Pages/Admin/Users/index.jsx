@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "@inertiajs/react";
 
 const AdminUsers = () => {
     const { userData, guruData, mitraData, privateData, adminData } = usePage().props;
@@ -13,16 +12,18 @@ const AdminUsers = () => {
     };
 
     // Pilih data yang sesuai dengan role yang dipilih
-    const filteredData =
+    const currentData =
         selectedRole === "all"
-            ? userData.data
+            ? userData
             : selectedRole === "Mitra"
-            ? mitraData.data
+            ? mitraData
             : selectedRole === "Guru"
-            ? guruData.data
+            ? guruData
             : selectedRole === "Private"
-            ? privateData.data
-            : adminData.data;
+            ? privateData
+            : adminData;
+
+    const filteredData = currentData.data;
 
     return (
         <DefaultLayout>
@@ -66,7 +67,7 @@ const AdminUsers = () => {
                             {filteredData.map((user, index) => (
                                 <tr key={user.id} className="border-b border-stroke dark:border-strokedark">
                                     <td className="py-4 px-4 pl-10 text-sm text-black dark:text-white">
-                                        {userData.from + index}
+                                        {currentData.from + index}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {user.name}
@@ -106,6 +107,29 @@ const AdminUsers = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {currentData.links && (
+                    <div className="flex justify-between items-center mt-4 px-7.5">
+                        <p className="text-sm text-black dark:text-white">
+                            Menampilkan {currentData.from || 0} sampai {currentData.to || 0} dari {currentData.total || 0} data
+                        </p>
+                        <div className="flex gap-2">
+                            {currentData.links.map((link, index) => (
+                                <Link
+                                    key={index}
+                                    href={link.url || "#"}
+                                    className={`px-3 py-1 text-sm rounded ${
+                                        link.active
+                                            ? "bg-primary text-white"
+                                            : "bg-gray-2 text-black dark:bg-meta-4 dark:text-white hover:bg-gray-3"
+                                    } ${!link.url ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </DefaultLayout>
     );
