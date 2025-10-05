@@ -31,7 +31,7 @@ class LapPengeluaranCabang extends Model
     ];
     public function cabang()
     {
-        return $this->belongsTo(Cabangalbri::class, 'cabang_id');
+        return $this->belongsTo(CabangAlbri::class, 'cabang_id');
     }
     public function user()
     {
