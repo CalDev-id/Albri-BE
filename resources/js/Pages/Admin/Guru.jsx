@@ -83,6 +83,29 @@ const Privat = () => {
             </tbody>
             </table>
         </div>
+
+        {/* Pagination */}
+        {privateData.links && (
+            <div className="flex justify-between items-center mt-4 px-7.5">
+                <p className="text-sm text-black dark:text-white">
+                    Menampilkan {privateData.from || 0} sampai {privateData.to || 0} dari {privateData.total || 0} data
+                </p>
+                <div className="flex gap-2">
+                    {privateData.links.map((link, index) => (
+                        <Link
+                            key={index}
+                            href={link.url || "#"}
+                            className={`px-3 py-1 text-sm rounded ${
+                                link.active
+                                    ? "bg-primary text-white"
+                                    : "bg-gray-2 text-black dark:bg-meta-4 dark:text-white hover:bg-gray-3"
+                            } ${!link.url ? "opacity-50 cursor-not-allowed" : ""}`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
+                </div>
+            </div>
+        )}
         </div>
         </div>
         </DefaultLayout>
