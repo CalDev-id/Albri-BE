@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { Inertia } from "@inertiajs/inertia";
 import * as XLSX from "xlsx";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import Swal from 'sweetalert2';
 
 const TablePemasukan = () => {
   const {
@@ -14,6 +15,10 @@ const TablePemasukan = () => {
     prevWeekOffset,
     pakets, // <--- dari controller
   } = usePage().props;
+
+  // State untuk mengelola checkbox
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const goToWeek = (weekOffset) => {
     Inertia.get(route("admin.laporan.cabang"), { weekOffset });
@@ -127,6 +132,89 @@ const TablePemasukan = () => {
     XLSX.writeFile(wb, fileName);
   };
 
+  // Fungsi untuk mengelola checkbox individual
+  const handleItemSelect = (id) => {
+    setSelectedItems(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(item => item !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  // Fungsi untuk select all checkbox
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(laporanCabang.data.map(item => item.id));
+    }
+    setSelectAll(!selectAll);
+  };
+
+  // Fungsi untuk bulk delete
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Pilih Data',
+        text: 'Pilih item yang ingin dihapus terlebih dahulu',
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Konfirmasi Hapus',
+      text: `Yakin ingin menghapus ${selectedItems.length} item yang dipilih?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const itemCount = selectedItems.length;
+        Inertia.post('/admin/laporan/cabang/bulk-delete', {
+          ids: selectedItems
+        }, {
+          preserveScroll: true,
+          onStart: () => {
+            setSelectedItems([]);
+            setSelectAll(false);
+          },
+          onSuccess: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil!',
+              text: `${itemCount} item berhasil dihapus`,
+              confirmButtonColor: '#3085d6',
+              timer: 2000,
+              timerProgressBar: true
+            });
+          },
+          onError: () => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal!',
+              text: 'Terjadi kesalahan saat menghapus data',
+              confirmButtonColor: '#3085d6'
+            });
+          }
+        });
+      }
+    });
+  };
+
+  // Update selectAll status berdasarkan selectedItems
+  React.useEffect(() => {
+    if (laporanCabang.data.length > 0) {
+      setSelectAll(selectedItems.length === laporanCabang.data.length);
+    }
+  }, [selectedItems, laporanCabang.data]);
+
   return (
     <div>
       <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -134,7 +222,7 @@ const TablePemasukan = () => {
           <h4 className="text-xl font-semibold text-black dark:text-white">
             Laporan Pemasukan Cabang ({startOfWeek} sampai {endOfWeek})
           </h4>
-          <div>
+          <div className="flex gap-2">
             <Link href="/admin/laporan/cabang/create">
               <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                 Tambah Laporan
@@ -148,6 +236,14 @@ const TablePemasukan = () => {
             >
               Download Excel
             </button>
+            {selectedItems.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Hapus Terpilih ({selectedItems.length})
+              </button>
+            )}
             <Link href="/admin/laporan/cabang/paket/">
               <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 ml-2">
                 Setting Harga
@@ -160,6 +256,14 @@ const TablePemasukan = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 dark:bg-meta-4">
+                <th className="py-4 px-4 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    className="checkbox checkbox-sm"
+                  />
+                </th>
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Nama</th>
@@ -186,6 +290,14 @@ const TablePemasukan = () => {
             <tbody>
               {laporanCabang.data.map((laporan) => (
                 <tr key={laporan.id} className="border-b border-stroke dark:border-strokedark">
+                  <td className="py-4 px-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(laporan.id)}
+                      onChange={() => handleItemSelect(laporan.id)}
+                      className="checkbox checkbox-sm"
+                    />
+                  </td>
                   <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{laporan.hari}</td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">{laporan.tanggal}</td>
 
@@ -231,6 +343,7 @@ const TablePemasukan = () => {
 
             <tfoot>
               <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                <td className="py-4 px-4 text-center"></td>
                 <td colSpan={4} className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
 
                 {/* Total per paket */}

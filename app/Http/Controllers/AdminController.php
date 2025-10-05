@@ -202,30 +202,49 @@ class AdminController extends Controller
     public function cabanglaporan(Request $request): Response
     {
         $weekOffset = (int) $request->input('weekOffset', 0);
+        $cabangId = $request->input('cabang_id'); // Get selected cabang filter
 
         $startOfWeek = now()->startOfWeek()->addWeeks($weekOffset);
         $endOfWeek = now()->endOfWeek()->addWeeks($weekOffset);
 
-        $laporanCabang = LapPemasukanCabang::with([
+        // Get all cabang for filter dropdown
+        $allCabang = CabangAlbri::select('id', 'nama')
+            ->orderBy('nama')
+            ->get();
+
+        // Build query for pemasukan with optional cabang filter
+        $laporanCabangQuery = LapPemasukanCabang::with([
             'cabang',
             'user',
-            // ambil paket + pivot jumlah
             'pakets:id,nama_paket,harga',
         ])
-            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
+        
+        // Apply cabang filter if selected
+        if ($cabangId) {
+            $laporanCabangQuery->where('cabang_id', $cabangId);
+        }
+        
+        $laporanCabang = $laporanCabangQuery
             ->orderBy('tanggal', 'desc')
             ->paginate(5000, ['*'], 'laporanCabangPage');
 
-        $laporanPengeluaranCabang = LapPengeluaranCabang::with([
+        // Build query for pengeluaran with optional cabang filter
+        $laporanPengeluaranCabangQuery = LapPengeluaranCabang::with([
             'user',
             'cabang',
-            'gurus' // langsung ambil dari relasi hasMany, tidak perlu select users.*
-
+            'gurus'
         ])
-            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+            ->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
+        
+        // Apply cabang filter if selected
+        if ($cabangId) {
+            $laporanPengeluaranCabangQuery->where('cabang_id', $cabangId);
+        }
+        
+        $laporanPengeluaranCabang = $laporanPengeluaranCabangQuery
             ->orderBy('tanggal', 'desc')
             ->paginate(5000, ['*'], 'laporanPengeluaranCabangPage');
-
 
         // daftar paket untuk header kolom dinamis
         $pakets = Paket::select('id', 'nama_paket', 'harga')->orderBy('nama_paket')->get();
@@ -234,6 +253,8 @@ class AdminController extends Controller
             'laporanCabang' => $laporanCabang,
             'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
             'pakets' => $pakets,
+            'allCabang' => $allCabang,
+            'selectedCabangId' => $cabangId,
             'startOfWeek' => $startOfWeek->format('Y-m-d'),
             'endOfWeek' => $endOfWeek->format('Y-m-d'),
             'nextWeekOffset' => $weekOffset + 1,
