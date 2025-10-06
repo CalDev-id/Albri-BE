@@ -5,9 +5,7 @@ import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
 import * as XLSX from "xlsx";
 
-const TablePengeluaran = () => {
-    // const { current_page, last_page, data } = laporanPengeluaranMitra || {};
-
+const TablePengeluaran = ({ selectedIds = [], setSelectedIds = () => { } }) => {
     const {
         laporanPengeluaranMitra,
         startOfWeek,
@@ -19,7 +17,41 @@ const TablePengeluaran = () => {
     const goToWeek = (weekOffset) => {
         Inertia.get(route("admin.laporan.mitra"), { weekOffset });
     };
-    // console.log(laporanPengeluaranMitra.data);
+
+    // Bulk delete handlers
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = laporanPengeluaranMitra.data.map(item => item.id);
+            setSelectedIds(allIds);
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectItem = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length === 0) {
+            alert('Pilih item yang akan dihapus');
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} item?`)) {
+            Inertia.post(route('admin.laporan.pengeluaranmitra.bulk-destroy'), {
+                ids: selectedIds
+            }, {
+                onSuccess: () => {
+                    setSelectedIds([]);
+                }
+            });
+        }
+    };
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
@@ -126,6 +158,15 @@ const TablePengeluaran = () => {
                     >
                         Download Excel
                     </button>
+
+                    {selectedIds.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2"
+                        >
+                            Hapus Terpilih ({selectedIds.length})
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -133,8 +174,16 @@ const TablePengeluaran = () => {
                 <table className="w-full table-auto">
                     <thead>
                         <tr className="bg-gray-2 dark:bg-meta-4">
-                            {/* Table Headers */}
-                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
+                            {/* Checkbox Header */}
+                            <th className="py-4 px-4 text-center">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={laporanPengeluaranMitra.data.length > 0 && selectedIds.length === laporanPengeluaranMitra.data.length}
+                                    className="w-4 h-4"
+                                />
+                            </th>
+                            <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Pembuat</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Gaji</th>
@@ -148,9 +197,22 @@ const TablePengeluaran = () => {
                     </thead>
                     <tbody>
                         {laporanPengeluaranMitra.data.map((pengeluaran, key) => (
-                            <tr key={key} className="border-b border-stroke dark:border-strokedark">
+                            <tr
+                                key={key}
+                                className="border-b border-stroke dark:border-strokedark"
+                            >
+                                {/* Checkbox Column */}
+                                <td className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(pengeluaran.id)}
+                                        onChange={() => handleSelectItem(pengeluaran.id)}
+                                        className="w-4 h-4"
+                                    />
+                                </td>
+
                                 {/* Data Rows */}
-                                <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
+                                <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">
@@ -191,11 +253,10 @@ const TablePengeluaran = () => {
                             </tr>
                         ))}
                     </tbody>
-                    {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
-                            <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
-                            <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotalGajiAllMitra().toLocaleString()}</td>
+                            <td className="py-4 px-4 text-center"></td>
+                            <td colSpan="4" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('intensif').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('lisensi').toLocaleString()}</td>
@@ -211,30 +272,13 @@ const TablePengeluaran = () => {
             <div className="flex justify-center gap-3 mt-4">
                 <button
                     onClick={() => goToWeek(prevWeekOffset)}
-                    // disabled={current_page === 1}
                     className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                 >
                     Sebelumnya
                 </button>
 
-                {/* Menampilkan nomor halaman */}
-                {/* {[...Array(last_page)].map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={`py-2 px-4 rounded ${
-                                    current_page === index + 1
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                } hover:bg-blue-400`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))} */}
-
                 <button
                     onClick={() => goToWeek(nextWeekOffset)}
-                    // disabled={current_page === last_page}
                     className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                 >
                     Selanjutnya

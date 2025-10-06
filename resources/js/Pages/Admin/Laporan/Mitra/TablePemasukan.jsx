@@ -9,7 +9,7 @@ import "flowbite/dist/flowbite.min.js";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 import { Inertia } from "@inertiajs/inertia";
 
-const TablePemasukan = () => {
+const TablePemasukan = ({ selectedIds = [], setSelectedIds = () => { } }) => {
     const {
         laporanMitra,
         startOfWeek,
@@ -21,6 +21,41 @@ const TablePemasukan = () => {
 
     const goToWeek = (weekOffset) => {
         Inertia.get(route("admin.laporan.mitra"), { weekOffset });
+    };
+
+    // Bulk delete handlers
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = laporanMitra.data.map(item => item.id);
+            setSelectedIds(allIds);
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectItem = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length === 0) {
+            alert('Pilih item yang akan dihapus');
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} item?`)) {
+            Inertia.post(route('admin.laporan.mitra.bulk-destroy'), {
+                ids: selectedIds
+            }, {
+                onSuccess: () => {
+                    setSelectedIds([]);
+                }
+            });
+        }
     };
 
     // Calculate total values for each column
@@ -131,6 +166,15 @@ const TablePemasukan = () => {
                             Download Excel
                         </button>
 
+                        {selectedIds.length > 0 && (
+                            <button
+                                onClick={handleBulkDelete}
+                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2"
+                            >
+                                Hapus Terpilih ({selectedIds.length})
+                            </button>
+                        )}
+
                         <Link href="/admin/laporan/mitra/setting-harga">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 ml-2 ">
                                 Setting Harga
@@ -143,11 +187,19 @@ const TablePemasukan = () => {
                     <table className="w-full table-auto">
                         <thead>
                             <tr className="bg-gray-2 dark:bg-meta-4">
-                                {/* Header cells */}
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
+                                {/* Checkbox Header */}
+                                <th className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAll}
+                                        checked={laporanMitra.data.length > 0 && selectedIds.length === laporanMitra.data.length}
+                                        className="w-4 h-4"
+                                    />
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Hari
                                 </th>
-                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
                                     Nama
                                 </th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">
@@ -193,11 +245,20 @@ const TablePemasukan = () => {
                                     key={key}
                                     className="border-b border-stroke dark:border-strokedark"
                                 >
-                                    {/* Table rows with data */}
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                                    {/* Checkbox Column */}
+                                    <td className="py-4 px-4 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(laporan.id)}
+                                            onChange={() => handleSelectItem(laporan.id)}
+                                            className="w-4 h-4"
+                                        />
+                                    </td>
+
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.hari}
                                     </td>
-                                    <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {laporan.user ? laporan.user.name : "N/A"}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
@@ -236,7 +297,6 @@ const TablePemasukan = () => {
                                         {Number(laporan.totalpemasukan).toLocaleString()}
                                     </td>
                                     <td className="py-4 px-4 text-center">
-                                        {/* Action buttons */}
                                         <div className="flex justify-center gap-3">
                                             <Link
                                                 href={`/admin/laporan/mitra/${laporan.id}/edit`}
@@ -251,7 +311,7 @@ const TablePemasukan = () => {
                                                 onClick={(e) => {
                                                     if (
                                                         !confirm(
-                                                            "Are you sure you want to delete this user?"
+                                                            "Are you sure you want to delete this item?"
                                                         )
                                                     ) {
                                                         e.preventDefault();
@@ -267,9 +327,10 @@ const TablePemasukan = () => {
                         </tbody>
                         <tfoot>
                             <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                                <td className="py-4 px-4 text-center"></td>
                                 <td
                                     colSpan="3"
-                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10"
+                                    className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white"
                                 >
                                     Total
                                 </td>
@@ -306,34 +367,18 @@ const TablePemasukan = () => {
                             </tr>
                         </tfoot>
                     </table>
+
                     {/* Pagination Controls */}
                     <div className="flex justify-center gap-3 mt-4">
                         <button
                             onClick={() => goToWeek(prevWeekOffset)}
-                            // disabled={current_page === 1}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Sebelumnya
                         </button>
 
-                        {/* Menampilkan nomor halaman */}
-                        {/* {[...Array(last_page)].map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={`py-2 px-4 rounded ${
-                                    current_page === index + 1
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-700"
-                                } hover:bg-blue-400`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))} */}
-
                         <button
                             onClick={() => goToWeek(nextWeekOffset)}
-                            // disabled={current_page === last_page}
                             className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                         >
                             Selanjutnya
@@ -346,3 +391,4 @@ const TablePemasukan = () => {
 };
 
 export default TablePemasukan;
+

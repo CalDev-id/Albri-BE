@@ -8,9 +8,6 @@ import CardDataStats from "@/components/Tables/CardDataStats";
 import { Inertia } from '@inertiajs/inertia';
 
 import "flowbite/dist/flowbite.min.js";
-
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
-
 const Laporan = () => {
     const {
         laporanMitraFull,
@@ -21,6 +18,10 @@ const Laporan = () => {
         nextWeekOffset,
         prevWeekOffset
     } = usePage().props;
+
+    // State for bulk delete functionality
+    const [selectedPemasukanIds, setSelectedPemasukanIds] = useState([]);
+    const [selectedPengeluaranIds, setSelectedPengeluaranIds] = useState([]);
 
     // Utility functions for safe calculations
     const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
@@ -180,7 +181,15 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanMitra={laporanMitra} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
+            <TablePemasukan
+                laporanMitra={laporanMitra}
+                startOfWeek={startOfWeek}
+                endOfWeek={endOfWeek}
+                nextWeekOffset={nextWeekOffset}
+                prevWeekOffset={prevWeekOffset}
+                selectedIds={selectedPemasukanIds}
+                setSelectedIds={setSelectedPemasukanIds}
+            />
 
             <TablePengeluaran
                 laporanPengeluaranMitra={laporanPengeluaranMitra}
@@ -188,6 +197,8 @@ const Laporan = () => {
                 endOfWeek={endOfWeek}
                 nextWeekOffset={nextWeekOffset}
                 prevWeekOffset={prevWeekOffset}
+                selectedIds={selectedPengeluaranIds}
+                setSelectedIds={setSelectedPengeluaranIds}
             />
 
 

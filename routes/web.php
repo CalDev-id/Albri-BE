@@ -162,6 +162,10 @@ Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra/setting-harga/{id}/edit', [AdminController::class, 'editPaketMitra'])->name('admin.laporan.mitra.paket.edit');
     Route::put('/admin/laporan/mitra/setting-harga/{id}', [AdminController::class, 'updatePaketMitra'])->name('admin.laporan.mitra.paket.update');
     Route::delete('/admin/laporan/mitra/setting-harga/{id}', [AdminController::class, 'destroyPaketMitra'])->name('admin.laporan.mitra.paket.destroy');
+     Route::post('/admin/laporan/mitra/bulk-destroy', [AdminController::class, 'bulkDestroyMitra'])
+        ->name('admin.laporan.mitra.bulk-destroy');
+    Route::post('/admin/laporan/pengeluaranmitra/bulk-destroy', [AdminController::class, 'bulkDestroyPengeluaranMitra'])
+        ->name('admin.laporan.pengeluaranmitra.bulk-destroy');
 });
 /* -----------------------------------------
                 Laporan Pengeluaran Mitra 

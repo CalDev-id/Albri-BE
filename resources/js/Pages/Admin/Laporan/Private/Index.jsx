@@ -13,12 +13,14 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
 
 const Laporan = () => {
-    // const {  laporanPrivate, laporanPrivateFull, laporanPengeluaranPrivate, laporanPengeluaranPrivateFull } = usePage().props;
-
     const {
         laporanPrivate, laporanPengeluaranPrivate,
         startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset, paketPrivate
     } = usePage().props;
+
+    // State for bulk delete functionality
+    const [selectedPemasukanIds, setSelectedPemasukanIds] = useState([]);
+    const [selectedPengeluaranIds, setSelectedPengeluaranIds] = useState([]);
 
     const goToWeek = (weekOffset) => {
         Inertia.get(route('admin.laporan.private'), { weekOffset });
@@ -173,14 +175,28 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanPrivate={laporanPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} goToWeek={goToWeek} paketPrivate={paketPrivate} />
+            <TablePemasukan
+                laporanPrivate={laporanPrivate}
+                startOfWeek={startOfWeek}
+                endOfWeek={endOfWeek}
+                nextWeekOffset={nextWeekOffset}
+                prevWeekOffset={prevWeekOffset}
+                goToWeek={goToWeek}
+                paketPrivate={paketPrivate}
+                selectedIds={selectedPemasukanIds}
+                setSelectedIds={setSelectedPemasukanIds}
+            />
 
-
-
-
-            {/* P E N G E L U A R A N */}
-
-            <TablePengeluaran laporanPengeluaranPrivate={laporanPengeluaranPrivate} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} goToWeek={goToWeek} />
+            <TablePengeluaran
+                laporanPengeluaranPrivate={laporanPengeluaranPrivate}
+                startOfWeek={startOfWeek}
+                endOfWeek={endOfWeek}
+                nextWeekOffset={nextWeekOffset}
+                prevWeekOffset={prevWeekOffset}
+                goToWeek={goToWeek}
+                selectedIds={selectedPengeluaranIds}
+                setSelectedIds={setSelectedPengeluaranIds}
+            />
 
         </DefaultLayout>
     );

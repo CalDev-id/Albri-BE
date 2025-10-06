@@ -20,12 +20,14 @@ const TablePengeluaranRekap = ({
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
 
+    // Move usePage to top level
+    const { selectedCabangId } = usePage().props;
+
     // Utility functions similar to working TablePemasukan
     const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
     const fmt = (v) => n(v).toLocaleString();
 
     const goToMonth = (month, year) => {
-        const { selectedCabangId } = usePage().props;
         Inertia.get(route("admin.rekap.cabang"), {
             bulan: month,
             tahun: year,

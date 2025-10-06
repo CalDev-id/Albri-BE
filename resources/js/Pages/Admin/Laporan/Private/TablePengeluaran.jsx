@@ -5,8 +5,42 @@ import { Inertia } from "@inertiajs/inertia";
 import { usePage } from "@inertiajs/react";
 import * as XLSX from "xlsx";
 
-const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset, goToWeek }) => {
+const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, nextWeekOffset, prevWeekOffset, goToWeek, selectedIds = [], setSelectedIds = () => { } }) => {
 
+    // Bulk delete handlers
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = laporanPengeluaranPrivate.data.map(item => item.id);
+            setSelectedIds(allIds);
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectItem = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length === 0) {
+            alert('Pilih item yang akan dihapus');
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} item?`)) {
+            Inertia.post(route('admin.laporan.pengeluaran.private.bulk-delete'), {
+                ids: selectedIds
+            }, {
+                onSuccess: () => {
+                    setSelectedIds([]);
+                }
+            });
+        }
+    };
 
     // Function to calculate totals for the columns
     const calculateTotal = (field) => {
@@ -95,6 +129,15 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                     >
                         Download Excel
                     </button>
+
+                    {selectedIds.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2"
+                        >
+                            Hapus Terpilih ({selectedIds.length})
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -102,7 +145,15 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                 <table className="w-full table-auto">
                     <thead>
                         <tr className="bg-gray-2 dark:bg-meta-4">
-                            {/* Table Headers */}
+                            {/* Checkbox Header */}
+                            <th className="py-4 px-4 text-center">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={laporanPengeluaranPrivate.data.length > 0 && selectedIds.length === laporanPengeluaranPrivate.data.length}
+                                    className="w-4 h-4"
+                                />
+                            </th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Hari</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Tanggal</th>
                             <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Pembuat</th>
@@ -118,7 +169,15 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                     <tbody>
                         {laporanPengeluaranPrivate.data.map((pengeluaran, key) => (
                             <tr key={key} className="border-b border-stroke dark:border-strokedark">
-                                {/* Data Rows */}
+                                {/* Checkbox Column */}
+                                <td className="py-4 px-4 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(pengeluaran.id)}
+                                        onChange={() => handleSelectItem(pengeluaran.id)}
+                                        className="w-4 h-4"
+                                    />
+                                </td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white pl-10">{pengeluaran.hari}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.tanggal}</td>
                                 <td className="py-4 px-4 text-sm text-black dark:text-white">{pengeluaran.user ? pengeluaran.user.name : "N/A"}</td>
@@ -163,6 +222,7 @@ const TablePengeluaran = ({ laporanPengeluaranPrivate, startOfWeek, endOfWeek, n
                     {/* Footer Row for Totals */}
                     <tfoot>
                         <tr className="bg-gray-2 dark:bg-meta-4 font-semibold">
+                            <td className="py-4 px-4 text-center"></td>
                             <td colSpan="3" className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">Total</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('gaji').toLocaleString()}</td>
                             <td className="py-4 px-4 text-sm text-black dark:text-white">{calculateTotal('atk').toLocaleString()}</td>

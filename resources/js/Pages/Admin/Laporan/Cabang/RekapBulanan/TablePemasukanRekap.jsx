@@ -16,9 +16,10 @@ const TablePemasukan = ({ laporanCabang, pakets = [], bulan, tahun, nextMonth, n
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
 
+    const { selectedCabangId } = usePage().props;
+
     // console.log(laporanCabang.data);
     const goToMonth = (month, year) => {
-        const { selectedCabangId } = usePage().props;
         Inertia.get(route("admin.rekap.cabang"), {
             bulan: month,
             tahun: year,

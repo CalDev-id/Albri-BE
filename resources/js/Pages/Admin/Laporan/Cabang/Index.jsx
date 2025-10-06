@@ -11,21 +11,21 @@ const Laporan = () => {
     const {
         laporanMitraFull,
         laporanPengeluaranCabang,
-        laporanCabang, 
-        startOfWeek, 
-        endOfWeek, 
-        nextWeekOffset, 
+        laporanCabang,
+        startOfWeek,
+        endOfWeek,
+        nextWeekOffset,
         prevWeekOffset,
         allCabang,
         selectedCabangId
     } = usePage().props;
-    
+
     const [selectedCabang, setSelectedCabang] = useState(selectedCabangId || '');
 
     const handleCabangChange = (e) => {
         const cabangId = e.target.value;
         setSelectedCabang(cabangId);
-        
+
         // Auto-reload page with filter
         router.get(route('admin.laporan.cabang'), {
             cabang_id: cabangId || null,
@@ -37,9 +37,9 @@ const Laporan = () => {
     };
 
     const goToWeek = (weekOffset) => {
-        router.get(route('admin.laporan.cabang'), { 
+        router.get(route('admin.laporan.cabang'), {
             weekOffset,
-            cabang_id: selectedCabang || null 
+            cabang_id: selectedCabang || null
         });
     };
     //---------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ const Laporan = () => {
         // Pastikan data adalah array
         if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
         if (!Array.isArray(laporanPengeluaranCabangData)) laporanPengeluaranCabangData = [];
-    
+
         // Helper function untuk konversi ke number yang aman
         const toNumber = (value) => {
             if (value === null || value === undefined) return 0;
@@ -56,22 +56,22 @@ const Laporan = () => {
             if (isNaN(num) || !isFinite(num)) return 0;
             return num;
         };
-    
+
         // Hitung total pemasukan
         const totalProfit = laporanCabangData.reduce(
             (sum, laporan) => sum + toNumber(laporan.totalpemasukan),
             0
         );
-    
+
         // Hitung total pengeluaran
         const totalOutcome = laporanPengeluaranCabangData.reduce(
             (sum, pengeluaran) => sum + toNumber(pengeluaran.totalpengeluaran),
             0
         );
-    
+
         // Hitung total laba
         const totalLaba = totalProfit - totalOutcome;
-    
+
         // Hitung total students (biaya)
         const totalStudents = laporanCabangData.reduce(
             (sum, laporan) =>
@@ -81,10 +81,10 @@ const Laporan = () => {
                     toNumber(laporan.biaya_12000)),
             0
         );
-    
+
         return { totalLaba, totalProfit, totalOutcome, totalStudents };
     };
-    
+
     // Memastikan .data digunakan saat memanggil fungsi
     const { totalLaba, totalProfit, totalOutcome, totalStudents } = calculateTotals(
         laporanCabang.data,
@@ -231,14 +231,14 @@ const Laporan = () => {
                 </CardDataStats>
             </div>
 
-            <TablePemasukan laporanCabang={laporanCabang} laporanPengeluaranCabang={laporanPengeluaranCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
-          
+            <TablePemasukan laporanCabang={laporanCabang} laporanPengeluaranCabang={laporanPengeluaranCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
+
 
 
 
             {/* P E N G E L U A R A N */}
 
-            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang}  startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset}/>
+            <TablePengeluaran laporanPengeluaranCabang={laporanPengeluaranCabang} startOfWeek={startOfWeek} endOfWeek={endOfWeek} nextWeekOffset={nextWeekOffset} prevWeekOffset={prevWeekOffset} />
 
         </DefaultLayout>
     );
