@@ -9,7 +9,6 @@ import CardDataStats from "@/components/Tables/CardDataStats";
 
 import "flowbite/dist/flowbite.min.js";
 
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa"; // Import icon
 
 
 const Laporan = () => {
