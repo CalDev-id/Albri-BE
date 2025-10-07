@@ -50,7 +50,4 @@ class GuruController extends Controller
             'prevWeekOffset' => $weekOffset - 1,
         ]);
     }
-
-
-    
 }

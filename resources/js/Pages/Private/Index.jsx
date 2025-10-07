@@ -24,7 +24,7 @@ const Laporan = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route('Private.index'), { weekOffset });
+        Inertia.get(route('private.dashboard'), { weekOffset });
     };
 
     const calculateTotals = (laporanPrivateData, laporanPengeluaranPrivateData) => {

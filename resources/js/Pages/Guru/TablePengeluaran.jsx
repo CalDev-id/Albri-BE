@@ -15,7 +15,7 @@ const TablePengeluaran = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route("admin.laporan.cabang"), { weekOffset });
+        Inertia.get(route("guru.dashboard"), { weekOffset });
     };
 
     // Function to calculate totals for the columns

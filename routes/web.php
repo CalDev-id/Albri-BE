@@ -1,24 +1,20 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CabangController;
+use App\Http\Controllers\GuruController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MitraController;
+use App\Http\Controllers\PrivateController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicNewsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\MitraController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\GuruController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\NewsEventController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\PrivateController;
-use App\Http\Controllers\PublicNewsController;
-use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-
-
 
 Route::get('/login', function () {
     return Inertia::render('Auth/Login', [
@@ -30,11 +26,6 @@ Route::get('/login', function () {
 })->middleware('guest');
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth', 'web');
-
-
-
-
-
 
 // Admin Controll Users
 Route::get('/admin/users', [UserController::class, 'index'])
@@ -107,7 +98,6 @@ Route::delete('/admin/cabang/{id}/force', [CabangController::class, 'forceDestro
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.cabangs.force-destroy');
 
-
 Route::get('/admin/mitra', [AdminController::class, 'mitra'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.mitra');
@@ -120,7 +110,7 @@ Route::get('/admin/guru', [AdminController::class, 'guru'])
 
 Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(function () {
     /* -----------------------------------------
-                Laporan Cabang 
+                Laporan Cabang
 -------------------------------------------- */
     Route::prefix('cabang')->group(function () {
         Route::get('/', [AdminController::class, 'cabanglaporan'])->name('admin.laporan.cabang');
@@ -132,7 +122,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyCabang'])->name('admin.laporan.cabang.bulk-delete');
     });
     /* -----------------------------------------
-                    Pengeluaran Cabang 
+                    Pengeluaran Cabang
     -------------------------------------------- */
     Route::prefix('pengeluaran')->group(function () {
         Route::get('/create', [AdminController::class, 'createcabanpengeluaranlaporan'])->name('admin.laporan.pengeluaran.cabang.create');
@@ -144,7 +134,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
     });
 });
 /* -----------------------------------------
-                Laporan Pemasukan Mitra 
+                Laporan Pemasukan Mitra
 -------------------------------------------- */
 Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])->name('admin.laporan.mitra');
@@ -162,13 +152,13 @@ Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra/setting-harga/{id}/edit', [AdminController::class, 'editPaketMitra'])->name('admin.laporan.mitra.paket.edit');
     Route::put('/admin/laporan/mitra/setting-harga/{id}', [AdminController::class, 'updatePaketMitra'])->name('admin.laporan.mitra.paket.update');
     Route::delete('/admin/laporan/mitra/setting-harga/{id}', [AdminController::class, 'destroyPaketMitra'])->name('admin.laporan.mitra.paket.destroy');
-     Route::post('/admin/laporan/mitra/bulk-destroy', [AdminController::class, 'bulkDestroyMitra'])
+    Route::post('/admin/laporan/mitra/bulk-destroy', [AdminController::class, 'bulkDestroyMitra'])
         ->name('admin.laporan.mitra.bulk-destroy');
     Route::post('/admin/laporan/pengeluaranmitra/bulk-destroy', [AdminController::class, 'bulkDestroyPengeluaranMitra'])
         ->name('admin.laporan.pengeluaranmitra.bulk-destroy');
 });
 /* -----------------------------------------
-                Laporan Pengeluaran Mitra 
+                Laporan Pengeluaran Mitra
 -------------------------------------------- */
 Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/pengeluaranmitra/create', [AdminController::class, 'createpengeluaranmitralaporan'])->name('admin.laporan.pengeluaran.mitra.create');
@@ -179,7 +169,7 @@ Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::post('/admin/laporan/pengeluaranmitra/bulk-delete', [AdminController::class, 'bulkDestroyPengeluaranMitra'])->name('admin.laporan.pengeluaran.mitra.bulk-delete');
 });
 /* -----------------------------------------
-                Laporan Private 
+                Laporan Private
 -------------------------------------------- */
 Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->group(function () {
     // Laporan Private
@@ -193,7 +183,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
         Route::post('/bulk-delete', [AdminController::class, 'bulkDestroyPrivate'])->name('admin.laporan.private.bulk-delete');
     });
     /* -----------------------------------------
-                    Pengeluaran Private 
+                    Pengeluaran Private
     -------------------------------------------- */
     Route::prefix('pengeluaranprivate')->group(function () {
         Route::get('/create', [AdminController::class, 'createpengeluaranprivatelaporan'])->name('admin.laporan.pengeluaran.private.create');
@@ -205,7 +195,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
     });
 });
 /* -----------------------------------------
-    Rekap Bulanan 
+    Rekap Bulanan
 -------------------------------------------- */
 Route::prefix('rekap')->middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/cabang', [AdminController::class, 'rekapcabang'])->name('admin.rekap.cabang');
@@ -233,7 +223,7 @@ Route::prefix('admin/laporan/private/paket')->middleware(['auth', 'role:Admin|Pr
     Route::delete('/{paketPrivate}', [App\Http\Controllers\Admin\PaketPrivateController::class, 'destroy'])->name('paketprivate.destroy');
 });
 /* -----------------------------------------
-                Settings 
+                Settings
 -------------------------------------------- */
 Route::get('/admin/settings', [AdminController::class, 'settings'])
     ->middleware(['auth', 'role:Admin'])
@@ -254,12 +244,8 @@ Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin|Guru|Private|Mitra'])
     ->name('admin.settings.update');
 
-
-
-
-
 /* -----------------------------------------
-                dashboard role 
+                dashboard role
 -------------------------------------------- */
 Route::get('guru/dashboard', [GuruController::class, 'index'])
     ->middleware(['auth', 'role:Guru'])
@@ -272,6 +258,7 @@ Route::get('/private/dashboard', [PrivateController::class, 'index'])
 Route::get('/mitra/dashboard', [MitraController::class, 'index'])
     ->middleware(['auth', 'role:Mitra'])
     ->name('mitra.dashboard');
+
 Route::get('/admin/dashboard', function () {
     return Inertia::render('Admin/Dashboard');
 })->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
@@ -280,20 +267,15 @@ Route::get('/admin/dashboard', [AdminController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.dashboard');
 
-
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
-
     Route::get('/laporan', function () {
         return Inertia::render('Laporan/LaporanPage');
     });
 });
-
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -345,9 +327,6 @@ Route::get('/berita-acara/{slug}', [PublicNewsController::class, 'show'])->name(
 //     return Inertia::render('Laporan.La');
 // });
 
-
-
-
 // Laporan Pemasukan Private Admin
 
 // Route::get('/admin/laporan/private', [AdminController::class, 'privatelaporan'])
@@ -386,7 +365,6 @@ Route::get('/berita-acara/{slug}', [PublicNewsController::class, 'show'])->name(
 //     ->middleware(['auth', 'role:Admin|Private'])
 //     ->name('admin.laporan.pengeluaran.destroy');
 
-
 // // Laporan Cabang Admin
 // Route::get('/admin/laporan/cabang', [AdminController::class, 'cabanglaporan'])
 //     ->middleware(['auth', 'role:Admin'])
@@ -423,8 +401,6 @@ Route::get('/berita-acara/{slug}', [PublicNewsController::class, 'show'])->name(
 // Route::delete('/admin/laporan/pengeluaran/{id}', [AdminController::class, 'destroypengeluarancabang'])
 //     ->middleware(['auth', 'role:Admin'])
 //     ->name('admin.laporan.pengeluaran.destroy');
-
-
 
 // // Laporan Pemasukan Mitra Admin
 // Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])
@@ -468,8 +444,6 @@ Route::get('/berita-acara/{slug}', [PublicNewsController::class, 'show'])->name(
 //     Route::resource('users', UserController::class);
 // });
 
-
-
 // Route::resource('cabangs', CabangController::class);
 
 /* -----------------------------------------
@@ -494,6 +468,7 @@ Route::prefix('gaji')->middleware(['auth', 'role:Admin'])->group(function () {
         $year = $request->year ?? date('Y');
         $month = $request->month ?? date('n');
         $pdfUrl = url("/gaji/guru/monthly/export/pdf?year=$year&month=$month");
+
         return view('exports.print-gaji-guru-monthly-pdf', compact('pdfUrl'));
     })->name('gaji.guru.monthly.print.pdf');
     Route::get('/guru', [App\Http\Controllers\GajiGuruController::class, 'index'])->name('gaji.guru.index');
@@ -504,4 +479,4 @@ Route::prefix('gaji')->middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/guru/monthly/export/pdf', [App\Http\Controllers\GajiGuruController::class, 'exportMonthlyPdf'])->name('gaji.guru.monthly.export.pdf');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

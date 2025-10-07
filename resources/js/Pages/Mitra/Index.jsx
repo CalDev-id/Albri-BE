@@ -20,7 +20,7 @@ const Laporan = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route('Mitra.index'), { weekOffset });
+        Inertia.get(route('mitra.dashboard'), { weekOffset });
     };
 
     const calculateTotals = (laporanMitraData, laporanPengeluaranMitraData) => {

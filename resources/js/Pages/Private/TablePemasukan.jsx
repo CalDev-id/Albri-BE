@@ -20,7 +20,7 @@ const TablePemasukan = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route("Private.index"), { weekOffset });
+        Inertia.get(route("private.dashboard"), { weekOffset });
     };
 
     // Calculate total values for each column

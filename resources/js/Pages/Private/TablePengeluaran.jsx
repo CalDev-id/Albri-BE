@@ -15,7 +15,7 @@ const TablePengeluaran = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route("Private.index"), { weekOffset });
+        Inertia.get(route("private.dashboard"), { weekOffset });
     };
 
     // Function to calculate totals for the columns

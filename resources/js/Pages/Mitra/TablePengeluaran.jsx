@@ -15,7 +15,7 @@ const TablePengeluaran = () => {
     } = usePage().props;
 
     const goToWeek = (weekOffset) => {
-        Inertia.get(route("Mitra.index"), { weekOffset });
+        Inertia.get(route("mitra.dashboard"), { weekOffset });
     };
 
     // Function to calculate totals for the columns

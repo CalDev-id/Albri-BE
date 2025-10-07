@@ -8,7 +8,6 @@ import TablePengeluaran from "./TablePengeluaran";
 import TablePemasukan from "./TablePemasukan";
 
 const Laporan = () => {
-    // const { laporanCabang, laporanPengeluaranCabang, laporanCabangFull, laporanPengeluaranCabangFull } = usePage().props;
     const {
         laporanMitraFull,
         laporanPengeluaranCabang,
@@ -16,9 +15,6 @@ const Laporan = () => {
     } = usePage().props;
     // console.log(laporanCabang);
     // console.log(laporanPengeluaranCabang);
-    const goToWeek = (weekOffset) => {
-        Inertia.get(route('admin.laporan.cabang'), { weekOffset });
-    };
     //---------------------------------------------------------------------------------
     const calculateTotals = (laporanCabangData, laporanPengeluaranCabangData) => {
         // Pastikan data adalah array

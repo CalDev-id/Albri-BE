@@ -16,7 +16,7 @@ const TablePemasukan = () => {
   } = usePage().props;
 
   const goToWeek = (weekOffset) => {
-    Inertia.get(route("admin.laporan.cabang"), { weekOffset });
+    Inertia.get(route("guru.dashboard"), { weekOffset });
   };
 
   const n = (v) => (typeof v === "number" ? v : (parseInt(v, 10) || 0));
